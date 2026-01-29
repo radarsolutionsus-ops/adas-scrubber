@@ -5,16 +5,16 @@ Insurance estimate scrubbing tool for ADAS (Advanced Driver Assistance Systems) 
 ## Features
 
 - Vehicle ADAS system lookup by VIN
-- - Estimate analysis and scrubbing
-  - - OEM position statement references
-    - - Professional login interface
-     
-      - ## Tech Stack
-     
-      - - Next.js 16
-        - - PostgreSQL with Prisma ORM
-          - - Deployed on Railway
-           
-            - ## Demo
-           
-            - Demo credentials: `demo@test.com` / `demo123`
+- Estimate analysis and scrubbing
+- OEM position statement references
+- Professional login interface
+
+## Tech Stack
+
+- Next.js 16
+- PostgreSQL with Prisma ORM
+- Deployed on Railway
+
+## Demo
+
+Demo credentials: `demo@test.com` / `demo123`
