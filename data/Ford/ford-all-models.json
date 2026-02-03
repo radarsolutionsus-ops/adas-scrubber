@@ -1,0 +1,268 @@
+{
+  "vehicle": {
+    "year_start": 2018,
+    "year_end": 2026,
+    "make": "Ford",
+    "model": "All Models"
+  },
+  "source": {
+    "provider": "Ford Position Statement",
+    "url": "FORD_Position_Statement_ADAS_Scanning__FNL_93025.pdf",
+    "date_extracted": "2026-01-29"
+  },
+  "scanning_requirements": {
+    "pre_scan": "required",
+    "post_scan": "required",
+    "tool": "IDS (1996-2018 vehicles), FDRS (2018-onwards)",
+    "hardware": "VCMII, VCM3, or J2534-compliant interface"
+  },
+  "adas_systems": [
+    {
+      "system_name": "Front Radar Module",
+      "oem_name": "Pre-Collision Assist / Adaptive Cruise Control Radar",
+      "description": "Pre-Collision Assist with AEB, Adaptive Cruise Control, BlueCruise, Evasive Steering Assist",
+      "location": "front bumper/grille",
+      "dtc_set": true,
+      "scan_tool_required": true,
+      "calibration_type": "Static/Dynamic",
+      "service_info": "Any repair or replacement of front bumper fascia on ADAS-equipped vehicles should utilize new, Ford Motor Company approved original equipment parts.",
+      "calibration_triggers": [
+        "Front bumper R&I/R&R",
+        "Front bumper repair",
+        "Grille R&I/R&R",
+        "Radar module replacement"
+      ]
+    },
+    {
+      "system_name": "Front Camera Module",
+      "oem_name": "Lane-Keeping System Camera",
+      "description": "Lane-Keeping System, Lane Centering, Traffic Sign Recognition, BlueCruise, Auto High Beam",
+      "location": "windshield/rearview mirror",
+      "dtc_set": true,
+      "scan_tool_required": true,
+      "calibration_type": "Static",
+      "calibration_triggers": [
+        "Windshield R&I/R&R",
+        "Windshield replacement",
+        "Camera module R&I",
+        "Steering gear replacement",
+        "Wheel alignment"
+      ]
+    },
+    {
+      "system_name": "BLIS Radar",
+      "oem_name": "Blind Spot Information System",
+      "description": "BLIS, Cross-Traffic Alert, Trailer Coverage",
+      "location": "rear bumper/quarter panel",
+      "dtc_set": true,
+      "scan_tool_required": true,
+      "calibration_type": "Static",
+      "calibration_triggers": [
+        "Rear bumper R&I/R&R",
+        "Rear bumper repair",
+        "Quarter panel R&I/R&R",
+        "Quarter panel repair"
+      ]
+    },
+    {
+      "system_name": "Parking Aid Sensors",
+      "oem_name": "Active Park Assist / Parking Sensors",
+      "description": "Active Park Assist, Front Parking Sensors, Rear Parking Sensors",
+      "location": "front and rear bumpers",
+      "dtc_set": true,
+      "scan_tool_required": true,
+      "calibration_type": "Coding",
+      "calibration_triggers": [
+        "Front bumper R&I/R&R",
+        "Rear bumper R&I/R&R",
+        "Bumper refinish",
+        "Sensor replacement"
+      ]
+    },
+    {
+      "system_name": "360 Degree Camera",
+      "oem_name": "360 Degree Camera / Split View Camera",
+      "description": "360 Degree Camera, Split View Camera",
+      "location": "front, sides, rear",
+      "dtc_set": true,
+      "scan_tool_required": true,
+      "calibration_type": "Static",
+      "calibration_triggers": [
+        "Front bumper R&I",
+        "Mirror R&I/R&R",
+        "Rear bumper R&I",
+        "Tailgate R&I"
+      ]
+    }
+  ],
+  "repair_to_calibration_map": [
+    {
+      "repair_operation": "Front Bumper R&I/R&R/Repair/Overhaul",
+      "repair_keywords": [
+        "front bumper",
+        "frt bumper",
+        "f bumper",
+        "front fascia",
+        "bumper cover",
+        "r&i front bumper",
+        "r&i bumper",
+        "r&r front bumper",
+        "r&r bumper",
+        "o/h front bumper",
+        "o/h bumper",
+        "rpr front bumper",
+        "rpr bumper",
+        "overhaul front bumper",
+        "repair front bumper",
+        "repl front bumper",
+        "repl bumper"
+      ],
+      "triggers_calibration": [
+        "Front Radar Module",
+        "Parking Aid Sensors",
+        "360 Degree Camera"
+      ],
+      "notes": "Front bumper work requires Ford-approved OE parts for ADAS vehicles"
+    },
+    {
+      "repair_operation": "Front Grille R&I/R&R",
+      "repair_keywords": [
+        "grille",
+        "grill",
+        "front grille",
+        "radiator grille",
+        "r&i grille",
+        "r&i grill",
+        "r&r grille",
+        "r&r grill",
+        "repl grille",
+        "repl grill"
+      ],
+      "triggers_calibration": [
+        "Front Radar Module"
+      ],
+      "notes": "Front grille removal requires front radar calibration"
+    },
+    {
+      "repair_operation": "Rear Bumper R&I/R&R/Repair/Overhaul",
+      "repair_keywords": [
+        "rear bumper",
+        "rr bumper",
+        "r bumper",
+        "rear fascia",
+        "back bumper",
+        "r&i rear bumper",
+        "r&r rear bumper",
+        "o/h rear bumper",
+        "rpr rear bumper",
+        "overhaul rear bumper",
+        "repair rear bumper",
+        "repl rear bumper"
+      ],
+      "triggers_calibration": [
+        "BLIS Radar",
+        "Parking Aid Sensors",
+        "360 Degree Camera"
+      ],
+      "notes": "Rear bumper work requires BLIS and parking sensor calibration"
+    },
+    {
+      "repair_operation": "Windshield R&I/R&R",
+      "repair_keywords": [
+        "windshield",
+        "windscreen",
+        "front glass",
+        "w/s glass",
+        "w/s",
+        "wsr",
+        "r&i windshield",
+        "r&r windshield",
+        "repl windshield"
+      ],
+      "triggers_calibration": [
+        "Front Camera Module"
+      ],
+      "notes": "Windshield replacement requires front camera calibration"
+    },
+    {
+      "repair_operation": "Quarter Panel R&I/R&R/Repair",
+      "repair_keywords": [
+        "quarter panel",
+        "qtr panel",
+        "quarter",
+        "rear fender",
+        "qtr",
+        "1/4 panel",
+        "rpr quarter",
+        "repair quarter",
+        "r&i quarter",
+        "r&r quarter"
+      ],
+      "triggers_calibration": [
+        "BLIS Radar"
+      ],
+      "notes": "Quarter panel work may affect BLIS sensor alignment"
+    },
+    {
+      "repair_operation": "Side Mirror R&I/R&R",
+      "repair_keywords": [
+        "side mirror",
+        "door mirror",
+        "outside mirror",
+        "mirror assembly",
+        "r&i mirror",
+        "r&r mirror",
+        "repl mirror"
+      ],
+      "triggers_calibration": [
+        "360 Degree Camera"
+      ],
+      "notes": "Side mirror cameras are part of 360 camera system"
+    },
+    {
+      "repair_operation": "Tailgate R&I/R&R",
+      "repair_keywords": [
+        "tailgate",
+        "liftgate",
+        "rear gate",
+        "hatch",
+        "trunk lid",
+        "decklid",
+        "r&i tailgate",
+        "r&r tailgate"
+      ],
+      "triggers_calibration": [
+        "360 Degree Camera"
+      ],
+      "notes": "Tailgate/liftgate includes rear camera"
+    },
+    {
+      "repair_operation": "Wheel Alignment",
+      "repair_keywords": [
+        "alignment",
+        "wheel alignment",
+        "four wheel alignment",
+        "4 wheel alignment",
+        "thrust angle"
+      ],
+      "triggers_calibration": [
+        "Front Radar Module",
+        "Front Camera Module"
+      ],
+      "notes": "Wheel alignment requires radar and camera calibration"
+    },
+    {
+      "repair_operation": "Steering Gear Replacement",
+      "repair_keywords": [
+        "steering gear",
+        "steering rack",
+        "power steering",
+        "steering column"
+      ],
+      "triggers_calibration": [
+        "Front Camera Module"
+      ],
+      "notes": "Steering gear replacement requires camera calibration"
+    }
+  ]
+}

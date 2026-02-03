@@ -1,0 +1,257 @@
+{
+  "vehicle": {
+    "year_start": 2015,
+    "year_end": 2026,
+    "make": "Subaru",
+    "model": "All Models"
+  },
+  "source": {
+    "provider": "Subaru Position Statement",
+    "url": "Subaru_Pos_Eyesight_FINAL.pdf",
+    "date_extracted": "2026-01-29"
+  },
+  "scanning_requirements": {
+    "pre_scan": "required",
+    "post_scan": "required",
+    "tool": "SSM4"
+  },
+  "parts_requirements": {
+    "oe_windshield_mandatory": true,
+    "oe_parts_recommended": true,
+    "warranty_exclusion": "Aftermarket parts not covered under any Subaru warranty"
+  },
+  "eyesight_requirements": {
+    "windshield_requirement": "Subaru genuine windshield ONLY",
+    "calibration_after_windshield": "REQUIRED - Inspection and Adjustment of stereo camera",
+    "aftermarket_glass_risk": [
+      "Camera visibility may be compromised",
+      "Glass distortion may prevent correct object measurement",
+      "May result in improper/incorrect EyeSight operation",
+      "May affect ability to properly calibrate"
+    ]
+  },
+  "adas_systems": [
+    {
+      "system_name": "EyeSight Camera System",
+      "oem_name": "EyeSight Driver Assist Technology",
+      "description": "Pre-Collision Braking, Pre-Collision Throttle Management, Adaptive Cruise Control, Lane Departure Warning, Lane Sway Warning, Lane Keep Assist",
+      "location": "windshield (stereo cameras)",
+      "dtc_set": true,
+      "scan_tool_required": true,
+      "calibration_type": "Static",
+      "service_info": "CRITICAL: EyeSight calibration may FAIL with non-OE windshield. Subaru genuine windshield ONLY. Stereo camera inspection required after windshield replacement.",
+      "calibration_triggers": [
+        "Windshield R&I/R&R",
+        "Windshield replacement",
+        "Camera replacement",
+        "Wheel alignment",
+        "Suspension work"
+      ]
+    },
+    {
+      "system_name": "Front Radar",
+      "oem_name": "Front Radar Sensor",
+      "description": "Adaptive Cruise Control, Pre-Collision System assist",
+      "location": "front grille/bumper",
+      "dtc_set": true,
+      "scan_tool_required": true,
+      "calibration_type": "Static/Dynamic",
+      "calibration_triggers": [
+        "Front bumper R&I/R&R",
+        "Front bumper repair",
+        "Grille R&I/R&R",
+        "Radar sensor replacement"
+      ]
+    },
+    {
+      "system_name": "Rear/Side Vehicle Detection",
+      "oem_name": "Rear/Side Vehicle Detection (SRVD)",
+      "description": "Blind Spot Detection, Lane Change Assist, Rear Cross Traffic Alert",
+      "location": "rear bumper corners",
+      "dtc_set": true,
+      "scan_tool_required": true,
+      "calibration_type": "Static",
+      "calibration_triggers": [
+        "Rear bumper R&I/R&R",
+        "Rear bumper repair",
+        "Quarter panel R&R",
+        "Sensor replacement"
+      ]
+    },
+    {
+      "system_name": "Rear View Camera",
+      "oem_name": "Rear Vision Camera / Reverse Automatic Braking",
+      "description": "Rear Vision Camera, Reverse Automatic Braking",
+      "location": "liftgate",
+      "dtc_set": true,
+      "scan_tool_required": true,
+      "calibration_type": "Static",
+      "calibration_triggers": [
+        "Liftgate R&R",
+        "Camera replacement"
+      ]
+    }
+  ],
+  "repair_to_calibration_map": [
+    {
+      "repair_operation": "Windshield R&I/R&R",
+      "repair_keywords": [
+        "windshield",
+        "windscreen",
+        "front glass",
+        "w/s glass",
+        "w/s",
+        "laminated glass",
+        "wsr",
+        "r&i windshield",
+        "r&r windshield",
+        "repl windshield"
+      ],
+      "triggers_calibration": [
+        "EyeSight Camera System"
+      ],
+      "notes": "CRITICAL: Subaru genuine windshield ONLY. EyeSight calibration may FAIL with aftermarket glass. Stereo camera inspection and adjustment required."
+    },
+    {
+      "repair_operation": "Front Bumper R&I/R&R/Repair/Overhaul",
+      "repair_keywords": [
+        "front bumper",
+        "frt bumper",
+        "f bumper",
+        "front fascia",
+        "bumper cover",
+        "f/bumper",
+        "bumper cvr frt",
+        "r&i front bumper",
+        "r&i bumper",
+        "r&r front bumper",
+        "r&r bumper",
+        "o/h front bumper",
+        "o/h bumper",
+        "oh bumper",
+        "ovhl bumper",
+        "overhaul bumper",
+        "rpr front bumper",
+        "rpr bumper",
+        "repair front bumper",
+        "repl front bumper",
+        "repl bumper"
+      ],
+      "triggers_calibration": [
+        "Front Radar"
+      ],
+      "notes": "Front bumper work requires radar calibration"
+    },
+    {
+      "repair_operation": "Front Grille R&I/R&R",
+      "repair_keywords": [
+        "grille",
+        "grill",
+        "front grille",
+        "radiator grille",
+        "r&i grille",
+        "r&i grill",
+        "r&r grille",
+        "r&r grill",
+        "repl grille",
+        "repl grill"
+      ],
+      "triggers_calibration": [
+        "Front Radar"
+      ],
+      "notes": "Front grille removal requires radar calibration"
+    },
+    {
+      "repair_operation": "Rear Bumper R&I/R&R/Repair/Overhaul",
+      "repair_keywords": [
+        "rear bumper",
+        "rr bumper",
+        "r bumper",
+        "rear fascia",
+        "back bumper",
+        "r/bumper",
+        "bumper cvr rr",
+        "r&i rear bumper",
+        "r&r rear bumper",
+        "o/h rear bumper",
+        "oh rear bumper",
+        "ovhl rear bumper",
+        "overhaul rear bumper",
+        "rpr rear bumper",
+        "repair rear bumper",
+        "repl rear bumper"
+      ],
+      "triggers_calibration": [
+        "Rear/Side Vehicle Detection"
+      ],
+      "notes": "Rear bumper work requires SRVD calibration"
+    },
+    {
+      "repair_operation": "Quarter Panel R&I/R&R/Repair",
+      "repair_keywords": [
+        "quarter panel",
+        "qtr panel",
+        "quarter",
+        "rear fender",
+        "qtr",
+        "1/4 panel",
+        "rpr quarter",
+        "repair quarter",
+        "r&i quarter",
+        "r&r quarter"
+      ],
+      "triggers_calibration": [
+        "Rear/Side Vehicle Detection"
+      ],
+      "notes": "Quarter panel work may affect SRVD sensor alignment"
+    },
+    {
+      "repair_operation": "Liftgate/Tailgate R&I/R&R",
+      "repair_keywords": [
+        "liftgate",
+        "tailgate",
+        "rear gate",
+        "hatch",
+        "trunk lid",
+        "decklid",
+        "r&i liftgate",
+        "r&r liftgate"
+      ],
+      "triggers_calibration": [
+        "Rear View Camera"
+      ],
+      "notes": "Liftgate includes rear vision camera"
+    },
+    {
+      "repair_operation": "Wheel Alignment",
+      "repair_keywords": [
+        "alignment",
+        "wheel alignment",
+        "four wheel alignment",
+        "4 wheel alignment",
+        "thrust angle"
+      ],
+      "triggers_calibration": [
+        "EyeSight Camera System",
+        "Front Radar"
+      ],
+      "notes": "Wheel alignment requires EyeSight and radar calibration"
+    },
+    {
+      "repair_operation": "Suspension Work",
+      "repair_keywords": [
+        "suspension",
+        "strut",
+        "shock",
+        "control arm",
+        "subframe",
+        "steering knuckle",
+        "spring"
+      ],
+      "triggers_calibration": [
+        "EyeSight Camera System"
+      ],
+      "notes": "Suspension work affecting ride height requires EyeSight calibration"
+    }
+  ]
+}

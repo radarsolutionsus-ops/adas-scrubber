@@ -1,0 +1,134 @@
+{
+  "vehicle": {
+    "year_start": 2018,
+    "year_end": 2026,
+    "make": "Volkswagen",
+    "model": "All Models"
+  },
+  "source": {
+    "provider": "Volkswagen Position Statement",
+    "url": "Audi_Position_WindshieldGlass_Replacement813pdf1.pdf",
+    "date_extracted": "2026-01-29"
+  },
+  "adas_systems": [
+    {
+      "system_name": "Front Assist Radar",
+      "oem_name": "Front Assist / ACC Radar",
+      "description": "Front Assist, Adaptive Cruise Control, Autonomous Emergency Braking",
+      "location": "front grille/bumper",
+      "dtc_set": true,
+      "scan_tool_required": true,
+      "calibration_type": "Static/Dynamic",
+      "calibration_triggers": [
+        "Component replacement",
+        "After collision repair"
+      ]
+    },
+    {
+      "system_name": "Front Camera",
+      "oem_name": "Lane Assist / Travel Assist Camera",
+      "description": "Lane Assist, Traffic Sign Recognition, Light Assist, Travel Assist",
+      "location": "windshield",
+      "dtc_set": true,
+      "scan_tool_required": true,
+      "calibration_type": "Static",
+      "calibration_triggers": [
+        "Component replacement",
+        "After collision repair"
+      ]
+    },
+    {
+      "system_name": "Side Assist Sensor",
+      "oem_name": "Side Assist Sensors",
+      "description": "Side Assist, Rear Traffic Alert, Lane Change Assist",
+      "location": "rear bumper corners",
+      "dtc_set": true,
+      "scan_tool_required": true,
+      "calibration_type": "Static",
+      "calibration_triggers": [
+        "Component replacement",
+        "After collision repair"
+      ]
+    }
+  ],
+  "repair_to_calibration_map": [
+    {
+      "repair_operation": "Front Bumper R&I/R&R",
+      "repair_keywords": [
+        "front bumper",
+        "frt bumper",
+        "f bumper",
+        "front fascia",
+        "bumper cover",
+        "r&i front bumper",
+        "r&r front bumper",
+        "o/h front bumper",
+        "o/h bumper",
+        "rpr front bumper",
+        "rpr bumper"
+      ],
+      "triggers_calibration": [
+        "Front Assist Radar"
+      ],
+      "notes": "Front Bumper R&I/R&R requires Front Assist Radar calibration"
+    },
+    {
+      "repair_operation": "Front Grille R&I/R&R",
+      "repair_keywords": [
+        "grille",
+        "front grille",
+        "radiator grille",
+        "grill",
+        "r&i grille",
+        "r&r grille"
+      ],
+      "triggers_calibration": [
+        "Front Assist Radar"
+      ],
+      "notes": "Front Grille R&I/R&R requires Front Assist Radar calibration"
+    },
+    {
+      "repair_operation": "Rear Bumper R&I/R&R",
+      "repair_keywords": [
+        "rear bumper",
+        "rr bumper",
+        "r bumper",
+        "rear fascia",
+        "r&i rear bumper",
+        "r&r rear bumper",
+        "o/h rear bumper",
+        "rpr rear bumper"
+      ],
+      "triggers_calibration": [
+        "Side Assist Sensor"
+      ],
+      "notes": "Rear Bumper R&I/R&R requires Side Assist Sensor calibration"
+    },
+    {
+      "repair_operation": "Windshield R&I/R&R",
+      "repair_keywords": [
+        "windshield",
+        "windscreen",
+        "front glass",
+        "w/s glass"
+      ],
+      "triggers_calibration": [
+        "Front Camera"
+      ],
+      "notes": "Windshield R&I/R&R requires Front Camera calibration"
+    },
+    {
+      "repair_operation": "Quarter Panel Repair",
+      "repair_keywords": [
+        "quarter panel",
+        "qtr panel",
+        "rear quarter",
+        "rpr quarter"
+      ],
+      "triggers_calibration": [
+        "Side Assist Sensor"
+      ],
+      "notes": "Quarter Panel Repair requires Side Assist Sensor calibration"
+    }
+  ]
+}

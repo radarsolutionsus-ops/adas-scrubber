@@ -1,0 +1,311 @@
+{
+  "vehicle": {
+    "year_start": 2013,
+    "year_end": 2026,
+    "make": "Honda",
+    "model": "All Models"
+  },
+  "source": {
+    "provider": "Honda Position Statement 28870",
+    "url": "Honda_Position_Statement_28870_2025.pdf",
+    "date_extracted": "2026-01-29"
+  },
+  "scanning_requirements": {
+    "pre_scan": "required",
+    "post_scan": "required",
+    "tool": "i-HDS",
+    "feature": "All DTC Check",
+    "hardware": "Bosch MVCI or Denso DST-i"
+  },
+  "parts_requirements": {
+    "oe_windshield_required": true,
+    "oe_sensors_required": true,
+    "notes": "OE windshield MANDATORY for camera aiming"
+  },
+  "bumper_restrictions": {
+    "radar_wave_emission_zone": {
+      "repair_allowed": false,
+      "notes": "Do NOT repair bumper cover when damage is found in radar wave emission range - return to authorized dealer"
+    },
+    "approved_paint_suppliers": ["PPG", "Sherwin-Williams", "Axalta Coating Systems", "BASF"]
+  },
+  "adas_systems": [
+    {
+      "system_name": "Millimeter Wave Radar",
+      "oem_name": "Millimeter Wave Radar Unit",
+      "description": "Adaptive Cruise Control, Collision Mitigation Braking System, Forward Collision Warning",
+      "location": "front bumper/grille",
+      "dtc_set": true,
+      "scan_tool_required": true,
+      "calibration_type": "Static",
+      "service_info": "Do NOT repair bumper cover when damage is found in radar wave emission range. i-HDS aiming required.",
+      "calibration_triggers": [
+        "Front bumper R&I/R&R",
+        "Front bumper repair",
+        "Grille R&I/R&R",
+        "Radar unit replacement"
+      ]
+    },
+    {
+      "system_name": "Multipurpose Camera",
+      "oem_name": "Multipurpose Camera Unit",
+      "description": "Lane Departure Warning, Lane Keeping Assist System, Road Departure Mitigation, Forward Collision Warning, Traffic Sign Recognition",
+      "location": "windshield (behind rearview mirror)",
+      "dtc_set": true,
+      "scan_tool_required": true,
+      "calibration_type": "Static",
+      "service_info": "OE windshield MANDATORY for camera aiming. i-HDS calibration required.",
+      "calibration_triggers": [
+        "Windshield R&I/R&R",
+        "Windshield replacement",
+        "Camera replacement"
+      ]
+    },
+    {
+      "system_name": "BSI Radar Units",
+      "oem_name": "Blind Spot Information (BSI) Radar",
+      "description": "Blind Spot Information, Cross Traffic Monitor",
+      "location": "rear bumper corners",
+      "dtc_set": true,
+      "scan_tool_required": true,
+      "calibration_type": "Static",
+      "service_info": "BSI radar aim inspection is static using laser with targets. i-HDS required.",
+      "calibration_triggers": [
+        "Rear bumper R&I/R&R",
+        "Rear bumper repair",
+        "Sensor replacement"
+      ]
+    },
+    {
+      "system_name": "LaneWatch Camera",
+      "oem_name": "LaneWatch Camera (Honda Only)",
+      "description": "Passenger-side blind spot camera display",
+      "location": "front passenger door mirror",
+      "dtc_set": true,
+      "scan_tool_required": true,
+      "calibration_type": "Adjustment",
+      "calibration_triggers": [
+        "Front passenger door mirror R&R",
+        "Camera replacement"
+      ]
+    },
+    {
+      "system_name": "Multi-View Camera System",
+      "oem_name": "Multi-View Camera System (MVCS - Acura)",
+      "description": "360-degree surround view camera system (Acura models)",
+      "location": "front, side mirrors, rear",
+      "dtc_set": true,
+      "scan_tool_required": true,
+      "calibration_type": "Static",
+      "calibration_triggers": [
+        "Front bumper R&I",
+        "Door mirror R&R",
+        "Rear bumper R&I"
+      ]
+    },
+    {
+      "system_name": "Parking Sensors",
+      "oem_name": "Parking Sensor System",
+      "description": "Front and rear parking sensors",
+      "location": "front and rear bumpers",
+      "dtc_set": true,
+      "scan_tool_required": true,
+      "calibration_type": "Coding",
+      "calibration_triggers": [
+        "Front bumper R&I/R&R",
+        "Rear bumper R&I/R&R",
+        "Bumper refinish",
+        "Sensor replacement"
+      ]
+    }
+  ],
+  "repair_to_calibration_map": [
+    {
+      "repair_operation": "Front Bumper R&I/R&R/Repair/Overhaul",
+      "repair_keywords": [
+        "front bumper",
+        "frt bumper",
+        "f bumper",
+        "front fascia",
+        "bumper cover",
+        "f/bumper",
+        "bumper cvr frt",
+        "r&i front bumper",
+        "r&i bumper",
+        "r&r front bumper",
+        "r&r bumper",
+        "o/h front bumper",
+        "o/h bumper",
+        "oh bumper",
+        "ovhl bumper",
+        "overhaul bumper",
+        "rpr front bumper",
+        "rpr bumper",
+        "repair front bumper",
+        "repl front bumper",
+        "repl bumper"
+      ],
+      "triggers_calibration": [
+        "Millimeter Wave Radar",
+        "Multi-View Camera System",
+        "Parking Sensors"
+      ],
+      "notes": "Front bumper work requires radar calibration. Do NOT repair in radar wave emission zone - bumper replacement required."
+    },
+    {
+      "repair_operation": "Front Grille R&I/R&R",
+      "repair_keywords": [
+        "grille",
+        "grill",
+        "front grille",
+        "radiator grille",
+        "r&i grille",
+        "r&i grill",
+        "r&r grille",
+        "r&r grill",
+        "repl grille",
+        "repl grill"
+      ],
+      "triggers_calibration": [
+        "Millimeter Wave Radar"
+      ],
+      "notes": "Front grille removal requires radar calibration"
+    },
+    {
+      "repair_operation": "Rear Bumper R&I/R&R/Repair/Overhaul",
+      "repair_keywords": [
+        "rear bumper",
+        "rr bumper",
+        "r bumper",
+        "rear fascia",
+        "back bumper",
+        "r/bumper",
+        "bumper cvr rr",
+        "r&i rear bumper",
+        "r&r rear bumper",
+        "o/h rear bumper",
+        "oh rear bumper",
+        "ovhl rear bumper",
+        "overhaul rear bumper",
+        "rpr rear bumper",
+        "repair rear bumper",
+        "repl rear bumper"
+      ],
+      "triggers_calibration": [
+        "BSI Radar Units",
+        "Multi-View Camera System",
+        "Parking Sensors"
+      ],
+      "notes": "Rear bumper work requires BSI radar calibration. Static laser calibration with targets required."
+    },
+    {
+      "repair_operation": "Windshield R&I/R&R",
+      "repair_keywords": [
+        "windshield",
+        "windscreen",
+        "front glass",
+        "w/s glass",
+        "w/s",
+        "laminated glass",
+        "wsr",
+        "r&i windshield",
+        "r&r windshield",
+        "repl windshield"
+      ],
+      "triggers_calibration": [
+        "Multipurpose Camera"
+      ],
+      "notes": "Windshield replacement requires camera calibration. OE windshield MANDATORY for camera aiming."
+    },
+    {
+      "repair_operation": "Front Passenger Door Mirror R&R",
+      "repair_keywords": [
+        "passenger mirror",
+        "right mirror",
+        "passenger door mirror",
+        "rh mirror",
+        "r/h mirror"
+      ],
+      "triggers_calibration": [
+        "LaneWatch Camera",
+        "Multi-View Camera System"
+      ],
+      "notes": "Passenger-side mirror includes LaneWatch camera (Honda) or right side MVCS camera (Acura)"
+    },
+    {
+      "repair_operation": "Driver Door Mirror R&R",
+      "repair_keywords": [
+        "driver mirror",
+        "left mirror",
+        "driver door mirror",
+        "lh mirror",
+        "l/h mirror"
+      ],
+      "triggers_calibration": [
+        "Multi-View Camera System"
+      ],
+      "notes": "Driver-side mirror includes left side MVCS camera (Acura)"
+    },
+    {
+      "repair_operation": "Side Mirror R&I/R&R",
+      "repair_keywords": [
+        "side mirror",
+        "door mirror",
+        "outside mirror",
+        "mirror assembly",
+        "wing mirror",
+        "exterior mirror",
+        "r&i mirror",
+        "r&r mirror",
+        "repl mirror"
+      ],
+      "triggers_calibration": [
+        "LaneWatch Camera",
+        "Multi-View Camera System"
+      ],
+      "notes": "Side mirror work may require LaneWatch or MVCS camera calibration"
+    },
+    {
+      "repair_operation": "Headlamp Aiming",
+      "repair_keywords": [
+        "headlamp",
+        "headlight",
+        "headlamp aim",
+        "headlight aim",
+        "head lamp",
+        "head light"
+      ],
+      "triggers_calibration": [
+        "Multipurpose Camera"
+      ],
+      "notes": "Headlamp R&R may affect multipurpose camera calibration on vehicles with automatic high beams"
+    },
+    {
+      "repair_operation": "Wheel Alignment",
+      "repair_keywords": [
+        "alignment",
+        "wheel alignment",
+        "four wheel alignment",
+        "4 wheel alignment",
+        "thrust angle"
+      ],
+      "triggers_calibration": [
+        "Millimeter Wave Radar",
+        "Multipurpose Camera"
+      ],
+      "notes": "Wheel alignment may require radar and camera calibration"
+    },
+    {
+      "repair_operation": "Seat Work",
+      "repair_keywords": [
+        "seat",
+        "front seat",
+        "seat track",
+        "seat frame",
+        "seat belt"
+      ],
+      "triggers_calibration": [],
+      "notes": "Seat weight sensor check required after ANY collision regardless of damage per Honda position statement"
+    }
+  ]
+}

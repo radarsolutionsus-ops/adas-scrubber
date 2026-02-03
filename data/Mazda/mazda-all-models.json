@@ -1,0 +1,279 @@
+{
+  "vehicle": {
+    "year_start": 2017,
+    "year_end": 2026,
+    "make": "Mazda",
+    "model": "All Models"
+  },
+  "source": {
+    "provider": "Mazda Position Statement",
+    "url": "Mazda_Pre-and-Post-Repair-Scanning_Position.pdf",
+    "date_extracted": "2026-01-29"
+  },
+  "scanning_requirements": {
+    "pre_scan": "required",
+    "post_scan": "required",
+    "tool": "Mazda IDS or M-MDS",
+    "hardware": "VCM II or compatible J2534 device"
+  },
+  "adas_systems": [
+    {
+      "system_name": "Forward Sensing Camera",
+      "oem_name": "Forward Sensing Camera (FSC)",
+      "description": "Lane Departure Warning, Lane-keep Assist, High Beam Control, Forward Obstruction Warning, Smart City Brake Support",
+      "location": "windshield/rearview mirror",
+      "dtc_set": true,
+      "scan_tool_required": true,
+      "calibration_type": "Static",
+      "service_info": "Camera calibration requires Mazda IDS and specific calibration target positioning",
+      "calibration_triggers": [
+        "Windshield R&I/R&R",
+        "Windshield replacement",
+        "Camera module R&I/R&R",
+        "Steering gear replacement",
+        "Wheel alignment"
+      ]
+    },
+    {
+      "system_name": "Front Radar",
+      "oem_name": "Millimeter Wave Radar",
+      "description": "Mazda Radar Cruise Control (MRCC), Smart Brake Support, Adaptive Cruise Control",
+      "location": "front bumper/grille",
+      "dtc_set": true,
+      "scan_tool_required": true,
+      "calibration_type": "Static/Dynamic",
+      "service_info": "Radar calibration required after any work affecting sensor positioning or alignment",
+      "calibration_triggers": [
+        "Front bumper R&I/R&R",
+        "Front bumper repair",
+        "Grille R&I/R&R",
+        "Radar sensor replacement",
+        "Wheel alignment"
+      ]
+    },
+    {
+      "system_name": "Blind Spot Monitoring Radar",
+      "oem_name": "Blind Spot Monitoring (BSM)",
+      "description": "Blind Spot Monitoring, Rear Cross Traffic Alert",
+      "location": "rear bumper corners",
+      "dtc_set": true,
+      "scan_tool_required": true,
+      "calibration_type": "Static",
+      "service_info": "BSM sensors located in rear bumper corners require calibration after bumper work",
+      "calibration_triggers": [
+        "Rear bumper R&I/R&R",
+        "Rear bumper repair",
+        "Quarter panel R&I/R&R",
+        "Quarter panel repair",
+        "Sensor replacement"
+      ]
+    },
+    {
+      "system_name": "Parking Sensors",
+      "oem_name": "Front and Rear Parking Sensors",
+      "description": "Parking aid sensors with audible alerts",
+      "location": "front and rear bumpers",
+      "dtc_set": true,
+      "scan_tool_required": true,
+      "calibration_type": "Coding",
+      "calibration_triggers": [
+        "Front bumper R&I/R&R",
+        "Rear bumper R&I/R&R",
+        "Bumper refinish",
+        "Sensor replacement"
+      ]
+    },
+    {
+      "system_name": "360 View Monitor",
+      "oem_name": "360 View Monitor",
+      "description": "Surround view camera system with bird's eye view display",
+      "location": "front, sides, rear",
+      "dtc_set": true,
+      "scan_tool_required": true,
+      "calibration_type": "Static",
+      "calibration_triggers": [
+        "Front bumper R&I",
+        "Mirror R&I/R&R",
+        "Rear bumper R&I",
+        "Tailgate/Liftgate R&I",
+        "Camera replacement"
+      ]
+    }
+  ],
+  "repair_to_calibration_map": [
+    {
+      "repair_operation": "Front Bumper R&I/R&R/Repair/Overhaul",
+      "repair_keywords": [
+        "front bumper",
+        "frt bumper",
+        "f bumper",
+        "front fascia",
+        "bumper cover",
+        "r&i front bumper",
+        "r&i bumper",
+        "r&r front bumper",
+        "r&r bumper",
+        "o/h front bumper",
+        "o/h bumper",
+        "oh bumper",
+        "ovhl bumper",
+        "overhaul bumper",
+        "rpr front bumper",
+        "rpr bumper",
+        "repair front bumper",
+        "repl front bumper",
+        "repl bumper"
+      ],
+      "triggers_calibration": [
+        "Front Radar",
+        "Parking Sensors",
+        "360 View Monitor"
+      ],
+      "notes": "Front bumper work requires MRCC radar, parking sensor, and 360 View calibration"
+    },
+    {
+      "repair_operation": "Front Grille R&I/R&R",
+      "repair_keywords": [
+        "grille",
+        "grill",
+        "front grille",
+        "radiator grille",
+        "r&i grille",
+        "r&i grill",
+        "r&r grille",
+        "r&r grill",
+        "repl grille",
+        "repl grill"
+      ],
+      "triggers_calibration": [
+        "Front Radar"
+      ],
+      "notes": "Front grille removal requires MRCC radar calibration"
+    },
+    {
+      "repair_operation": "Rear Bumper R&I/R&R/Repair/Overhaul",
+      "repair_keywords": [
+        "rear bumper",
+        "rr bumper",
+        "r bumper",
+        "rear fascia",
+        "back bumper",
+        "r&i rear bumper",
+        "r&r rear bumper",
+        "o/h rear bumper",
+        "oh rear bumper",
+        "ovhl rear bumper",
+        "overhaul rear bumper",
+        "rpr rear bumper",
+        "repair rear bumper",
+        "repl rear bumper"
+      ],
+      "triggers_calibration": [
+        "Blind Spot Monitoring Radar",
+        "Parking Sensors",
+        "360 View Monitor"
+      ],
+      "notes": "Rear bumper work requires BSM, parking sensor, and 360 View calibration"
+    },
+    {
+      "repair_operation": "Windshield R&I/R&R",
+      "repair_keywords": [
+        "windshield",
+        "windscreen",
+        "front glass",
+        "w/s glass",
+        "w/s",
+        "wsr",
+        "r&i windshield",
+        "r&r windshield",
+        "repl windshield"
+      ],
+      "triggers_calibration": [
+        "Forward Sensing Camera"
+      ],
+      "notes": "Windshield replacement requires FSC camera calibration"
+    },
+    {
+      "repair_operation": "Quarter Panel R&I/R&R/Repair",
+      "repair_keywords": [
+        "quarter panel",
+        "qtr panel",
+        "quarter",
+        "rear fender",
+        "qtr",
+        "1/4 panel",
+        "rpr quarter",
+        "repair quarter",
+        "r&i quarter",
+        "r&r quarter"
+      ],
+      "triggers_calibration": [
+        "Blind Spot Monitoring Radar"
+      ],
+      "notes": "Quarter panel work may affect BSM sensor alignment"
+    },
+    {
+      "repair_operation": "Side Mirror R&I/R&R",
+      "repair_keywords": [
+        "side mirror",
+        "door mirror",
+        "outside mirror",
+        "mirror assembly",
+        "r&i mirror",
+        "r&r mirror",
+        "repl mirror"
+      ],
+      "triggers_calibration": [
+        "360 View Monitor"
+      ],
+      "notes": "Side mirror cameras are part of 360 View system"
+    },
+    {
+      "repair_operation": "Tailgate/Liftgate R&I/R&R",
+      "repair_keywords": [
+        "tailgate",
+        "liftgate",
+        "rear gate",
+        "hatch",
+        "trunk lid",
+        "decklid",
+        "r&i tailgate",
+        "r&r tailgate",
+        "r&i liftgate",
+        "r&r liftgate"
+      ],
+      "triggers_calibration": [
+        "360 View Monitor"
+      ],
+      "notes": "Tailgate/liftgate includes rear camera for 360 View"
+    },
+    {
+      "repair_operation": "Wheel Alignment",
+      "repair_keywords": [
+        "alignment",
+        "wheel alignment",
+        "four wheel alignment",
+        "4 wheel alignment",
+        "thrust angle"
+      ],
+      "triggers_calibration": [
+        "Front Radar",
+        "Forward Sensing Camera"
+      ],
+      "notes": "Wheel alignment requires radar and camera calibration"
+    },
+    {
+      "repair_operation": "Steering Gear Replacement",
+      "repair_keywords": [
+        "steering gear",
+        "steering rack",
+        "power steering",
+        "steering column"
+      ],
+      "triggers_calibration": [
+        "Forward Sensing Camera"
+      ],
+      "notes": "Steering gear replacement requires camera calibration"
+    }
+  ]
+}

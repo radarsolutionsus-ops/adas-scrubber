@@ -1,0 +1,296 @@
+{
+  "vehicle": {
+    "year_start": 2015,
+    "year_end": 2026,
+    "make": "Chevrolet",
+    "model": "All Models"
+  },
+  "source": {
+    "provider": "GM Service Technical College / GMSi Position Statement",
+    "url": "GM_Position_Statement_ADAS.pdf",
+    "date_extracted": "2026-01-29"
+  },
+  "scanning_requirements": {
+    "pre_scan": "required",
+    "post_scan": "required",
+    "tool": "GM Service Technical College / GMSi"
+  },
+  "parts_requirements": {
+    "oe_parts_only": true,
+    "oe_glass_only": true,
+    "aftermarket_fascias": "NOT APPROVED",
+    "reconditioned_fascias": "NOT APPROVED",
+    "salvage_fascias": "NOT APPROVED",
+    "notes": "Aftermarket parts may have different material or dimensional specifications"
+  },
+  "bumper_restrictions": {
+    "repair_type": "Topcoat refinish ONLY",
+    "paint_thickness_max_mils": 13,
+    "measurement_tool": "Non-metallic paint film thickness tool (e.g., PosiTector 200)",
+    "substrate_repair": "NOT PERMITTED - bumper replacement required",
+    "prohibited": ["Substrate repair material", "Reinforcement tapes", "Filler material"]
+  },
+  "obstructions_prohibited": [
+    "Protective covers/film",
+    "Decorative/cosmetic wraps",
+    "Stickers",
+    "Window tint",
+    "Magnets",
+    "Hood protectors",
+    "Push bars",
+    "Bicycle/cargo racks",
+    "Light bars",
+    "Oversized roof cargo",
+    "License plate covers"
+  ],
+  "adas_systems": [
+    {
+      "system_name": "Front Radar Module",
+      "oem_name": "Forward Collision Alert / ACC Radar",
+      "description": "Adaptive Cruise Control, Forward Collision Alert, Collision Imminent Braking, Front Pedestrian Braking, Following Distance Indicator",
+      "location": "front grille/bumper",
+      "dtc_set": true,
+      "scan_tool_required": true,
+      "calibration_type": "Static/Dynamic",
+      "service_info": "Bumper topcoat refinish ONLY - substrate repair NOT PERMITTED. Max paint thickness 13 mils.",
+      "calibration_triggers": [
+        "Front bumper R&I/R&R",
+        "Front bumper refinish",
+        "Grille R&I/R&R",
+        "Radar sensor replacement",
+        "Headlamp R&R"
+      ]
+    },
+    {
+      "system_name": "Front Camera",
+      "oem_name": "Lane Departure Warning / Lane Keep Assist Camera",
+      "description": "Lane Departure Warning, Lane Keep Assist, Automatic High Beam, Traffic Sign Memory, Head Up Display, Super Cruise, Lane Change on Demand",
+      "location": "windshield (behind rearview mirror)",
+      "dtc_set": true,
+      "scan_tool_required": true,
+      "calibration_type": "Static",
+      "service_info": "OE glass ONLY. Aftermarket glass may have different optical properties affecting calibration.",
+      "calibration_triggers": [
+        "Windshield R&I/R&R",
+        "Windshield replacement",
+        "Camera replacement"
+      ]
+    },
+    {
+      "system_name": "Side Blind Zone Alert Sensor",
+      "oem_name": "Side Blind Zone Alert (SBZA)",
+      "description": "Side Blind Zone Alert, Lane Change Alert, Rear Cross Traffic Alert",
+      "location": "rear bumper corners",
+      "dtc_set": true,
+      "scan_tool_required": true,
+      "calibration_type": "Static",
+      "service_info": "Sensor areas in rear bumper corners. Substrate repair NOT PERMITTED.",
+      "calibration_triggers": [
+        "Rear bumper R&I/R&R",
+        "Rear bumper refinish",
+        "Quarter panel R&R",
+        "Sensor replacement"
+      ]
+    },
+    {
+      "system_name": "Surround Vision Camera",
+      "oem_name": "Surround Vision",
+      "description": "360-degree surround view camera system, Rear Vision Camera",
+      "location": "front grille, side mirrors, rear",
+      "dtc_set": true,
+      "scan_tool_required": true,
+      "calibration_type": "Static",
+      "calibration_triggers": [
+        "Front grille R&I/R&R",
+        "Mirror R&R",
+        "Rear bumper R&I",
+        "Tailgate R&R",
+        "Camera replacement"
+      ]
+    },
+    {
+      "system_name": "Ultrasonic Parking Sensors",
+      "oem_name": "Front/Rear Park Assist",
+      "description": "Front Parking Assist, Rear Park Assist, Automatic Parking Assist",
+      "location": "front and rear bumpers",
+      "dtc_set": true,
+      "scan_tool_required": true,
+      "calibration_type": "Coding",
+      "calibration_triggers": [
+        "Front bumper R&I/R&R",
+        "Rear bumper R&I/R&R",
+        "Bumper refinish",
+        "Sensor replacement"
+      ]
+    }
+  ],
+  "repair_to_calibration_map": [
+    {
+      "repair_operation": "Front Bumper R&I/R&R/Repair/Overhaul",
+      "repair_keywords": [
+        "front bumper",
+        "frt bumper",
+        "f bumper",
+        "front fascia",
+        "bumper cover",
+        "f/bumper",
+        "bumper cvr frt",
+        "r&i front bumper",
+        "r&i bumper",
+        "r&r front bumper",
+        "r&r bumper",
+        "o/h front bumper",
+        "o/h bumper",
+        "oh bumper",
+        "ovhl bumper",
+        "overhaul bumper",
+        "rpr front bumper",
+        "rpr bumper",
+        "repair front bumper",
+        "repl front bumper",
+        "repl bumper"
+      ],
+      "triggers_calibration": [
+        "Front Radar Module",
+        "Surround Vision Camera",
+        "Ultrasonic Parking Sensors"
+      ],
+      "notes": "Front bumper topcoat refinish ONLY - substrate repair NOT PERMITTED. Max paint 13 mils. Aftermarket/salvage fascias NOT APPROVED."
+    },
+    {
+      "repair_operation": "Front Grille R&I/R&R",
+      "repair_keywords": [
+        "grille",
+        "grill",
+        "front grille",
+        "radiator grille",
+        "r&i grille",
+        "r&i grill",
+        "r&r grille",
+        "r&r grill",
+        "repl grille",
+        "repl grill"
+      ],
+      "triggers_calibration": [
+        "Front Radar Module",
+        "Surround Vision Camera"
+      ],
+      "notes": "Front grille removal requires radar and surround vision calibration"
+    },
+    {
+      "repair_operation": "Rear Bumper R&I/R&R/Repair/Overhaul",
+      "repair_keywords": [
+        "rear bumper",
+        "rr bumper",
+        "r bumper",
+        "rear fascia",
+        "back bumper",
+        "r/bumper",
+        "bumper cvr rr",
+        "r&i rear bumper",
+        "r&r rear bumper",
+        "o/h rear bumper",
+        "oh rear bumper",
+        "ovhl rear bumper",
+        "overhaul rear bumper",
+        "rpr rear bumper",
+        "repair rear bumper",
+        "repl rear bumper"
+      ],
+      "triggers_calibration": [
+        "Side Blind Zone Alert Sensor",
+        "Surround Vision Camera",
+        "Ultrasonic Parking Sensors"
+      ],
+      "notes": "Rear bumper substrate repair NOT PERMITTED per GM position statement"
+    },
+    {
+      "repair_operation": "Windshield R&I/R&R",
+      "repair_keywords": [
+        "windshield",
+        "windscreen",
+        "front glass",
+        "w/s glass",
+        "w/s",
+        "laminated glass",
+        "wsr",
+        "r&i windshield",
+        "r&r windshield",
+        "repl windshield"
+      ],
+      "triggers_calibration": [
+        "Front Camera"
+      ],
+      "notes": "Windshield replacement requires camera calibration. OE glass ONLY."
+    },
+    {
+      "repair_operation": "Side Mirror R&I/R&R",
+      "repair_keywords": [
+        "side mirror",
+        "door mirror",
+        "outside mirror",
+        "mirror assembly",
+        "wing mirror",
+        "exterior mirror",
+        "r&i mirror",
+        "r&r mirror",
+        "repl mirror"
+      ],
+      "triggers_calibration": [
+        "Surround Vision Camera"
+      ],
+      "notes": "Side mirror cameras are part of Surround Vision system"
+    },
+    {
+      "repair_operation": "Quarter Panel R&I/R&R/Repair",
+      "repair_keywords": [
+        "quarter panel",
+        "qtr panel",
+        "quarter",
+        "rear fender",
+        "qtr",
+        "1/4 panel",
+        "rpr quarter",
+        "repair quarter",
+        "r&i quarter",
+        "r&r quarter"
+      ],
+      "triggers_calibration": [
+        "Side Blind Zone Alert Sensor"
+      ],
+      "notes": "Quarter panel work may affect SBZA sensor alignment"
+    },
+    {
+      "repair_operation": "Tailgate/Trunk R&I/R&R",
+      "repair_keywords": [
+        "tailgate",
+        "liftgate",
+        "trunk lid",
+        "decklid",
+        "rear gate",
+        "hatch",
+        "r&i tailgate",
+        "r&r tailgate"
+      ],
+      "triggers_calibration": [
+        "Surround Vision Camera"
+      ],
+      "notes": "Tailgate/trunk includes rear camera for Surround Vision"
+    },
+    {
+      "repair_operation": "Headlamp R&I/R&R",
+      "repair_keywords": [
+        "headlamp",
+        "headlight",
+        "head lamp",
+        "head light",
+        "r&i headlamp",
+        "r&r headlamp"
+      ],
+      "triggers_calibration": [
+        "Front Camera"
+      ],
+      "notes": "Headlamp R&R on vehicles with automatic high beam may require camera calibration"
+    }
+  ]
+}

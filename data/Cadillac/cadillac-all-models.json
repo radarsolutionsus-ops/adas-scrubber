@@ -1,0 +1,134 @@
+{
+  "vehicle": {
+    "year_start": 2018,
+    "year_end": 2026,
+    "make": "Cadillac",
+    "model": "All Models"
+  },
+  "source": {
+    "provider": "Cadillac Position Statement",
+    "url": "gmgpwindshieldreplacementpositionstatementfeb272025.pdf",
+    "date_extracted": "2026-01-29"
+  },
+  "adas_systems": [
+    {
+      "system_name": "Front Radar Module",
+      "oem_name": "Super Cruise / Ultra Cruise Radar",
+      "description": "Super Cruise, Adaptive Cruise Control, Enhanced Automatic Emergency Braking",
+      "location": "front grille/bumper",
+      "dtc_set": true,
+      "scan_tool_required": true,
+      "calibration_type": "Static/Dynamic",
+      "calibration_triggers": [
+        "Component replacement",
+        "After collision repair"
+      ]
+    },
+    {
+      "system_name": "Front Camera",
+      "oem_name": "Super Cruise / Ultra Cruise Camera",
+      "description": "Super Cruise, Lane Keep Assist, Lane Departure Warning, Ultra Cruise",
+      "location": "windshield",
+      "dtc_set": true,
+      "scan_tool_required": true,
+      "calibration_type": "Static",
+      "calibration_triggers": [
+        "Component replacement",
+        "After collision repair"
+      ]
+    },
+    {
+      "system_name": "Side Blind Zone Alert Sensor",
+      "oem_name": "Side Blind Zone Alert",
+      "description": "Side Blind Zone Alert, Rear Cross Traffic Alert",
+      "location": "rear bumper corners",
+      "dtc_set": true,
+      "scan_tool_required": true,
+      "calibration_type": "Static",
+      "calibration_triggers": [
+        "Component replacement",
+        "After collision repair"
+      ]
+    }
+  ],
+  "repair_to_calibration_map": [
+    {
+      "repair_operation": "Front Bumper R&I/R&R",
+      "repair_keywords": [
+        "front bumper",
+        "frt bumper",
+        "f bumper",
+        "front fascia",
+        "bumper cover",
+        "r&i front bumper",
+        "r&r front bumper",
+        "o/h front bumper",
+        "o/h bumper",
+        "rpr front bumper",
+        "rpr bumper"
+      ],
+      "triggers_calibration": [
+        "Front Radar Module"
+      ],
+      "notes": "Front Bumper R&I/R&R requires Front Radar Module calibration"
+    },
+    {
+      "repair_operation": "Front Grille R&I/R&R",
+      "repair_keywords": [
+        "grille",
+        "front grille",
+        "radiator grille",
+        "grill",
+        "r&i grille",
+        "r&r grille"
+      ],
+      "triggers_calibration": [
+        "Front Radar Module"
+      ],
+      "notes": "Front Grille R&I/R&R requires Front Radar Module calibration"
+    },
+    {
+      "repair_operation": "Rear Bumper R&I/R&R",
+      "repair_keywords": [
+        "rear bumper",
+        "rr bumper",
+        "r bumper",
+        "rear fascia",
+        "r&i rear bumper",
+        "r&r rear bumper",
+        "o/h rear bumper",
+        "rpr rear bumper"
+      ],
+      "triggers_calibration": [
+        "Side Blind Zone Alert Sensor"
+      ],
+      "notes": "Rear Bumper R&I/R&R requires Side Blind Zone Alert Sensor calibration"
+    },
+    {
+      "repair_operation": "Windshield R&I/R&R",
+      "repair_keywords": [
+        "windshield",
+        "windscreen",
+        "front glass",
+        "w/s glass"
+      ],
+      "triggers_calibration": [
+        "Front Camera"
+      ],
+      "notes": "Windshield R&I/R&R requires Front Camera calibration"
+    },
+    {
+      "repair_operation": "Quarter Panel Repair",
+      "repair_keywords": [
+        "quarter panel",
+        "qtr panel",
+        "rear quarter",
+        "rpr quarter"
+      ],
+      "triggers_calibration": [
+        "Side Blind Zone Alert Sensor"
+      ],
+      "notes": "Quarter Panel Repair requires Side Blind Zone Alert Sensor calibration"
+    }
+  ]
+}

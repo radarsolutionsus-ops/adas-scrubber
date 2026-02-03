@@ -1,0 +1,129 @@
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "linux-musl-openssl-3.0.x", "linux-musl-arm64-openssl-3.0.x", "debian-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Shop/Account Management
+model Shop {
+  id            String   @id @default(cuid())
+  name          String
+  email         String   @unique
+  passwordHash  String
+  phone         String?
+  address       String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  subscription  Subscription?
+  usageRecords  UsageRecord[]
+  reports       Report[]
+}
+
+model Subscription {
+  id                 String   @id @default(cuid())
+  shopId             String   @unique
+  plan               String   @default("standard") // standard = $500/month
+  monthlyVehicleLimit Int     @default(150)
+  pricePerMonth      Float    @default(500)
+  overagePrice       Float    @default(5) // per vehicle over limit
+  billingCycleStart  DateTime @default(now())
+  active             Boolean  @default(true)
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  shop Shop @relation(fields: [shopId], references: [id], onDelete: Cascade)
+}
+
+model UsageRecord {
+  id          String   @id @default(cuid())
+  shopId      String
+  vehicleInfo String   // "2024 Toyota Camry"
+  reportId    String?
+  createdAt   DateTime @default(now())
+
+  shop Shop @relation(fields: [shopId], references: [id], onDelete: Cascade)
+
+  @@index([shopId])
+  @@index([createdAt])
+}
+
+// Vehicle & ADAS Data
+model Vehicle {
+  id        String   @id @default(cuid())
+  yearStart Int
+  yearEnd   Int
+  make      String
+  model     String
+  sourceProvider String?
+  sourceUrl      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  adasSystems           AdasSystem[]
+  repairCalibrationMaps RepairCalibrationMap[]
+}
+
+model AdasSystem {
+  id                   String   @id @default(cuid())
+  vehicleId            String
+  systemName           String
+  oemName              String?
+  location             String?
+  dtcSet               Boolean  @default(false)
+  scanToolRequired     Boolean?
+  specialToolsRequired Boolean?
+  calibrationType      String?
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+
+  vehicle             Vehicle              @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+  calibrationTriggers CalibrationTrigger[]
+
+  @@index([vehicleId])
+}
+
+model CalibrationTrigger {
+  id           String @id @default(cuid())
+  adasSystemId String
+  trigger      String
+
+  adasSystem AdasSystem @relation(fields: [adasSystemId], references: [id], onDelete: Cascade)
+
+  @@index([adasSystemId])
+}
+
+model RepairCalibrationMap {
+  id              String @id @default(cuid())
+  vehicleId       String
+  repairOperation String
+  repairKeywords  String
+  triggersCalibration String
+  notes           String?
+
+  vehicle Vehicle @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+
+  @@index([vehicleId])
+}
+
+// Report Generation
+model Report {
+  id              String   @id @default(cuid())
+  shopId          String
+  vehicleYear     Int
+  vehicleMake     String
+  vehicleModel    String
+  estimateText    String
+  calibrations    String   // JSON array of calibration results
+  pdfUrl          String?
+  createdAt       DateTime @default(now())
+
+  shop Shop @relation(fields: [shopId], references: [id], onDelete: Cascade)
+
+  @@index([shopId])
+  @@index([createdAt])
+}

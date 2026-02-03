@@ -1,0 +1,277 @@
+{
+  "vehicle": {
+    "year_start": 1996,
+    "year_end": 2026,
+    "make": "Volvo",
+    "model": "All Models"
+  },
+  "source": {
+    "provider": "Volvo Position Statement",
+    "url": "Volvo_Position_Statement_October_2024.pdf",
+    "date_extracted": "2026-01-29"
+  },
+  "scanning_requirements": {
+    "pre_scan": "required",
+    "post_scan": "required",
+    "tool": "VIDA (Volvo Information and Diagnostics for Aftersales)",
+    "battery_requirement": "Battery maintainer MUST be connected during diagnostics/software download",
+    "applies_to": "All 1996+ (OBDII) vehicles"
+  },
+  "parts_requirements": {
+    "oe_parts_only": true,
+    "oe_glass_only": true,
+    "adhesive": "Volvo-specified PUR adhesive ONLY",
+    "structural_component": true
+  },
+  "windshield_requirements": {
+    "oe_only": true,
+    "asdm_location": "Active Safety Domain Master located inside upper edge of windshield",
+    "asdm_components": ["Camera", "Radar"],
+    "sensitivity": "Optical and geometric tolerances (glass thickness and materials)",
+    "calibration_required": "ASDM calibration required after windshield replacement",
+    "hud_windshields": "Engineered for clear projected image - wrong windshield causes redundant images"
+  },
+  "scan_triggers": [
+    "Windshield replacements (cameras and sensors on glass)",
+    "Removal/replacement of bumpers",
+    "SRS sensors",
+    "PDC sensors",
+    "Exterior mirrors",
+    "Autonomous drive sensors and cameras",
+    "All lights including LED taillights",
+    "Wiring harnesses",
+    "Vehicle control units",
+    "Seats",
+    "Interior trim panels and components",
+    "Battery disconnect/de-energize"
+  ],
+  "adas_systems": [
+    {
+      "system_name": "Active Safety Domain Master",
+      "oem_name": "City Safety / Pilot Assist Camera-Radar",
+      "description": "City Safety, Forward Collision Warning, Pedestrian Detection, Lane Keeping Aid, Pilot Assist, Oncoming Lane Mitigation, Run-off Road Mitigation",
+      "location": "windshield (upper edge) - camera and radar combined",
+      "dtc_set": true,
+      "scan_tool_required": true,
+      "calibration_type": "Static",
+      "service_info": "ASDM located inside upper edge of windshield. OE glass ONLY - optical/geometric tolerances critical. HUD windshields engineered for clear projected image.",
+      "calibration_triggers": [
+        "Windshield R&I/R&R",
+        "Windshield replacement",
+        "Camera/radar replacement"
+      ]
+    },
+    {
+      "system_name": "Blind Spot Information System",
+      "oem_name": "BLIS (Blind Spot Information System)",
+      "description": "Blind Spot Information System, Cross Traffic Alert, Lane Change Aid",
+      "location": "rear bumper corners",
+      "dtc_set": true,
+      "scan_tool_required": true,
+      "calibration_type": "Static",
+      "service_info": "Sensors may be damaged in ways not visually evident. Safety systems activated during collision may require initialization, calibration, or replacement.",
+      "calibration_triggers": [
+        "Rear bumper R&I/R&R",
+        "Rear bumper repair",
+        "Quarter panel R&R",
+        "Sensor replacement"
+      ]
+    },
+    {
+      "system_name": "PDC Sensors",
+      "oem_name": "Park Distance Control",
+      "description": "Front and rear parking sensors, Park Assist Pilot",
+      "location": "front and rear bumpers",
+      "dtc_set": true,
+      "scan_tool_required": true,
+      "calibration_type": "Coding",
+      "calibration_triggers": [
+        "Front bumper R&I/R&R",
+        "Rear bumper R&I/R&R",
+        "Bumper refinish",
+        "Sensor replacement"
+      ]
+    },
+    {
+      "system_name": "360 Surround View",
+      "oem_name": "360 Surround View Camera",
+      "description": "360-degree surround view camera system",
+      "location": "front grille, side mirrors, rear",
+      "dtc_set": true,
+      "scan_tool_required": true,
+      "calibration_type": "Static",
+      "calibration_triggers": [
+        "Front grille R&I/R&R",
+        "Mirror R&R",
+        "Rear bumper R&I",
+        "Camera replacement"
+      ]
+    }
+  ],
+  "repair_to_calibration_map": [
+    {
+      "repair_operation": "Windshield R&I/R&R",
+      "repair_keywords": [
+        "windshield",
+        "windscreen",
+        "front glass",
+        "w/s glass",
+        "w/s",
+        "laminated glass",
+        "wsr",
+        "r&i windshield",
+        "r&r windshield",
+        "repl windshield"
+      ],
+      "triggers_calibration": [
+        "Active Safety Domain Master"
+      ],
+      "notes": "OE windshield ONLY. ASDM calibration required. Volvo-specified PUR adhesive ONLY. HUD windshields engineered for clear projected image."
+    },
+    {
+      "repair_operation": "Front Bumper R&I/R&R/Repair/Overhaul",
+      "repair_keywords": [
+        "front bumper",
+        "frt bumper",
+        "f bumper",
+        "front fascia",
+        "bumper cover",
+        "f/bumper",
+        "bumper cvr frt",
+        "r&i front bumper",
+        "r&i bumper",
+        "r&r front bumper",
+        "r&r bumper",
+        "o/h front bumper",
+        "o/h bumper",
+        "oh bumper",
+        "ovhl bumper",
+        "overhaul bumper",
+        "rpr front bumper",
+        "rpr bumper",
+        "repair front bumper",
+        "repl front bumper",
+        "repl bumper"
+      ],
+      "triggers_calibration": [
+        "PDC Sensors",
+        "360 Surround View"
+      ],
+      "notes": "Front bumper work requires PDC and 360 camera calibration"
+    },
+    {
+      "repair_operation": "Rear Bumper R&I/R&R/Repair/Overhaul",
+      "repair_keywords": [
+        "rear bumper",
+        "rr bumper",
+        "r bumper",
+        "rear fascia",
+        "back bumper",
+        "r/bumper",
+        "bumper cvr rr",
+        "r&i rear bumper",
+        "r&r rear bumper",
+        "o/h rear bumper",
+        "oh rear bumper",
+        "ovhl rear bumper",
+        "overhaul rear bumper",
+        "rpr rear bumper",
+        "repair rear bumper",
+        "repl rear bumper"
+      ],
+      "triggers_calibration": [
+        "Blind Spot Information System",
+        "PDC Sensors",
+        "360 Surround View"
+      ],
+      "notes": "Rear bumper work requires BLIS, PDC, and 360 camera calibration. BLIS sensors may be damaged in ways not visually evident."
+    },
+    {
+      "repair_operation": "Front Grille R&I/R&R",
+      "repair_keywords": [
+        "grille",
+        "grill",
+        "front grille",
+        "radiator grille",
+        "r&i grille",
+        "r&i grill",
+        "r&r grille",
+        "r&r grill",
+        "repl grille",
+        "repl grill"
+      ],
+      "triggers_calibration": [
+        "360 Surround View"
+      ],
+      "notes": "Front grille includes 360 camera"
+    },
+    {
+      "repair_operation": "Side Mirror R&I/R&R",
+      "repair_keywords": [
+        "side mirror",
+        "door mirror",
+        "outside mirror",
+        "mirror assembly",
+        "wing mirror",
+        "exterior mirror",
+        "r&i mirror",
+        "r&r mirror",
+        "repl mirror"
+      ],
+      "triggers_calibration": [
+        "360 Surround View"
+      ],
+      "notes": "Exterior mirror removal requires 360 camera calibration"
+    },
+    {
+      "repair_operation": "Quarter Panel R&I/R&R/Repair",
+      "repair_keywords": [
+        "quarter panel",
+        "qtr panel",
+        "quarter",
+        "rear fender",
+        "qtr",
+        "1/4 panel",
+        "rpr quarter",
+        "repair quarter",
+        "r&i quarter",
+        "r&r quarter"
+      ],
+      "triggers_calibration": [
+        "Blind Spot Information System"
+      ],
+      "notes": "Quarter panel work may affect BLIS sensor alignment"
+    },
+    {
+      "repair_operation": "Bumper Refinish",
+      "repair_keywords": [
+        "bumper refinish",
+        "bumper paint",
+        "bumper blend",
+        "refn bumper",
+        "refinish bumper",
+        "paint bumper"
+      ],
+      "triggers_calibration": [
+        "PDC Sensors"
+      ],
+      "notes": "Bumper refinish requires PDC coding. Volvo-approved paint products only per stringent quality requirements."
+    },
+    {
+      "repair_operation": "Suspension Work",
+      "repair_keywords": [
+        "suspension",
+        "strut",
+        "shock",
+        "control arm",
+        "subframe",
+        "steering knuckle",
+        "spring"
+      ],
+      "triggers_calibration": [
+        "Active Safety Domain Master"
+      ],
+      "notes": "Suspension repairs affecting alignment may require ASDM calibration"
+    }
+  ]
+}

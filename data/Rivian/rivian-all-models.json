@@ -1,0 +1,268 @@
+{
+  "vehicle": {
+    "year_start": 2018,
+    "year_end": 2026,
+    "make": "Rivian",
+    "model": "All Models"
+  },
+  "source": {
+    "provider": "Rivian Technical Documentation",
+    "url": "https://support.rivian.com/hc/en-us/articles/technical-specifications",
+    "date_extracted": "2026-02-03"
+  },
+  "scanning_requirements": {
+    "pre_scan": "required",
+    "post_scan": "required",
+    "tool": "Rivian Service Application (RSA), Rivian Diagnostic Interface",
+    "hardware": "Rivian Gateway Module, OBD-II interface, RSA software"
+  },
+  "adas_systems": [
+    {
+      "system_name": "Front Radar Sensor",
+      "oem_name": "Advanced Driver Assistance Radar / Autonomous Emergency Braking Radar",
+      "description": "Adaptive Cruise Control with Lane Centering, Autonomous Emergency Braking, Collision Avoidance, Advanced Navigation",
+      "location": "front bumper/grille",
+      "dtc_set": true,
+      "scan_tool_required": true,
+      "calibration_type": "Static/Dynamic",
+      "service_info": "Rivian requires OEM-approved parts for all ADAS-equipped vehicles. Radar alignment is critical for autonomous safety systems.",
+      "calibration_triggers": [
+        "Front bumper R&I/R&R",
+        "Front bumper repair",
+        "Grille R&I/R&R",
+        "Radar module replacement"
+      ]
+    },
+    {
+      "system_name": "Front Camera Module",
+      "oem_name": "Multi-Function Camera / Advanced Vision System",
+      "description": "Lane Keep Assist, Lane Centering, Traffic Sign Recognition, Driver Monitoring, Object Detection, Autonomous Navigation",
+      "location": "windshield/rearview mirror",
+      "dtc_set": true,
+      "scan_tool_required": true,
+      "calibration_type": "Static",
+      "calibration_triggers": [
+        "Windshield R&I/R&R",
+        "Windshield replacement",
+        "Camera module R&I",
+        "Steering gear replacement",
+        "Wheel alignment"
+      ]
+    },
+    {
+      "system_name": "Blind Spot Monitor",
+      "oem_name": "Advanced Safety Monitoring System",
+      "description": "Blind Spot Monitoring with rear cross traffic alert, Lane Change Assist, Pedestrian Detection",
+      "location": "rear bumper/quarter panel",
+      "dtc_set": true,
+      "scan_tool_required": true,
+      "calibration_type": "Static",
+      "calibration_triggers": [
+        "Rear bumper R&I/R&R",
+        "Rear bumper repair",
+        "Quarter panel R&I/R&R",
+        "Quarter panel repair"
+      ]
+    },
+    {
+      "system_name": "Parking Sensors",
+      "oem_name": "Advanced Parking Assistant / Autonomous Parking System",
+      "description": "Front and Rear Parking Sensors, Autonomous Parking Assist, Park Distance Control, Smart Parking",
+      "location": "front and rear bumpers",
+      "dtc_set": true,
+      "scan_tool_required": true,
+      "calibration_type": "Coding",
+      "calibration_triggers": [
+        "Front bumper R&I/R&R",
+        "Rear bumper R&I/R&R",
+        "Bumper refinish",
+        "Sensor replacement"
+      ]
+    },
+    {
+      "system_name": "Surround View Camera",
+      "oem_name": "Multi-Camera Surround View System / 360 Degree Advanced Vision",
+      "description": "360 Degree Surround View Camera System with Top-Down View, Ground View, High-Definition 3D Imaging",
+      "location": "front, sides, rear",
+      "dtc_set": true,
+      "scan_tool_required": true,
+      "calibration_type": "Static",
+      "calibration_triggers": [
+        "Front bumper R&I",
+        "Mirror R&I/R&R",
+        "Rear bumper R&I",
+        "Tailgate R&I"
+      ]
+    }
+  ],
+  "repair_to_calibration_map": [
+    {
+      "repair_operation": "Front Bumper R&I/R&R/Repair/Overhaul",
+      "repair_keywords": [
+        "front bumper",
+        "frt bumper",
+        "f bumper",
+        "front fascia",
+        "bumper cover",
+        "r&i front bumper",
+        "r&i bumper",
+        "r&r front bumper",
+        "r&r bumper",
+        "o/h front bumper",
+        "o/h bumper",
+        "rpr front bumper",
+        "rpr bumper",
+        "overhaul front bumper",
+        "repair front bumper",
+        "repl front bumper",
+        "repl bumper"
+      ],
+      "triggers_calibration": [
+        "Front Radar Sensor",
+        "Parking Sensors",
+        "Surround View Camera"
+      ],
+      "notes": "Front bumper work requires Rivian OEM-approved parts for ADAS vehicles. Critical for autonomous system operation."
+    },
+    {
+      "repair_operation": "Front Grille R&I/R&R",
+      "repair_keywords": [
+        "grille",
+        "grill",
+        "front grille",
+        "radiator grille",
+        "r&i grille",
+        "r&i grill",
+        "r&r grille",
+        "r&r grill",
+        "repl grille",
+        "repl grill"
+      ],
+      "triggers_calibration": [
+        "Front Radar Sensor"
+      ],
+      "notes": "Front grille removal requires front radar recalibration and validation"
+    },
+    {
+      "repair_operation": "Rear Bumper R&I/R&R/Repair/Overhaul",
+      "repair_keywords": [
+        "rear bumper",
+        "rr bumper",
+        "r bumper",
+        "rear fascia",
+        "back bumper",
+        "r&i rear bumper",
+        "r&r rear bumper",
+        "o/h rear bumper",
+        "rpr rear bumper",
+        "overhaul rear bumper",
+        "repair rear bumper",
+        "repl rear bumper"
+      ],
+      "triggers_calibration": [
+        "Blind Spot Monitor",
+        "Parking Sensors",
+        "Surround View Camera"
+      ],
+      "notes": "Rear bumper work requires blind spot monitor and parking sensor calibration and testing"
+    },
+    {
+      "repair_operation": "Windshield R&I/R&R",
+      "repair_keywords": [
+        "windshield",
+        "windscreen",
+        "front glass",
+        "w/s glass",
+        "w/s",
+        "wsr",
+        "r&i windshield",
+        "r&r windshield",
+        "repl windshield"
+      ],
+      "triggers_calibration": [
+        "Front Camera Module"
+      ],
+      "notes": "Windshield replacement requires front camera calibration and system validation"
+    },
+    {
+      "repair_operation": "Quarter Panel R&I/R&R/Repair",
+      "repair_keywords": [
+        "quarter panel",
+        "qtr panel",
+        "quarter",
+        "rear fender",
+        "qtr",
+        "1/4 panel",
+        "rpr quarter",
+        "repair quarter",
+        "r&i quarter",
+        "r&r quarter"
+      ],
+      "triggers_calibration": [
+        "Blind Spot Monitor"
+      ],
+      "notes": "Quarter panel work may affect blind spot monitor sensor alignment and detection accuracy"
+    },
+    {
+      "repair_operation": "Side Mirror R&I/R&R",
+      "repair_keywords": [
+        "side mirror",
+        "door mirror",
+        "outside mirror",
+        "mirror assembly",
+        "r&i mirror",
+        "r&r mirror",
+        "repl mirror"
+      ],
+      "triggers_calibration": [
+        "Surround View Camera"
+      ],
+      "notes": "Side mirror cameras are integrated into advanced surround view system"
+    },
+    {
+      "repair_operation": "Tailgate R&I/R&R",
+      "repair_keywords": [
+        "tailgate",
+        "liftgate",
+        "rear gate",
+        "hatch",
+        "trunk lid",
+        "decklid",
+        "r&i tailgate",
+        "r&r tailgate"
+      ],
+      "triggers_calibration": [
+        "Surround View Camera"
+      ],
+      "notes": "Tailgate includes rear camera component of surround view system"
+    },
+    {
+      "repair_operation": "Wheel Alignment",
+      "repair_keywords": [
+        "alignment",
+        "wheel alignment",
+        "four wheel alignment",
+        "4 wheel alignment",
+        "thrust angle"
+      ],
+      "triggers_calibration": [
+        "Front Radar Sensor",
+        "Front Camera Module"
+      ],
+      "notes": "Wheel alignment requires radar and camera calibration for autonomous system accuracy"
+    },
+    {
+      "repair_operation": "Steering Gear Replacement",
+      "repair_keywords": [
+        "steering gear",
+        "steering rack",
+        "power steering",
+        "steering column"
+      ],
+      "triggers_calibration": [
+        "Front Camera Module"
+      ],
+      "notes": "Steering gear replacement requires camera calibration and autonomous system validation"
+    }
+  ]
+}

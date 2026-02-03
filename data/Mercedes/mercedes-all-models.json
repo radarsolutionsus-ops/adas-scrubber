@@ -1,0 +1,347 @@
+{
+  "vehicle": {
+    "year_start": 2015,
+    "year_end": 2026,
+    "make": "Mercedes-Benz",
+    "model": "All Models"
+  },
+  "source": {
+    "provider": "MBUSA Position Statements",
+    "url": "MBUSA_Pos_DiagnosticRepairsfollowingaCollision117.pdf",
+    "date_extracted": "2026-01-29"
+  },
+  "scanning_requirements": {
+    "pre_scan": "highly recommended",
+    "post_scan": "required",
+    "tool": "Xentry Kit diagnostics computer",
+    "applies_to": "Model year 1996 and newer (OBDII)"
+  },
+  "adas_systems": [
+    {
+      "system_name": "DISTRONIC Radar Sensor",
+      "oem_name": "DISTRONIC/DISTRONIC PLUS",
+      "description": "Active Brake Assist, Adaptive Cruise Control, PRE-SAFE brake, Collision Prevention Assist",
+      "location": "front bumper - long-range and short-range radar sensors",
+      "dtc_set": true,
+      "scan_tool_required": true,
+      "calibration_type": "Dynamic",
+      "service_info": "ARS 210 sensor requires manual calibration. ARS 310/315/316 requires calibration drive via Xentry Diagnostics.",
+      "calibration_triggers": [
+        "Front bumper R&I/R&R",
+        "Front bumper repair",
+        "Grille R&I/R&R",
+        "Radar sensor replacement",
+        "After collision repair"
+      ]
+    },
+    {
+      "system_name": "Blind Spot Assist Sensor",
+      "oem_name": "Active Blind Spot Assist",
+      "description": "Blind Spot Assist, Lane Change Assist",
+      "location": "rear bumper corners - 2x short-range radar sensors (NBR)",
+      "dtc_set": true,
+      "scan_tool_required": true,
+      "calibration_type": "None",
+      "service_info": "No calibration required. Paint coat thickness on bumper must be observed. Filler repairs may NOT be carried out in the sensor area.",
+      "calibration_triggers": [
+        "Component replacement",
+        "After collision repair"
+      ]
+    },
+    {
+      "system_name": "PARKTRONIC Sensors",
+      "oem_name": "PARKTRONIC / Active Parking Assist",
+      "description": "Parking Assist, PARKTRONIC",
+      "location": "front and rear bumpers",
+      "dtc_set": true,
+      "scan_tool_required": true,
+      "calibration_type": "Coding",
+      "service_info": "Painted sensors must meet specific paint thickness requirements per SI98_00P0021A",
+      "calibration_triggers": [
+        "Front bumper R&I/R&R",
+        "Rear bumper R&I/R&R",
+        "Bumper refinish",
+        "Parking sensor replacement"
+      ]
+    },
+    {
+      "system_name": "Stereo Multifunction Camera",
+      "oem_name": "Lane Keeping Assist Camera",
+      "description": "Lane Keeping Assist, Active Lane Keeping Assist, Traffic Sign Recognition, PRE-SAFE brake pedestrian detection",
+      "location": "windshield",
+      "dtc_set": true,
+      "scan_tool_required": true,
+      "calibration_type": "Static",
+      "service_info": "Calibration using Xentry Diagnostics with special tool Romess Rogg 0840-10",
+      "calibration_triggers": [
+        "Windshield R&I/R&R",
+        "Windshield replacement",
+        "Camera replacement",
+        "Suspension modification"
+      ]
+    },
+    {
+      "system_name": "360 Camera System",
+      "oem_name": "360 Surround View",
+      "description": "360 Surround View, Parking Camera",
+      "location": "front grille, side mirrors, rear",
+      "dtc_set": true,
+      "scan_tool_required": true,
+      "calibration_type": "Dynamic",
+      "service_info": "After camera replacement, must be calibrated during a calibration drive. If more than one camera is replaced, all cameras have to be calibrated.",
+      "calibration_triggers": [
+        "Front bumper R&I",
+        "Mirror R&I/R&R",
+        "Rear bumper R&I",
+        "Grille R&I",
+        "Camera replacement"
+      ]
+    },
+    {
+      "system_name": "PRE-SAFE PLUS Rear Radar",
+      "oem_name": "PRE-SAFE PLUS",
+      "description": "PRE-SAFE PLUS, Rear Collision Warning",
+      "location": "rear bumper - multi-mode radar sensor",
+      "dtc_set": true,
+      "scan_tool_required": true,
+      "calibration_type": "Activation",
+      "service_info": "After a rear-end collision, PRE-SAFE PLUS function must be activated using diagnostic tester. Calibration of radar sensor is not required.",
+      "calibration_triggers": [
+        "Rear bumper R&I/R&R",
+        "Rear-end collision"
+      ]
+    },
+    {
+      "system_name": "Steering Angle Sensor",
+      "oem_name": "Steering Angle Sensor",
+      "description": "Zero point calibration for ADAS and ESP",
+      "location": "steering column",
+      "dtc_set": true,
+      "scan_tool_required": true,
+      "calibration_type": "Static",
+      "calibration_triggers": [
+        "Steering component replacement",
+        "Wheel alignment",
+        "After collision repair"
+      ]
+    }
+  ],
+  "repair_to_calibration_map": [
+    {
+      "repair_operation": "Front Bumper R&I/R&R/Repair/Overhaul",
+      "repair_keywords": [
+        "front bumper",
+        "frt bumper",
+        "f bumper",
+        "front fascia",
+        "bumper cover",
+        "bumper assy",
+        "bumper assembly",
+        "f/bumper",
+        "bumper cvr frt",
+        "r&i front bumper",
+        "r&i bumper",
+        "r&r front bumper",
+        "r&r bumper",
+        "o/h front bumper",
+        "o/h bumper",
+        "oh bumper",
+        "ovhl bumper",
+        "overhaul bumper",
+        "overhaul front bumper",
+        "rpr front bumper",
+        "rpr bumper",
+        "rpr. bumper",
+        "repair front bumper",
+        "repair bumper",
+        "repl front bumper",
+        "repl bumper",
+        "replace front bumper",
+        "replace bumper"
+      ],
+      "triggers_calibration": [
+        "DISTRONIC Radar Sensor",
+        "PARKTRONIC Sensors",
+        "360 Camera System"
+      ],
+      "notes": "Front bumper R&I, R&R, repair, or overhaul requires DISTRONIC radar, PARKTRONIC, and 360 Camera calibration per MBUSA position statement"
+    },
+    {
+      "repair_operation": "Rear Bumper R&I/R&R/Repair/Overhaul",
+      "repair_keywords": [
+        "rear bumper",
+        "rr bumper",
+        "r bumper",
+        "rear fascia",
+        "back bumper",
+        "r/bumper",
+        "bumper cvr rr",
+        "r&i rear bumper",
+        "r&r rear bumper",
+        "o/h rear bumper",
+        "oh rear bumper",
+        "ovhl rear bumper",
+        "overhaul rear bumper",
+        "rpr rear bumper",
+        "rpr. rear bumper",
+        "repair rear bumper",
+        "repl rear bumper",
+        "replace rear bumper"
+      ],
+      "triggers_calibration": [
+        "PARKTRONIC Sensors",
+        "360 Camera System",
+        "PRE-SAFE PLUS Rear Radar"
+      ],
+      "notes": "Rear bumper work requires PARKTRONIC and 360 Camera calibration. Blind Spot sensors do NOT require calibration but paint thickness must be observed. No filler repairs in sensor area."
+    },
+    {
+      "repair_operation": "Rear Bumper Refinish",
+      "repair_keywords": [
+        "bumper refinish",
+        "bumper paint",
+        "bumper blend",
+        "refn rear bumper",
+        "refinish rear bumper",
+        "paint rear bumper",
+        "blend rear bumper",
+        "blnd rear bumper",
+        "repaint rear bumper"
+      ],
+      "triggers_calibration": [
+        "PARKTRONIC Sensors"
+      ],
+      "notes": "Bumper refinish requires PARKTRONIC coding. Paint thickness requirements apply per SI98_00P0021A."
+    },
+    {
+      "repair_operation": "Front Grille R&I/R&R",
+      "repair_keywords": [
+        "grille",
+        "grill",
+        "front grille",
+        "radiator grille",
+        "grille surround",
+        "r&i grille",
+        "r&i grill",
+        "r&r grille",
+        "r&r grill",
+        "repl grille",
+        "repl grill",
+        "replace grille"
+      ],
+      "triggers_calibration": [
+        "DISTRONIC Radar Sensor",
+        "360 Camera System"
+      ],
+      "notes": "Front grille removal requires DISTRONIC radar and 360 Camera calibration"
+    },
+    {
+      "repair_operation": "Radar Sensor Replacement",
+      "repair_keywords": [
+        "radar sensor",
+        "distronic sensor",
+        "front radar",
+        "radar module",
+        "collision sensor",
+        "front collision",
+        "radar unit",
+        "aim radar"
+      ],
+      "triggers_calibration": [
+        "DISTRONIC Radar Sensor"
+      ],
+      "notes": "Radar sensor replacement requires calibration"
+    },
+    {
+      "repair_operation": "Windshield R&I/R&R",
+      "repair_keywords": [
+        "windshield",
+        "windscreen",
+        "front glass",
+        "w/s glass",
+        "w/s",
+        "w/shield",
+        "laminated glass",
+        "wsr",
+        "r&i windshield",
+        "r&r windshield",
+        "repl windshield",
+        "replace windshield",
+        "windshield replacement"
+      ],
+      "triggers_calibration": [
+        "Stereo Multifunction Camera"
+      ],
+      "notes": "Windshield replacement requires camera calibration using Xentry Diagnostics with special tool Romess Rogg 0840-10"
+    },
+    {
+      "repair_operation": "Side Mirror R&I/R&R",
+      "repair_keywords": [
+        "side mirror",
+        "door mirror",
+        "outside mirror",
+        "mirror assembly",
+        "wing mirror",
+        "o/s mirror",
+        "rearview mirror",
+        "r&i mirror",
+        "r&r mirror",
+        "repl mirror",
+        "replace mirror"
+      ],
+      "triggers_calibration": [
+        "360 Camera System"
+      ],
+      "notes": "Side mirror cameras are part of 360 camera system"
+    },
+    {
+      "repair_operation": "Quarter Panel Repair",
+      "repair_keywords": [
+        "quarter panel",
+        "qtr panel",
+        "quarter",
+        "rear fender",
+        "qtr",
+        "1/4 panel",
+        "rpr quarter",
+        "repair quarter",
+        "r&r quarter"
+      ],
+      "triggers_calibration": [
+        "Blind Spot Assist Sensor"
+      ],
+      "notes": "Quarter panel repair near rear bumper may affect Blind Spot sensor mounting"
+    },
+    {
+      "repair_operation": "Wheel Alignment",
+      "repair_keywords": [
+        "alignment",
+        "wheel alignment",
+        "four wheel alignment",
+        "4 wheel alignment",
+        "thrust angle"
+      ],
+      "triggers_calibration": [
+        "DISTRONIC Radar Sensor",
+        "Steering Angle Sensor"
+      ],
+      "notes": "Wheel alignment requires radar and steering angle sensor calibration"
+    },
+    {
+      "repair_operation": "Suspension Repair",
+      "repair_keywords": [
+        "suspension",
+        "strut",
+        "shock",
+        "control arm",
+        "subframe",
+        "steering knuckle"
+      ],
+      "triggers_calibration": [
+        "Steering Angle Sensor",
+        "Stereo Multifunction Camera"
+      ],
+      "notes": "Suspension repairs affecting alignment require steering angle sensor and camera calibration"
+    }
+  ]
+}

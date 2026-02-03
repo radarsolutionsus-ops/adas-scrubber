@@ -1,0 +1,277 @@
+{
+  "vehicle": {
+    "year_start": 2016,
+    "year_end": 2026,
+    "make": "Kia",
+    "model": "All Models"
+  },
+  "source": {
+    "provider": "Kia Position Statement",
+    "url": "Kia_Pos_Pre-and-Post-Repair-Scanning_Final.pdf",
+    "date_extracted": "2026-01-29"
+  },
+  "scanning_requirements": {
+    "pre_scan": "required",
+    "post_scan": "required",
+    "tool": "Kia GDS or compatible scan tool",
+    "hardware": "VCI (Vehicle Communication Interface)"
+  },
+  "adas_systems": [
+    {
+      "system_name": "Forward Collision-Avoidance Assist Radar",
+      "oem_name": "Forward Collision-Avoidance Assist (FCA)",
+      "description": "Forward Collision Warning, Autonomous Emergency Braking, Pedestrian Detection",
+      "location": "front bumper/grille",
+      "dtc_set": true,
+      "scan_tool_required": true,
+      "calibration_type": "Static/Dynamic",
+      "service_info": "Radar sensor calibration required after any work affecting sensor positioning or alignment",
+      "calibration_triggers": [
+        "Front bumper R&I/R&R",
+        "Front bumper repair",
+        "Grille R&I/R&R",
+        "Radar sensor replacement",
+        "Wheel alignment"
+      ]
+    },
+    {
+      "system_name": "Front Camera",
+      "oem_name": "Multi-Function Camera (MFC)",
+      "description": "Lane Keeping Assist, Lane Following Assist, High Beam Assist, Traffic Sign Recognition",
+      "location": "windshield/rearview mirror",
+      "dtc_set": true,
+      "scan_tool_required": true,
+      "calibration_type": "Static",
+      "service_info": "Camera calibration requires specific target setup and Kia GDS",
+      "calibration_triggers": [
+        "Windshield R&I/R&R",
+        "Windshield replacement",
+        "Camera module R&I/R&R",
+        "Steering gear replacement",
+        "Wheel alignment"
+      ]
+    },
+    {
+      "system_name": "Blind-Spot Collision Warning Radar",
+      "oem_name": "Blind-Spot Collision Warning (BCW)",
+      "description": "Blind Spot Detection, Lane Change Assist, Rear Cross-Traffic Collision Warning",
+      "location": "rear bumper corners",
+      "dtc_set": true,
+      "scan_tool_required": true,
+      "calibration_type": "Static",
+      "service_info": "Rear radar sensors require calibration after bumper work",
+      "calibration_triggers": [
+        "Rear bumper R&I/R&R",
+        "Rear bumper repair",
+        "Quarter panel R&I/R&R",
+        "Quarter panel repair",
+        "Radar sensor replacement"
+      ]
+    },
+    {
+      "system_name": "Parking Sensors",
+      "oem_name": "Parking Distance Warning (PDW)",
+      "description": "Front and Rear Parking Sensors, Parking Collision-Avoidance Assist",
+      "location": "front and rear bumpers",
+      "dtc_set": true,
+      "scan_tool_required": true,
+      "calibration_type": "Coding",
+      "calibration_triggers": [
+        "Front bumper R&I/R&R",
+        "Rear bumper R&I/R&R",
+        "Bumper refinish",
+        "Sensor replacement"
+      ]
+    },
+    {
+      "system_name": "Surround View Monitor",
+      "oem_name": "Surround View Monitor (SVM)",
+      "description": "360 Degree Camera System",
+      "location": "front, sides, rear",
+      "dtc_set": true,
+      "scan_tool_required": true,
+      "calibration_type": "Static",
+      "calibration_triggers": [
+        "Front bumper R&I",
+        "Mirror R&I/R&R",
+        "Rear bumper R&I",
+        "Tailgate R&I",
+        "Camera replacement"
+      ]
+    }
+  ],
+  "repair_to_calibration_map": [
+    {
+      "repair_operation": "Front Bumper R&I/R&R/Repair/Overhaul",
+      "repair_keywords": [
+        "front bumper",
+        "frt bumper",
+        "f bumper",
+        "front fascia",
+        "bumper cover",
+        "r&i front bumper",
+        "r&i bumper",
+        "r&r front bumper",
+        "r&r bumper",
+        "o/h front bumper",
+        "o/h bumper",
+        "oh bumper",
+        "ovhl bumper",
+        "overhaul bumper",
+        "rpr front bumper",
+        "rpr bumper",
+        "repair front bumper",
+        "repl front bumper",
+        "repl bumper"
+      ],
+      "triggers_calibration": [
+        "Forward Collision-Avoidance Assist Radar",
+        "Parking Sensors",
+        "Surround View Monitor"
+      ],
+      "notes": "Front bumper work requires FCA radar, parking sensor, and SVM calibration"
+    },
+    {
+      "repair_operation": "Front Grille R&I/R&R",
+      "repair_keywords": [
+        "grille",
+        "grill",
+        "front grille",
+        "radiator grille",
+        "r&i grille",
+        "r&i grill",
+        "r&r grille",
+        "r&r grill",
+        "repl grille",
+        "repl grill"
+      ],
+      "triggers_calibration": [
+        "Forward Collision-Avoidance Assist Radar"
+      ],
+      "notes": "Front grille removal requires FCA radar calibration"
+    },
+    {
+      "repair_operation": "Rear Bumper R&I/R&R/Repair/Overhaul",
+      "repair_keywords": [
+        "rear bumper",
+        "rr bumper",
+        "r bumper",
+        "rear fascia",
+        "back bumper",
+        "r&i rear bumper",
+        "r&r rear bumper",
+        "o/h rear bumper",
+        "oh rear bumper",
+        "ovhl rear bumper",
+        "overhaul rear bumper",
+        "rpr rear bumper",
+        "repair rear bumper",
+        "repl rear bumper"
+      ],
+      "triggers_calibration": [
+        "Blind-Spot Collision Warning Radar",
+        "Parking Sensors",
+        "Surround View Monitor"
+      ],
+      "notes": "Rear bumper work requires BCW radar, parking sensor, and SVM calibration"
+    },
+    {
+      "repair_operation": "Windshield R&I/R&R",
+      "repair_keywords": [
+        "windshield",
+        "windscreen",
+        "front glass",
+        "w/s glass",
+        "w/s",
+        "wsr",
+        "r&i windshield",
+        "r&r windshield",
+        "repl windshield"
+      ],
+      "triggers_calibration": [
+        "Front Camera"
+      ],
+      "notes": "Windshield replacement requires MFC camera calibration"
+    },
+    {
+      "repair_operation": "Quarter Panel R&I/R&R/Repair",
+      "repair_keywords": [
+        "quarter panel",
+        "qtr panel",
+        "quarter",
+        "rear fender",
+        "qtr",
+        "1/4 panel",
+        "rpr quarter",
+        "repair quarter",
+        "r&i quarter",
+        "r&r quarter"
+      ],
+      "triggers_calibration": [
+        "Blind-Spot Collision Warning Radar"
+      ],
+      "notes": "Quarter panel work may affect BCW sensor alignment"
+    },
+    {
+      "repair_operation": "Side Mirror R&I/R&R",
+      "repair_keywords": [
+        "side mirror",
+        "door mirror",
+        "outside mirror",
+        "mirror assembly",
+        "r&i mirror",
+        "r&r mirror",
+        "repl mirror"
+      ],
+      "triggers_calibration": [
+        "Surround View Monitor"
+      ],
+      "notes": "Side mirror cameras are part of SVM system"
+    },
+    {
+      "repair_operation": "Tailgate R&I/R&R",
+      "repair_keywords": [
+        "tailgate",
+        "liftgate",
+        "rear gate",
+        "hatch",
+        "trunk lid",
+        "decklid",
+        "r&i tailgate",
+        "r&r tailgate"
+      ],
+      "triggers_calibration": [
+        "Surround View Monitor"
+      ],
+      "notes": "Tailgate/liftgate includes rear camera for SVM"
+    },
+    {
+      "repair_operation": "Wheel Alignment",
+      "repair_keywords": [
+        "alignment",
+        "wheel alignment",
+        "four wheel alignment",
+        "4 wheel alignment",
+        "thrust angle"
+      ],
+      "triggers_calibration": [
+        "Forward Collision-Avoidance Assist Radar",
+        "Front Camera"
+      ],
+      "notes": "Wheel alignment requires radar and camera calibration"
+    },
+    {
+      "repair_operation": "Steering Gear Replacement",
+      "repair_keywords": [
+        "steering gear",
+        "steering rack",
+        "power steering",
+        "steering column"
+      ],
+      "triggers_calibration": [
+        "Front Camera"
+      ],
+      "notes": "Steering gear replacement requires camera calibration"
+    }
+  ]
+}

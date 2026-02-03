@@ -1,0 +1,121 @@
+{
+  "vehicle": {
+    "year_start": 2018,
+    "year_end": 2026,
+    "make": "Lexus",
+    "model": "All Models"
+  },
+  "source": {
+    "provider": "Lexus Position Statement",
+    "url": "Toyota_Lexus_Scion_Position_Statement__Pre_and_PostRepair_System_Scanning.pdf",
+    "date_extracted": "2026-01-29"
+  },
+  "adas_systems": [
+    {
+      "system_name": "Front Radar Sensor",
+      "oem_name": "Lexus Safety System+ Radar",
+      "description": "Dynamic Radar Cruise Control, Pre-Collision System",
+      "location": "front grille/bumper",
+      "dtc_set": true,
+      "scan_tool_required": true,
+      "calibration_type": "Static/Dynamic",
+      "calibration_triggers": [
+        "Component replacement",
+        "After collision repair"
+      ]
+    },
+    {
+      "system_name": "Forward Facing Camera",
+      "oem_name": "Lexus Safety System+ Camera",
+      "description": "Lane Departure Alert, Lane Keep Assist, Road Sign Assist",
+      "location": "windshield",
+      "dtc_set": true,
+      "scan_tool_required": true,
+      "calibration_type": "Static",
+      "calibration_triggers": [
+        "Component replacement",
+        "After collision repair"
+      ]
+    },
+    {
+      "system_name": "Blind Spot Monitor Sensor",
+      "oem_name": "Blind Spot Monitor (BSM)",
+      "description": "Blind Spot Monitor, Rear Cross-Traffic Alert",
+      "location": "rear bumper corners",
+      "dtc_set": true,
+      "scan_tool_required": true,
+      "calibration_type": "Static",
+      "calibration_triggers": [
+        "Component replacement",
+        "After collision repair"
+      ]
+    }
+  ],
+  "repair_to_calibration_map": [
+    {
+      "repair_operation": "Front Bumper R&I/R&R",
+      "repair_keywords": [
+        "front bumper",
+        "frt bumper",
+        "f bumper",
+        "front fascia",
+        "bumper cover",
+        "r&i front bumper",
+        "r&r front bumper",
+        "o/h front bumper",
+        "o/h bumper",
+        "rpr front bumper",
+        "rpr bumper"
+      ],
+      "triggers_calibration": [
+        "Front Radar Sensor"
+      ],
+      "notes": "Front Bumper R&I/R&R requires Front Radar Sensor calibration"
+    },
+    {
+      "repair_operation": "Front Grille R&I/R&R",
+      "repair_keywords": [
+        "grille",
+        "front grille",
+        "radiator grille",
+        "grill",
+        "r&i grille",
+        "r&r grille"
+      ],
+      "triggers_calibration": [
+        "Front Radar Sensor"
+      ],
+      "notes": "Front Grille R&I/R&R requires Front Radar Sensor calibration"
+    },
+    {
+      "repair_operation": "Rear Bumper R&I/R&R",
+      "repair_keywords": [
+        "rear bumper",
+        "rr bumper",
+        "r bumper",
+        "rear fascia",
+        "r&i rear bumper",
+        "r&r rear bumper",
+        "o/h rear bumper",
+        "rpr rear bumper"
+      ],
+      "triggers_calibration": [
+        "Blind Spot Monitor Sensor"
+      ],
+      "notes": "Rear Bumper R&I/R&R requires Blind Spot Monitor Sensor calibration"
+    },
+    {
+      "repair_operation": "Windshield R&I/R&R",
+      "repair_keywords": [
+        "windshield",
+        "windscreen",
+        "front glass",
+        "w/s glass"
+      ],
+      "triggers_calibration": [
+        "Forward Facing Camera"
+      ],
+      "notes": "Windshield R&I/R&R requires Forward Facing Camera calibration"
+    }
+  ]
+}

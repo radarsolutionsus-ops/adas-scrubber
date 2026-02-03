@@ -1,0 +1,202 @@
+{
+  "vehicle": {
+    "year_start": 2016,
+    "year_end": 2026,
+    "make": "Infiniti",
+    "model": "All Models"
+  },
+  "source": {
+    "provider": "Infiniti Position Statements (IPSB-26-730, Revised 11-1-25)",
+    "url": "https://www.infiniti-techinfo.com",
+    "date_extracted": "2026-02-03"
+  },
+  "scanning_requirements": {
+    "pre_scan": "required",
+    "post_scan": "required",
+    "tool": "CONSULT",
+    "applies_to": "All collision-damaged vehicles"
+  },
+  "parts_requirements": {
+    "oe_glass_required": true,
+    "oe_sensors_required": true
+  },
+  "adas_systems": [
+    {
+      "system_name": "Front Radar Sensor",
+      "oem_name": "Intelligent Cruise Control (ICC) / Forward Emergency Braking (FEB)",
+      "description": "Distance Control Assist, Forward Collision Warning, Intelligent Cruise Control",
+      "location": "front grille/bumper",
+      "dtc_set": true,
+      "scan_tool_required": true,
+      "calibration_type": "Static",
+      "service_info": "Radar calibration required after any front bumper or grille work. Use CONSULT with approved targets.",
+      "calibration_triggers": [
+        "Front bumper R&I/R&R",
+        "Front bumper repair",
+        "Grille R&I/R&R",
+        "Radar sensor replacement",
+        "After collision repair",
+        "Wheel alignment"
+      ]
+    },
+    {
+      "system_name": "Front Camera",
+      "oem_name": "ProPILOT Assist Camera / Lane Departure Warning Camera",
+      "description": "Lane Departure Warning, Lane Departure Prevention, Traffic Sign Recognition, Intelligent Lane Intervention",
+      "location": "windshield (behind rearview mirror)",
+      "dtc_set": true,
+      "scan_tool_required": true,
+      "calibration_type": "Static",
+      "service_info": "Camera calibration required after windshield R&R. OE windshield required.",
+      "calibration_triggers": [
+        "Windshield R&I/R&R",
+        "Windshield replacement",
+        "Camera replacement",
+        "Steering angle sensor R&R",
+        "Suspension work affecting ride height"
+      ]
+    },
+    {
+      "system_name": "Blind Spot Warning",
+      "oem_name": "Blind Spot Warning (BSW) / Rear Cross Traffic Alert (RCTA)",
+      "description": "Blind Spot Warning, Rear Cross Traffic Alert, Backup Collision Intervention",
+      "location": "rear bumper corners",
+      "dtc_set": true,
+      "scan_tool_required": true,
+      "calibration_type": "Static",
+      "calibration_triggers": [
+        "Rear bumper R&I/R&R",
+        "Rear bumper repair",
+        "BSW sensor replacement",
+        "Quarter panel repair",
+        "After collision repair"
+      ]
+    },
+    {
+      "system_name": "Around View Monitor",
+      "oem_name": "Around View Monitor (AVM)",
+      "description": "360-degree surround view, Moving Object Detection",
+      "location": "front grille, side mirrors, rear",
+      "dtc_set": true,
+      "scan_tool_required": true,
+      "calibration_type": "Static",
+      "service_info": "Calibration required if any camera is disturbed or replaced",
+      "calibration_triggers": [
+        "Front bumper R&I/R&R",
+        "Side mirror R&R",
+        "Trunk lid/Tailgate R&R",
+        "Camera replacement",
+        "Grille R&I/R&R"
+      ]
+    },
+    {
+      "system_name": "Parking Sensors",
+      "oem_name": "Sonar System / Parking Assist",
+      "description": "Front and rear parking sensors, obstacle detection",
+      "location": "front and rear bumpers",
+      "dtc_set": true,
+      "scan_tool_required": true,
+      "calibration_type": "Coding",
+      "calibration_triggers": [
+        "Front bumper R&I/R&R",
+        "Rear bumper R&I/R&R",
+        "Bumper refinish",
+        "Sensor replacement"
+      ]
+    },
+    {
+      "system_name": "Steering Angle Sensor",
+      "oem_name": "Steering Angle Sensor",
+      "description": "Zero point calibration for ADAS and stability systems",
+      "location": "steering column",
+      "dtc_set": false,
+      "scan_tool_required": true,
+      "calibration_type": "Static",
+      "calibration_triggers": [
+        "Steering component replacement",
+        "Wheel alignment",
+        "Steering rack R&R",
+        "After collision repair"
+      ]
+    }
+  ],
+  "repair_to_calibration_map": [
+    {
+      "repair_operation": "Front Bumper R&I/R&R/Repair",
+      "repair_keywords": [
+        "front bumper", "frt bumper", "f bumper", "front fascia", "bumper cover",
+        "f/bumper", "bumper cvr frt", "r&i front bumper", "r&r front bumper",
+        "o/h front bumper", "o/h bumper", "rpr front bumper", "rpr bumper",
+        "repl front bumper", "bpr cvr frt", "bmpr cvr frt", "frt bpr"
+      ],
+      "triggers_calibration": ["Front Radar Sensor", "Around View Monitor", "Parking Sensors"],
+      "notes": "Front bumper work requires radar, AVM, and parking sensor calibration per Infiniti position statements"
+    },
+    {
+      "repair_operation": "Front Grille R&I/R&R",
+      "repair_keywords": [
+        "grille", "grill", "front grille", "radiator grille", "r&i grille",
+        "r&i grill", "r&r grille", "r&r grill", "repl grille", "repl grill"
+      ],
+      "triggers_calibration": ["Front Radar Sensor", "Around View Monitor"],
+      "notes": "Grille removal requires radar calibration"
+    },
+    {
+      "repair_operation": "Rear Bumper R&I/R&R/Repair",
+      "repair_keywords": [
+        "rear bumper", "rr bumper", "r bumper", "rear fascia", "back bumper",
+        "r/bumper", "bumper cvr rr", "r&i rear bumper", "r&r rear bumper",
+        "o/h rear bumper", "rpr rear bumper", "bpr cvr rr", "bmpr cvr rr", "rr bpr"
+      ],
+      "triggers_calibration": ["Blind Spot Warning", "Around View Monitor", "Parking Sensors"],
+      "notes": "Rear bumper work requires BSW/RCTA calibration"
+    },
+    {
+      "repair_operation": "Windshield R&I/R&R",
+      "repair_keywords": [
+        "windshield", "windscreen", "front glass", "w/s glass", "w/s",
+        "laminated glass", "wsr", "r&i windshield", "r&r windshield",
+        "repl windshield", "windshield w/camera"
+      ],
+      "triggers_calibration": ["Front Camera"],
+      "notes": "Windshield replacement requires camera calibration. OE glass required."
+    },
+    {
+      "repair_operation": "Side Mirror R&I/R&R",
+      "repair_keywords": [
+        "side mirror", "door mirror", "outside mirror", "mirror assembly",
+        "wing mirror", "exterior mirror", "r&i mirror", "r&r mirror",
+        "repl mirror", "mirror w/camera"
+      ],
+      "triggers_calibration": ["Around View Monitor"],
+      "notes": "Side mirror cameras are part of Around View Monitor system"
+    },
+    {
+      "repair_operation": "Wheel Alignment",
+      "repair_keywords": [
+        "alignment", "wheel alignment", "four wheel alignment", "4 wheel alignment",
+        "thrust angle", "front alignment", "rear alignment"
+      ],
+      "triggers_calibration": ["Front Radar Sensor", "Front Camera", "Steering Angle Sensor"],
+      "notes": "Alignment requires radar, camera, and steering angle sensor calibration"
+    },
+    {
+      "repair_operation": "Quarter Panel Repair",
+      "repair_keywords": [
+        "quarter panel", "qtr panel", "quarter pnl", "rear quarter", "rr qtr",
+        "r&i quarter", "r&r quarter", "section quarter"
+      ],
+      "triggers_calibration": ["Blind Spot Warning"],
+      "notes": "Quarter panel repair may affect BSW sensor alignment"
+    },
+    {
+      "repair_operation": "Suspension Work",
+      "repair_keywords": [
+        "suspension", "strut", "shock", "control arm", "subframe", "steering knuckle",
+        "spring", "ride height", "level sensor"
+      ],
+      "triggers_calibration": ["Front Camera", "Steering Angle Sensor"],
+      "notes": "Suspension work affecting ride height requires camera recalibration"
+    }
+  ]
+}

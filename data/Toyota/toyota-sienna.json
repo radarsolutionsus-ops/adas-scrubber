@@ -1,0 +1,182 @@
+{
+  "vehicle": {
+    "year_start": 2020,
+    "year_end": 2026,
+    "make": "Toyota",
+    "model": "Sienna"
+  },
+  "source": {
+    "provider": "Toyota Position Statement",
+    "url": "/Users/_akhihasan/Desktop/OEM Position Statements/Toyota/",
+    "date_extracted": "2026-01-29"
+  },
+  "adas_systems": [
+    {
+      "system_name": "Front Radar Sensor",
+      "oem_name": "Toyota Safety Sense (TSS) Radar",
+      "description": "Pre-Collision System, Dynamic Radar Cruise Control, Lane Tracing Assist",
+      "location": "front grille/bumper",
+      "dtc_set": true,
+      "scan_tool_required": true,
+      "calibration_type": "Static",
+      "calibration_triggers": [
+        "Component replacement",
+        "After collision repair",
+        "Wheel alignment"
+      ]
+    },
+    {
+      "system_name": "Blind Spot Monitor",
+      "oem_name": "Blind Spot Monitor (BSM) / Rear Cross Traffic Alert (RCTA)",
+      "description": "Blind Spot Monitoring, Rear Cross Traffic Alert",
+      "location": "rear bumper corners",
+      "dtc_set": true,
+      "scan_tool_required": true,
+      "calibration_type": "Static",
+      "calibration_triggers": [
+        "Rear bumper R&I/R&R",
+        "Sensor replacement",
+        "After collision repair"
+      ]
+    },
+    {
+      "system_name": "Front Camera",
+      "oem_name": "Toyota Safety Sense Camera",
+      "description": "Lane Departure Alert, Lane Tracing Assist, Road Sign Assist, Automatic High Beams",
+      "location": "windshield (behind rearview mirror)",
+      "dtc_set": true,
+      "scan_tool_required": true,
+      "calibration_type": "Static",
+      "calibration_triggers": [
+        "Windshield replacement",
+        "Camera replacement",
+        "After collision repair"
+      ]
+    },
+    {
+      "system_name": "Parking Sonar",
+      "oem_name": "Intelligent Clearance Sonar / Parking Assist",
+      "description": "Front and rear parking sensors, Intelligent Clearance Sonar",
+      "location": "front and rear bumpers",
+      "dtc_set": false,
+      "scan_tool_required": false,
+      "calibration_type": "None",
+      "calibration_triggers": [
+        "Sensor replacement"
+      ]
+    },
+    {
+      "system_name": "Steering Angle Sensor",
+      "oem_name": "Steering Angle Sensor",
+      "description": "Zero point calibration for ADAS and VSC",
+      "location": "steering column",
+      "dtc_set": false,
+      "scan_tool_required": true,
+      "calibration_type": "Static",
+      "calibration_triggers": [
+        "Steering component replacement",
+        "Wheel alignment",
+        "After collision repair"
+      ]
+    }
+  ],
+  "repair_to_calibration_map": [
+    {
+      "repair_operation": "Front Bumper R&I/R&R",
+      "repair_keywords": [
+        "front bumper",
+        "frt bumper",
+        "f bumper",
+        "front fascia",
+        "bumper cover front",
+        "r&r front bumper",
+        "r&i front bumper"
+      ],
+      "triggers_calibration": [
+        "Front Radar Sensor"
+      ],
+      "notes": "Front bumper removal/replacement requires front radar sensor calibration"
+    },
+    {
+      "repair_operation": "Front Grille R&I/R&R",
+      "repair_keywords": [
+        "grille",
+        "front grille",
+        "radiator grille",
+        "grill"
+      ],
+      "triggers_calibration": [
+        "Front Radar Sensor"
+      ],
+      "notes": "Front grille removal requires front radar sensor calibration"
+    },
+    {
+      "repair_operation": "Rear Bumper R&I/R&R",
+      "repair_keywords": [
+        "rear bumper",
+        "rear fascia",
+        "rr bumper",
+        "back bumper",
+        "r bumper",
+        "r&r rear bumper",
+        "r&i rear bumper",
+        "o/h rear bumper",
+        "o/h bumper",
+        "rpr rear bumper",
+        "rpr bumper",
+        "overhaul rear bumper",
+        "overhaul bumper",
+        "repair rear bumper",
+        "rear bumper overhaul",
+        "rear bumper repair"
+      ],
+      "triggers_calibration": [
+        "Blind Spot Monitor"
+      ],
+      "notes": "Rear bumper R&I, R&R, repair, or overhaul requires BSM radar calibration per Toyota position statement"
+    },
+    {
+      "repair_operation": "Windshield R&I/R&R",
+      "repair_keywords": [
+        "windshield",
+        "windscreen",
+        "front glass",
+        "w/s glass"
+      ],
+      "triggers_calibration": [
+        "Front Camera"
+      ],
+      "notes": "Windshield replacement requires front camera calibration"
+    },
+    {
+      "repair_operation": "Wheel Alignment",
+      "repair_keywords": [
+        "alignment",
+        "wheel alignment",
+        "four wheel alignment",
+        "4 wheel alignment",
+        "thrust angle"
+      ],
+      "triggers_calibration": [
+        "Front Radar Sensor",
+        "Steering Angle Sensor"
+      ],
+      "notes": "Wheel alignment requires radar and steering angle sensor calibration"
+    },
+    {
+      "repair_operation": "Suspension Repair",
+      "repair_keywords": [
+        "suspension",
+        "strut",
+        "shock",
+        "control arm",
+        "subframe",
+        "steering knuckle"
+      ],
+      "triggers_calibration": [
+        "Steering Angle Sensor"
+      ],
+      "notes": "Suspension repairs affecting alignment require steering angle sensor calibration"
+    }
+  ]
+}

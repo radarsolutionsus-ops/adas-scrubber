@@ -1,0 +1,306 @@
+{
+  "vehicle": {
+    "year_start": 2015,
+    "year_end": 2026,
+    "make": "Toyota",
+    "model": "All Models"
+  },
+  "source": {
+    "provider": "Toyota CRIB 191",
+    "url": "Toyota_CRIB_191_July_2021.pdf",
+    "date_extracted": "2026-01-29"
+  },
+  "scanning_requirements": {
+    "pre_scan": "required",
+    "post_scan": "required",
+    "tool": "Techstream",
+    "feature": "Health Check",
+    "applies_to": "All collision-damaged vehicles"
+  },
+  "parts_requirements": {
+    "oe_glass_required": true,
+    "oe_sensors_required": true
+  },
+  "adas_systems": [
+    {
+      "system_name": "Front Radar Sensor",
+      "oem_name": "Toyota Safety Sense Radar (TSS)",
+      "description": "Pre-Collision System, Dynamic Radar Cruise Control, Lane Tracing Assist",
+      "location": "front grille/bumper",
+      "dtc_set": true,
+      "scan_tool_required": true,
+      "calibration_type": "Static",
+      "service_info": "Health Check diagnostic scan required before AND after every collision repair. DTCs may not illuminate MIL - scanning is the only way to identify codes.",
+      "calibration_triggers": [
+        "Front bumper R&I/R&R",
+        "Front bumper repair",
+        "Grille R&I/R&R",
+        "Radar sensor replacement",
+        "After collision repair"
+      ]
+    },
+    {
+      "system_name": "Front Camera",
+      "oem_name": "Toyota Safety Sense Camera",
+      "description": "Lane Departure Alert, Lane Tracing Assist, Road Sign Assist, Automatic High Beams",
+      "location": "windshield (behind rearview mirror)",
+      "dtc_set": true,
+      "scan_tool_required": true,
+      "calibration_type": "Static",
+      "service_info": "Camera systems may require static calibration after windshield R&R. OE windshield required.",
+      "calibration_triggers": [
+        "Windshield R&I/R&R",
+        "Windshield replacement",
+        "Camera replacement",
+        "Steering angle sensor R&R",
+        "Suspension work"
+      ]
+    },
+    {
+      "system_name": "Blind Spot Monitor",
+      "oem_name": "Blind Spot Monitor (BSM) / Rear Cross Traffic Alert (RCTA)",
+      "description": "Blind Spot Monitoring, Rear Cross Traffic Alert",
+      "location": "rear bumper corners",
+      "dtc_set": true,
+      "scan_tool_required": true,
+      "calibration_type": "Static",
+      "calibration_triggers": [
+        "Rear bumper R&I/R&R",
+        "Rear bumper repair",
+        "Sensor replacement",
+        "After collision repair"
+      ]
+    },
+    {
+      "system_name": "Panoramic View Monitor",
+      "oem_name": "Panoramic View Monitor (PVM)",
+      "description": "360-degree surround view camera system",
+      "location": "front grille, side mirrors, rear",
+      "dtc_set": true,
+      "scan_tool_required": true,
+      "calibration_type": "Static",
+      "calibration_triggers": [
+        "Front bumper R&I",
+        "Side mirror R&R",
+        "Trunk lid R&R",
+        "Camera replacement",
+        "After collision repair"
+      ]
+    },
+    {
+      "system_name": "Front Parking Sensors",
+      "oem_name": "Clearance Sonar / Parking Assist",
+      "description": "Front parking sensors with obstacle detection",
+      "location": "front bumper",
+      "dtc_set": true,
+      "scan_tool_required": true,
+      "calibration_type": "Coding",
+      "calibration_triggers": [
+        "Front bumper R&I/R&R",
+        "Bumper refinish",
+        "Sensor replacement"
+      ]
+    },
+    {
+      "system_name": "Steering Angle Sensor",
+      "oem_name": "Steering Angle Sensor",
+      "description": "Zero point calibration for ADAS and VSC",
+      "location": "steering column",
+      "dtc_set": false,
+      "scan_tool_required": true,
+      "calibration_type": "Static",
+      "service_info": "All camera systems may require recalibration after steering angle sensor work or suspension work affecting ride height.",
+      "calibration_triggers": [
+        "Steering component replacement",
+        "Wheel alignment",
+        "After collision repair"
+      ]
+    }
+  ],
+  "repair_to_calibration_map": [
+    {
+      "repair_operation": "Front Bumper R&I/R&R/Repair/Overhaul",
+      "repair_keywords": [
+        "front bumper",
+        "frt bumper",
+        "f bumper",
+        "front fascia",
+        "bumper cover",
+        "f/bumper",
+        "bumper cvr frt",
+        "r&i front bumper",
+        "r&i bumper",
+        "r&r front bumper",
+        "r&r bumper",
+        "o/h front bumper",
+        "o/h bumper",
+        "oh bumper",
+        "ovhl bumper",
+        "overhaul bumper",
+        "rpr front bumper",
+        "rpr bumper",
+        "repair front bumper",
+        "repl front bumper",
+        "repl bumper"
+      ],
+      "triggers_calibration": [
+        "Front Radar Sensor",
+        "Front Parking Sensors",
+        "Panoramic View Monitor"
+      ],
+      "notes": "Front bumper work requires radar, parking sensor, and 360 camera calibration per Toyota CRIB 191"
+    },
+    {
+      "repair_operation": "Front Grille R&I/R&R",
+      "repair_keywords": [
+        "grille",
+        "grill",
+        "front grille",
+        "radiator grille",
+        "r&i grille",
+        "r&i grill",
+        "r&r grille",
+        "r&r grill",
+        "repl grille",
+        "repl grill"
+      ],
+      "triggers_calibration": [
+        "Front Radar Sensor",
+        "Panoramic View Monitor"
+      ],
+      "notes": "Front grille removal requires front radar calibration"
+    },
+    {
+      "repair_operation": "Rear Bumper R&I/R&R/Repair/Overhaul",
+      "repair_keywords": [
+        "rear bumper",
+        "rr bumper",
+        "r bumper",
+        "rear fascia",
+        "back bumper",
+        "r/bumper",
+        "bumper cvr rr",
+        "r&i rear bumper",
+        "r&r rear bumper",
+        "o/h rear bumper",
+        "oh rear bumper",
+        "ovhl rear bumper",
+        "overhaul rear bumper",
+        "rpr rear bumper",
+        "repair rear bumper",
+        "repl rear bumper"
+      ],
+      "triggers_calibration": [
+        "Blind Spot Monitor",
+        "Panoramic View Monitor"
+      ],
+      "notes": "Rear bumper work requires BSM/RCTA calibration per Toyota position statement"
+    },
+    {
+      "repair_operation": "Windshield R&I/R&R",
+      "repair_keywords": [
+        "windshield",
+        "windscreen",
+        "front glass",
+        "w/s glass",
+        "w/s",
+        "laminated glass",
+        "wsr",
+        "r&i windshield",
+        "r&r windshield",
+        "repl windshield"
+      ],
+      "triggers_calibration": [
+        "Front Camera"
+      ],
+      "notes": "Windshield replacement requires camera calibration. OE glass required per Toyota position statement."
+    },
+    {
+      "repair_operation": "Side Mirror R&I/R&R",
+      "repair_keywords": [
+        "side mirror",
+        "door mirror",
+        "outside mirror",
+        "mirror assembly",
+        "wing mirror",
+        "exterior mirror",
+        "r&i mirror",
+        "r&r mirror",
+        "repl mirror"
+      ],
+      "triggers_calibration": [
+        "Panoramic View Monitor"
+      ],
+      "notes": "Side mirror cameras are part of Panoramic View Monitor system"
+    },
+    {
+      "repair_operation": "Trunk Lid/Tailgate R&I/R&R",
+      "repair_keywords": [
+        "trunk lid",
+        "decklid",
+        "tailgate",
+        "liftgate",
+        "rear gate",
+        "hatch",
+        "r&i tailgate",
+        "r&r tailgate",
+        "r&i trunk",
+        "r&r trunk"
+      ],
+      "triggers_calibration": [
+        "Panoramic View Monitor"
+      ],
+      "notes": "Trunk/tailgate includes rear camera for PVM system"
+    },
+    {
+      "repair_operation": "Wheel Alignment",
+      "repair_keywords": [
+        "alignment",
+        "wheel alignment",
+        "four wheel alignment",
+        "4 wheel alignment",
+        "thrust angle"
+      ],
+      "triggers_calibration": [
+        "Front Radar Sensor",
+        "Front Camera",
+        "Steering Angle Sensor"
+      ],
+      "notes": "Wheel alignment requires radar, camera, and steering angle sensor calibration"
+    },
+    {
+      "repair_operation": "Suspension Work",
+      "repair_keywords": [
+        "suspension",
+        "strut",
+        "shock",
+        "control arm",
+        "subframe",
+        "steering knuckle",
+        "spring",
+        "ride height"
+      ],
+      "triggers_calibration": [
+        "Front Camera",
+        "Steering Angle Sensor"
+      ],
+      "notes": "Suspension work affecting ride height requires camera calibration - ride height affects calibration per Toyota"
+    },
+    {
+      "repair_operation": "Steering Angle Sensor R&R",
+      "repair_keywords": [
+        "steering angle sensor",
+        "steering sensor",
+        "sas",
+        "steering gear",
+        "steering rack",
+        "steering column"
+      ],
+      "triggers_calibration": [
+        "Front Camera",
+        "Steering Angle Sensor"
+      ],
+      "notes": "Steering angle sensor R&R requires all camera systems recalibration per Toyota"
+    }
+  ]
+}

@@ -1,0 +1,106 @@
+{
+  "vehicle": {
+    "year_start": 2018,
+    "year_end": 2026,
+    "make": "Porsche",
+    "model": "All Models"
+  },
+  "source": {
+    "provider": "Porsche Position Statement",
+    "url": "General OEM Position Statements",
+    "date_extracted": "2026-01-29"
+  },
+  "adas_systems": [
+    {
+      "system_name": "Front Radar Sensor",
+      "oem_name": "Adaptive Cruise Control / InnoDrive Radar",
+      "description": "Adaptive Cruise Control, Porsche InnoDrive",
+      "location": "front bumper",
+      "dtc_set": true,
+      "scan_tool_required": true,
+      "calibration_type": "Static/Dynamic",
+      "calibration_triggers": [
+        "Component replacement",
+        "After collision repair"
+      ]
+    },
+    {
+      "system_name": "Front Camera",
+      "oem_name": "Lane Keep Assist Camera",
+      "description": "Lane Keep Assist, Traffic Sign Recognition",
+      "location": "windshield",
+      "dtc_set": true,
+      "scan_tool_required": true,
+      "calibration_type": "Static",
+      "calibration_triggers": [
+        "Component replacement",
+        "After collision repair"
+      ]
+    },
+    {
+      "system_name": "Side Assist Sensor",
+      "oem_name": "Lane Change Assist Sensors",
+      "description": "Lane Change Assist, Rear Cross Traffic Alert",
+      "location": "rear bumper corners",
+      "dtc_set": true,
+      "scan_tool_required": true,
+      "calibration_type": "Static",
+      "calibration_triggers": [
+        "Component replacement",
+        "After collision repair"
+      ]
+    }
+  ],
+  "repair_to_calibration_map": [
+    {
+      "repair_operation": "Front Bumper R&I/R&R",
+      "repair_keywords": [
+        "front bumper",
+        "frt bumper",
+        "f bumper",
+        "front fascia",
+        "bumper cover",
+        "r&i front bumper",
+        "r&r front bumper",
+        "o/h front bumper",
+        "o/h bumper",
+        "rpr front bumper",
+        "rpr bumper"
+      ],
+      "triggers_calibration": [
+        "Front Radar Sensor"
+      ],
+      "notes": "Front Bumper R&I/R&R requires Front Radar Sensor calibration"
+    },
+    {
+      "repair_operation": "Rear Bumper R&I/R&R",
+      "repair_keywords": [
+        "rear bumper",
+        "rr bumper",
+        "r bumper",
+        "rear fascia",
+        "r&i rear bumper",
+        "r&r rear bumper",
+        "o/h rear bumper",
+        "rpr rear bumper"
+      ],
+      "triggers_calibration": [
+        "Side Assist Sensor"
+      ],
+      "notes": "Rear Bumper R&I/R&R requires Side Assist Sensor calibration"
+    },
+    {
+      "repair_operation": "Windshield R&I/R&R",
+      "repair_keywords": [
+        "windshield",
+        "windscreen",
+        "front glass",
+        "w/s glass"
+      ],
+      "triggers_calibration": [
+        "Front Camera"
+      ],
+      "notes": "Windshield R&I/R&R requires Front Camera calibration"
+    }
+  ]
+}

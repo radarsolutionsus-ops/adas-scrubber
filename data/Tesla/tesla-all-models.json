@@ -1,0 +1,158 @@
+{
+  "vehicle": {
+    "year_start": 2018,
+    "year_end": 2026,
+    "make": "Tesla",
+    "model": "All Models"
+  },
+  "source": {
+    "provider": "Tesla Position Statement",
+    "url": "Tesla Service Information",
+    "date_extracted": "2026-01-29"
+  },
+  "adas_systems": [
+    {
+      "system_name": "Front Facing Cameras",
+      "oem_name": "Autopilot / FSD Cameras",
+      "description": "Autopilot, Full Self-Driving, Traffic-Aware Cruise Control, Autosteer",
+      "location": "windshield",
+      "dtc_set": true,
+      "scan_tool_required": true,
+      "calibration_type": "Static",
+      "calibration_triggers": [
+        "Component replacement",
+        "After collision repair"
+      ]
+    },
+    {
+      "system_name": "Ultrasonic Sensors",
+      "oem_name": "Parking Sensors",
+      "description": "Parking Assist, Summon",
+      "location": "front and rear bumpers",
+      "dtc_set": true,
+      "scan_tool_required": true,
+      "calibration_type": "Coding",
+      "calibration_triggers": [
+        "Component replacement",
+        "After collision repair"
+      ]
+    },
+    {
+      "system_name": "Side Cameras",
+      "oem_name": "B-Pillar / Fender Cameras",
+      "description": "Autopilot, Blind Spot Warning, Lane Change",
+      "location": "front fenders / b-pillars",
+      "dtc_set": true,
+      "scan_tool_required": true,
+      "calibration_type": "Static",
+      "calibration_triggers": [
+        "Component replacement",
+        "After collision repair"
+      ]
+    },
+    {
+      "system_name": "Rear Cameras",
+      "oem_name": "Trunk / Liftgate Camera",
+      "description": "Autopilot, Rear View Camera",
+      "location": "trunk lid / liftgate",
+      "dtc_set": true,
+      "scan_tool_required": true,
+      "calibration_type": "Static",
+      "calibration_triggers": [
+        "Component replacement",
+        "After collision repair"
+      ]
+    }
+  ],
+  "repair_to_calibration_map": [
+    {
+      "repair_operation": "Windshield R&I/R&R",
+      "repair_keywords": [
+        "windshield",
+        "windscreen",
+        "front glass",
+        "w/s glass"
+      ],
+      "triggers_calibration": [
+        "Front Facing Cameras"
+      ],
+      "notes": "Windshield R&I/R&R requires Front Facing Cameras calibration"
+    },
+    {
+      "repair_operation": "Front Bumper R&I/R&R",
+      "repair_keywords": [
+        "front bumper",
+        "frt bumper",
+        "f bumper",
+        "front fascia",
+        "bumper cover",
+        "r&i front bumper",
+        "r&r front bumper",
+        "o/h front bumper",
+        "o/h bumper",
+        "rpr front bumper",
+        "rpr bumper"
+      ],
+      "triggers_calibration": [
+        "Ultrasonic Sensors"
+      ],
+      "notes": "Front Bumper R&I/R&R requires Ultrasonic Sensors calibration"
+    },
+    {
+      "repair_operation": "Rear Bumper R&I/R&R",
+      "repair_keywords": [
+        "rear bumper",
+        "rr bumper",
+        "r bumper",
+        "rear fascia",
+        "r&i rear bumper",
+        "r&r rear bumper",
+        "o/h rear bumper",
+        "rpr rear bumper"
+      ],
+      "triggers_calibration": [
+        "Ultrasonic Sensors"
+      ],
+      "notes": "Rear Bumper R&I/R&R requires Ultrasonic Sensors calibration"
+    },
+    {
+      "repair_operation": "Front Fender R&I/R&R",
+      "repair_keywords": [
+        "front fender",
+        "fender",
+        "frt fender",
+        "f fender"
+      ],
+      "triggers_calibration": [
+        "Side Cameras"
+      ],
+      "notes": "Front Fender R&I/R&R requires Side Cameras calibration"
+    },
+    {
+      "repair_operation": "B-Pillar Repair",
+      "repair_keywords": [
+        "b-pillar",
+        "b pillar",
+        "center pillar"
+      ],
+      "triggers_calibration": [
+        "Side Cameras"
+      ],
+      "notes": "B-Pillar Repair requires Side Cameras calibration"
+    },
+    {
+      "repair_operation": "Trunk/Liftgate R&I/R&R",
+      "repair_keywords": [
+        "trunk lid",
+        "liftgate",
+        "tailgate",
+        "decklid",
+        "rear hatch"
+      ],
+      "triggers_calibration": [
+        "Rear Cameras"
+      ],
+      "notes": "Trunk/Liftgate R&I/R&R requires Rear Cameras calibration"
+    }
+  ]
+}

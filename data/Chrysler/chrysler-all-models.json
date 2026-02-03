@@ -1,0 +1,246 @@
+{
+  "vehicle": {
+    "year_start": 2015,
+    "year_end": 2026,
+    "make": "Chrysler",
+    "model": "All Models"
+  },
+  "source": {
+    "provider": "Stellantis / Mopar Position Statement",
+    "url": "Mopar_wiTECH_Position_Statement.pdf",
+    "date_extracted": "2026-01-29"
+  },
+  "scanning_requirements": {
+    "pre_scan": "required",
+    "post_scan": "required",
+    "tool": "Mopar wiTECH",
+    "notes": "Contains software aftermarket tools may not have"
+  },
+  "parts_requirements": {
+    "mopar_parts_required": true
+  },
+  "dtc_triggers": [
+    "Vehicle collision (even minor)",
+    "Accident with or without airbag deployment",
+    "Voltage loss / battery disconnect",
+    "Bumper removal",
+    "Door handle removal",
+    "Headlamp removal",
+    "Mirror removal",
+    "Interior trim repair or removal",
+    "Glass removal and replacement"
+  ],
+  "adas_systems": [
+    {
+      "system_name": "Forward Facing Camera",
+      "oem_name": "Forward Collision Warning Camera / LaneSense",
+      "description": "Adaptive Cruise Control, Forward Collision Warning, LaneSense, Traffic Sign Recognition",
+      "location": "windshield (behind rearview mirror)",
+      "dtc_set": true,
+      "scan_tool_required": true,
+      "calibration_type": "Static",
+      "service_info": "wiTECH required before AND after collision repair. Safety systems MUST be tested for active or stored DTCs.",
+      "calibration_triggers": [
+        "Windshield R&I/R&R",
+        "Windshield replacement",
+        "Camera replacement",
+        "Glass removal"
+      ]
+    },
+    {
+      "system_name": "Front Radar Module",
+      "oem_name": "Adaptive Cruise Control Radar",
+      "description": "Adaptive Cruise Control, Full Speed Forward Collision Warning Plus",
+      "location": "front grille/bumper",
+      "dtc_set": true,
+      "scan_tool_required": true,
+      "calibration_type": "Static/Dynamic",
+      "service_info": "Bumper removal triggers DTCs - wiTECH required.",
+      "calibration_triggers": [
+        "Front bumper R&I/R&R",
+        "Front bumper repair",
+        "Grille R&I/R&R",
+        "Radar sensor replacement"
+      ]
+    },
+    {
+      "system_name": "Blind Spot Monitor Sensor",
+      "oem_name": "Blind Spot Monitoring / Rear Cross Path",
+      "description": "Blind Spot Monitoring, Rear Cross Path Detection, ParkSense",
+      "location": "rear bumper corners",
+      "dtc_set": true,
+      "scan_tool_required": true,
+      "calibration_type": "Static",
+      "calibration_triggers": [
+        "Rear bumper R&I/R&R",
+        "Rear bumper repair",
+        "Quarter panel R&R",
+        "Sensor replacement"
+      ]
+    },
+    {
+      "system_name": "ParkSense Sensors",
+      "oem_name": "ParkSense Front/Rear Park Assist",
+      "description": "Front and Rear Parking Assist sensors",
+      "location": "front and rear bumpers",
+      "dtc_set": true,
+      "scan_tool_required": true,
+      "calibration_type": "Coding",
+      "calibration_triggers": [
+        "Front bumper R&I/R&R",
+        "Rear bumper R&I/R&R",
+        "Bumper refinish",
+        "Sensor replacement"
+      ]
+    }
+  ],
+  "repair_to_calibration_map": [
+    {
+      "repair_operation": "Front Bumper R&I/R&R/Repair/Overhaul",
+      "repair_keywords": [
+        "front bumper",
+        "frt bumper",
+        "f bumper",
+        "front fascia",
+        "bumper cover",
+        "f/bumper",
+        "bumper cvr frt",
+        "r&i front bumper",
+        "r&i bumper",
+        "r&r front bumper",
+        "r&r bumper",
+        "o/h front bumper",
+        "o/h bumper",
+        "oh bumper",
+        "ovhl bumper",
+        "overhaul bumper",
+        "rpr front bumper",
+        "rpr bumper",
+        "repair front bumper",
+        "repl front bumper",
+        "repl bumper"
+      ],
+      "triggers_calibration": [
+        "Front Radar Module",
+        "ParkSense Sensors"
+      ],
+      "notes": "Front bumper removal triggers DTCs - wiTECH required before AND after repair"
+    },
+    {
+      "repair_operation": "Front Grille R&I/R&R",
+      "repair_keywords": [
+        "grille",
+        "grill",
+        "front grille",
+        "radiator grille",
+        "r&i grille",
+        "r&i grill",
+        "r&r grille",
+        "r&r grill",
+        "repl grille",
+        "repl grill"
+      ],
+      "triggers_calibration": [
+        "Front Radar Module"
+      ],
+      "notes": "Front grille removal requires radar calibration"
+    },
+    {
+      "repair_operation": "Rear Bumper R&I/R&R/Repair/Overhaul",
+      "repair_keywords": [
+        "rear bumper",
+        "rr bumper",
+        "r bumper",
+        "rear fascia",
+        "back bumper",
+        "r/bumper",
+        "bumper cvr rr",
+        "r&i rear bumper",
+        "r&r rear bumper",
+        "o/h rear bumper",
+        "oh rear bumper",
+        "ovhl rear bumper",
+        "overhaul rear bumper",
+        "rpr rear bumper",
+        "repair rear bumper",
+        "repl rear bumper"
+      ],
+      "triggers_calibration": [
+        "Blind Spot Monitor Sensor",
+        "ParkSense Sensors"
+      ],
+      "notes": "Rear bumper removal triggers DTCs - wiTECH required"
+    },
+    {
+      "repair_operation": "Windshield R&I/R&R",
+      "repair_keywords": [
+        "windshield",
+        "windscreen",
+        "front glass",
+        "w/s glass",
+        "w/s",
+        "laminated glass",
+        "wsr",
+        "r&i windshield",
+        "r&r windshield",
+        "repl windshield"
+      ],
+      "triggers_calibration": [
+        "Forward Facing Camera"
+      ],
+      "notes": "Glass removal and replacement triggers DTCs - wiTECH required"
+    },
+    {
+      "repair_operation": "Side Mirror R&I/R&R",
+      "repair_keywords": [
+        "side mirror",
+        "door mirror",
+        "outside mirror",
+        "mirror assembly",
+        "wing mirror",
+        "exterior mirror",
+        "r&i mirror",
+        "r&r mirror",
+        "repl mirror"
+      ],
+      "triggers_calibration": [
+        "Blind Spot Monitor Sensor"
+      ],
+      "notes": "Mirror removal triggers DTCs per Stellantis position statement"
+    },
+    {
+      "repair_operation": "Quarter Panel R&I/R&R/Repair",
+      "repair_keywords": [
+        "quarter panel",
+        "qtr panel",
+        "quarter",
+        "rear fender",
+        "qtr",
+        "1/4 panel",
+        "rpr quarter",
+        "repair quarter",
+        "r&i quarter",
+        "r&r quarter"
+      ],
+      "triggers_calibration": [
+        "Blind Spot Monitor Sensor"
+      ],
+      "notes": "Quarter panel work may affect BSM sensor alignment"
+    },
+    {
+      "repair_operation": "Headlamp R&I/R&R",
+      "repair_keywords": [
+        "headlamp",
+        "headlight",
+        "head lamp",
+        "head light",
+        "r&i headlamp",
+        "r&r headlamp"
+      ],
+      "triggers_calibration": [
+        "Forward Facing Camera"
+      ],
+      "notes": "Headlamp removal triggers DTCs per Stellantis position statement"
+    }
+  ]
+}
