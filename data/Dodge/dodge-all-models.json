@@ -20,7 +20,12 @@
       "scan_tool_required": true,
       "calibration_type": "Dynamic",
       "tools_required": ["Scan Tool Diagnostics", "Workshop Provided Instruments"],
-      "calibration_triggers": ["Component replacement", "After collision repair", "Front bumper overhaul", "Front bumper repair"]
+      "calibration_triggers": [
+        "Component replacement",
+        "After collision repair",
+        "Front bumper overhaul",
+        "Front bumper repair"
+      ]
     },
     {
       "system_name": "Forward Collision Warning-Plus",
@@ -31,18 +36,28 @@
       "scan_tool_required": true,
       "calibration_type": "Dynamic",
       "tools_required": ["Scan Tool Diagnostics", "Workshop Provided Instruments"],
-      "calibration_triggers": ["Component replacement", "After collision repair", "Front bumper overhaul", "Front bumper repair"]
+      "calibration_triggers": [
+        "Component replacement",
+        "After collision repair",
+        "Front bumper overhaul",
+        "Front bumper repair"
+      ]
     },
     {
       "system_name": "ParkSense with Stop rear parking sensors",
       "oem_name": "ParkSense Rear Park Assist",
-      "description": "Ultrasonic sensors detect objects behind vehicle during reverse",
+      "description": "Ultrasonic sensors detect objects behind vehicle during reverse, can stop vehicle automatically",
       "location": "Rear Bumper",
       "dtc_set": true,
       "scan_tool_required": true,
       "calibration_type": "Static",
       "tools_required": ["Scan Tool Diagnostics"],
-      "calibration_triggers": ["Component replacement", "After collision repair", "Rear bumper overhaul", "Rear bumper repair"]
+      "calibration_triggers": [
+        "Component replacement",
+        "After collision repair",
+        "Rear bumper overhaul",
+        "Rear bumper repair"
+      ]
     },
     {
       "system_name": "Rear Cross Path Detection",
@@ -53,7 +68,11 @@
       "scan_tool_required": true,
       "calibration_type": "Static",
       "tools_required": ["Scan Tool Diagnostics"],
-      "calibration_triggers": ["Component replacement", "After collision repair", "Rear bumper overhaul"]
+      "calibration_triggers": [
+        "Component replacement",
+        "After collision repair",
+        "Rear bumper overhaul"
+      ]
     },
     {
       "system_name": "Blind Spot w/Trailer Detection",
@@ -64,7 +83,11 @@
       "scan_tool_required": true,
       "calibration_type": "Static",
       "tools_required": ["Scan Tool Diagnostics"],
-      "calibration_triggers": ["Component replacement", "After collision repair", "Rear bumper overhaul"]
+      "calibration_triggers": [
+        "Component replacement",
+        "After collision repair",
+        "Rear bumper overhaul"
+      ]
     },
     {
       "system_name": "ParkView rear mounted camera",
@@ -75,7 +98,10 @@
       "scan_tool_required": true,
       "calibration_type": "Static",
       "tools_required": ["Scan Tool Diagnostics"],
-      "calibration_triggers": ["Component replacement", "Camera angle adjustment"]
+      "calibration_triggers": [
+        "Component replacement",
+        "Camera angle adjustment"
+      ]
     },
     {
       "system_name": "LaneSense Lane Departure Warning",
@@ -86,14 +112,39 @@
       "scan_tool_required": true,
       "calibration_type": "Static",
       "tools_required": ["Scan Tool Diagnostics", "Calibration Target"],
-      "calibration_triggers": ["Component replacement", "Windshield replacement", "Camera bracket adjustment"]
+      "calibration_triggers": [
+        "Component replacement",
+        "Windshield replacement",
+        "Camera bracket adjustment"
+      ]
     }
   ],
   "repair_to_calibration_map": [
     {
       "repair_operation": "Front Bumper Overhaul/Repair",
-      "repair_keywords": ["front bumper", "frt bumper", "f bumper", "front fascia", "bumper cover", "r&i front bumper", "r&r front bumper", "o/h front bumper", "o/h bumper", "o/h bumper assy", "overhaul bumper", "rpr front bumper", "rpr bumper", "rpr bumper cover", "repair bumper", "repl front bumper", "repl bumper"],
-      "triggers_calibration": ["Adaptive Cruise Control w/Stop", "Forward Collision Warning-Plus"],
+      "repair_keywords": [
+        "front bumper",
+        "frt bumper",
+        "f bumper",
+        "front fascia",
+        "bumper cover",
+        "r&i front bumper",
+        "r&r front bumper",
+        "o/h front bumper",
+        "o/h bumper",
+        "o/h bumper assy",
+        "overhaul bumper",
+        "rpr front bumper",
+        "rpr bumper",
+        "rpr bumper cover",
+        "repair bumper",
+        "repl front bumper",
+        "repl bumper"
+      ],
+      "triggers_calibration": [
+        "Adaptive Cruise Control w/Stop",
+        "Forward Collision Warning-Plus"
+      ],
       "procedure_type": "Dynamic Calibration",
       "procedure_name": "Adaptive Speed Control Sensor Alignment",
       "location": "Grille",
@@ -102,8 +153,22 @@
     },
     {
       "repair_operation": "Front Grille R&I/R&R",
-      "repair_keywords": ["grille", "front grille", "radiator grille", "grill", "lower grille", "upper grille", "r&i grille", "r&r grille", "repl grille", "repl lower grille"],
-      "triggers_calibration": ["Adaptive Cruise Control w/Stop", "Forward Collision Warning-Plus"],
+      "repair_keywords": [
+        "grille",
+        "front grille",
+        "radiator grille",
+        "grill",
+        "lower grille",
+        "upper grille",
+        "r&i grille",
+        "r&r grille",
+        "repl grille",
+        "repl lower grille"
+      ],
+      "triggers_calibration": [
+        "Adaptive Cruise Control w/Stop",
+        "Forward Collision Warning-Plus"
+      ],
       "procedure_type": "Dynamic Calibration",
       "procedure_name": "Adaptive Speed Control Sensor Alignment",
       "location": "Grille",
@@ -112,8 +177,21 @@
     },
     {
       "repair_operation": "Rear Bumper R&I/R&R",
-      "repair_keywords": ["rear bumper", "rr bumper", "r bumper", "rear fascia", "r&i rear bumper", "r&r rear bumper", "o/h rear bumper", "rpr rear bumper"],
-      "triggers_calibration": ["ParkSense with Stop rear parking sensors", "Rear Cross Path Detection", "Blind Spot w/Trailer Detection"],
+      "repair_keywords": [
+        "rear bumper",
+        "rr bumper",
+        "r bumper",
+        "rear fascia",
+        "r&i rear bumper",
+        "r&r rear bumper",
+        "o/h rear bumper",
+        "rpr rear bumper"
+      ],
+      "triggers_calibration": [
+        "ParkSense with Stop rear parking sensors",
+        "Rear Cross Path Detection",
+        "Blind Spot w/Trailer Detection"
+      ],
       "procedure_type": "Static Calibration",
       "procedure_name": "Rear Sensor Module Calibration",
       "location": "Rear Bumper",
@@ -122,8 +200,16 @@
     },
     {
       "repair_operation": "Windshield R&I/R&R",
-      "repair_keywords": ["windshield", "windscreen", "front glass", "w/s glass", "w/s"],
-      "triggers_calibration": ["LaneSense Lane Departure Warning"],
+      "repair_keywords": [
+        "windshield",
+        "windscreen",
+        "front glass",
+        "w/s glass",
+        "w/s"
+      ],
+      "triggers_calibration": [
+        "LaneSense Lane Departure Warning"
+      ],
       "procedure_type": "Static Calibration",
       "procedure_name": "Forward Facing Camera Calibration",
       "location": "Windshield",

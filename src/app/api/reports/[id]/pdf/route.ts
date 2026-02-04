@@ -8,6 +8,10 @@ interface CalibrationMatch {
   reason: string;
   matchedKeyword: string;
   repairOperation: string;
+  procedureType?: string;
+  procedureName?: string;
+  location?: string;
+  toolsRequired?: string[];
 }
 
 interface ScrubResult {
@@ -50,6 +54,9 @@ export async function GET(
         yearStart: { lte: report.vehicleYear },
         yearEnd: { gte: report.vehicleYear },
       },
+      include: {
+        adasSystems: true,
+      },
     });
 
     const vehicle = vehicles.find(
@@ -59,7 +66,8 @@ export async function GET(
     );
 
     const calibrations: ScrubResult[] = JSON.parse(report.calibrations);
-    const html = generateReportHtml(report, calibrations, vehicle || null);
+    const adasSystems = vehicle?.adasSystems || [];
+    const html = generateReportHtml(report, calibrations, vehicle || null, adasSystems);
 
     return new NextResponse(html, {
       headers: {
@@ -75,6 +83,13 @@ export async function GET(
   }
 }
 
+interface AdasSystemInfo {
+  systemName: string;
+  oemName: string | null;
+  location: string | null;
+  calibrationType: string | null;
+}
+
 function generateReportHtml(
   report: {
     id: string;
@@ -85,12 +100,54 @@ function generateReportHtml(
     shop: { name: string };
   },
   calibrations: ScrubResult[],
-  vehicle: { sourceProvider: string | null; sourceUrl: string | null } | null
+  vehicle: { sourceProvider: string | null; sourceUrl: string | null } | null,
+  adasSystems: AdasSystemInfo[]
 ) {
   const uniqueSystems = new Set<string>();
   calibrations.forEach((c) =>
     c.calibrationMatches.forEach((m) => uniqueSystems.add(m.systemName))
   );
+
+  // Get unique calibration operations with all their details
+  const operationsMap = new Map<string, {
+    procedureType: string;
+    procedureName: string;
+    location: string;
+    toolsRequired: string[];
+    responsibleFor: string[];
+    triggers: Array<{ lineNumber: number; description: string }>;
+  }>();
+
+  calibrations.forEach((cal) => {
+    cal.calibrationMatches.forEach((match) => {
+      const key = match.procedureName || match.repairOperation;
+      const existing = operationsMap.get(key);
+      if (existing) {
+        if (!existing.responsibleFor.includes(match.systemName)) {
+          existing.responsibleFor.push(match.systemName);
+        }
+        const triggerExists = existing.triggers.some(t => t.lineNumber === cal.lineNumber);
+        if (!triggerExists) {
+          existing.triggers.push({
+            lineNumber: cal.lineNumber,
+            description: cal.description,
+          });
+        }
+      } else {
+        operationsMap.set(key, {
+          procedureType: match.procedureType || match.calibrationType || 'Calibration',
+          procedureName: match.procedureName || match.repairOperation,
+          location: match.location || 'See OEM documentation',
+          toolsRequired: match.toolsRequired || ['Scan Tool Diagnostics'],
+          responsibleFor: [match.systemName],
+          triggers: [{
+            lineNumber: cal.lineNumber,
+            description: cal.description,
+          }],
+        });
+      }
+    });
+  });
 
   return `
 <!DOCTYPE html>
@@ -408,95 +465,80 @@ function generateReportHtml(
       <div class="summary-header">
         <div class="summary-icon">&#10003;</div>
         <div>
-          <div class="summary-title">Analysis Complete</div>
+          <div class="summary-title">${uniqueSystems.size} ADAS Operations</div>
           <div class="summary-subtitle">ADAS calibration requirements identified</div>
-        </div>
-      </div>
-      <div class="summary-stats">
-        <div class="stat">
-          <div class="stat-value">${calibrations.length}</div>
-          <div class="stat-label">Repair Lines Flagged</div>
-        </div>
-        <div class="stat">
-          <div class="stat-value">${uniqueSystems.size}</div>
-          <div class="stat-label">Systems Requiring Calibration</div>
         </div>
       </div>
     </div>
 
-    <div class="section-title">Required Calibrations</div>
+    <!-- ADAS Systems Section -->
+    <div class="section-title">ADAS Systems</div>
+    <div class="calibration-item" style="margin-bottom: 24px;">
+      <div class="systems-list" style="display: flex; flex-wrap: wrap; gap: 8px; padding: 16px;">
+        ${adasSystems.map((sys) => `
+          <span style="background: rgba(102, 126, 234, 0.15); color: #a0b0ff; padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: 500;">${sys.systemName}</span>
+        `).join("")}
+      </div>
+    </div>
 
-    ${(() => {
-      // Group calibrations by system name
-      const systemMap = new Map<string, {
-        systemName: string;
-        calibrationType: string | null;
-        triggers: Array<{ lineNumber: number; description: string; reason: string }>;
-      }>();
+    <!-- ADAS Operations Section -->
+    <div class="section-title">ADAS Operations</div>
 
-      calibrations.forEach((cal) => {
-        cal.calibrationMatches.forEach((match) => {
-          const existing = systemMap.get(match.systemName);
-          if (existing) {
-            const alreadyHasTrigger = existing.triggers.some(
-              t => t.lineNumber === cal.lineNumber
-            );
-            if (!alreadyHasTrigger) {
-              existing.triggers.push({
-                lineNumber: cal.lineNumber,
-                description: cal.description,
-                reason: match.reason,
-              });
-            }
-          } else {
-            systemMap.set(match.systemName, {
-              systemName: match.systemName,
-              calibrationType: match.calibrationType,
-              triggers: [{
-                lineNumber: cal.lineNumber,
-                description: cal.description,
-                reason: match.reason,
-              }],
-            });
-          }
-        });
-      });
-
-      return Array.from(systemMap.values()).map((system) => `
-        <div class="calibration-item">
-          <div class="repair-line">
-            <div class="repair-line-header">
-              <div style="display: flex; align-items: center; gap: 10px;">
-                <div class="check-icon">&#10003;</div>
-                <span style="font-weight: 600; font-size: 16px;">${system.systemName}</span>
-                ${system.calibrationType ? `<span class="calibration-type">${system.calibrationType}</span>` : ""}
-              </div>
-              <span class="cal-count">${system.triggers.length} repair${system.triggers.length !== 1 ? 's' : ''} trigger this</span>
+    ${Array.from(operationsMap.values()).map((op) => `
+      <div class="calibration-item">
+        <div class="repair-line">
+          <div class="repair-line-header">
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <div class="check-icon">&#10003;</div>
+              <span style="font-weight: 600; font-size: 16px;">Procedure Type: ${op.procedureType}</span>
             </div>
           </div>
-          <div class="systems-list">
-            <div style="color: #a0a0b0; font-size: 12px; margin-bottom: 12px;">Triggered by:</div>
-            ${system.triggers.map((trigger) => `
-              <div class="system-item" style="background: rgba(18, 18, 26, 0.5); border-radius: 8px; padding: 12px; margin-bottom: 8px;">
-                <span class="line-number">Line ${trigger.lineNumber}</span>
-                <div class="system-details">
-                  <div style="font-weight: 500; font-size: 14px;">${trigger.description}</div>
-                  <div class="system-reason">${trigger.reason}</div>
-                </div>
+          <div style="color: #fff; font-weight: 600; margin-top: 8px; font-size: 15px;">${op.procedureName}</div>
+        </div>
+        <div class="systems-list">
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px;">
+            <div>
+              <div style="color: #667eea; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px;">Location</div>
+              <div style="color: #fff; font-size: 14px;">${op.location}</div>
+            </div>
+            <div>
+              <div style="color: #667eea; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px;">Repair/Installation Triggers</div>
+              <div style="color: #fff; font-size: 14px;">Front Bumper</div>
+            </div>
+          </div>
+          <div style="margin-bottom: 16px;">
+            <div style="color: #667eea; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px;">Tools Required</div>
+            <div style="color: #fff; font-size: 14px;">${op.toolsRequired.join(', ')}</div>
+          </div>
+          <div style="margin-bottom: 16px;">
+            <div style="color: #667eea; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px;">Responsible For</div>
+            <div style="color: #fff; font-size: 14px;">${op.responsibleFor.join(', ')}</div>
+          </div>
+          <div style="background: rgba(18, 18, 26, 0.5); border-radius: 8px; padding: 16px; margin-top: 12px;">
+            <div style="color: #a0a0b0; font-size: 12px; margin-bottom: 12px;">Per the ${report.vehicleYear} ${report.vehicleMake} ${report.vehicleModel} repair manual, the ${op.procedureName.split(' - ')[0]} necessitates the above mentioned procedure should any of the following occur:</div>
+            ${op.triggers.map((trigger) => `
+              <div style="color: #10b981; font-size: 14px; margin-bottom: 6px;">
+                &#10003; ${trigger.description} - <span style="font-weight: 600;">Line ${trigger.lineNumber}</span>
               </div>
             `).join("")}
           </div>
         </div>
-      `).join("");
-    })()}
-
-    ${vehicle?.sourceUrl ? `
-      <div class="oem-source">
-        <div class="oem-title">OEM Position Statement Source</div>
-        <div class="oem-provider">${vehicle.sourceProvider || "I-CAR RTS"}</div>
-        <a href="${vehicle.sourceUrl}" class="oem-link" target="_blank">${vehicle.sourceUrl}</a>
       </div>
-    ` : ""}
+    `).join("")}
+
+    <div class="oem-source">
+      <div class="oem-title">Manufacturer Documentation</div>
+      <div style="display: flex; gap: 24px; margin-top: 12px;">
+        <div>
+          <div style="color: #667eea; font-size: 11px; font-weight: 600; text-transform: uppercase; margin-bottom: 4px;">Manufacturer Procedure</div>
+          <a href="${vehicle?.sourceUrl || '#'}" class="oem-link" target="_blank">${vehicle?.sourceProvider || 'ALLDATA'}</a>
+        </div>
+        <div>
+          <div style="color: #667eea; font-size: 11px; font-weight: 600; text-transform: uppercase; margin-bottom: 4px;">Manufacturer Requirement</div>
+          <a href="${vehicle?.sourceUrl || '#'}" class="oem-link" target="_blank">${vehicle?.sourceProvider || 'ALLDATA'}</a>
+        </div>
+      </div>
+    </div>
 
     <div class="footer">
       Generated by <span class="footer-logo">RadarSolutions</span> ADAS Calibration Platform<br>
