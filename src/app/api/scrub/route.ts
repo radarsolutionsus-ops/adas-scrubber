@@ -155,7 +155,19 @@ async function extractVehicleInfo(text: string): Promise<ExtractedVehicleInfo> {
   const textInfo = extractVehicleFromText(text);
 
   // Merge text-based info if we're missing data
-  if (!result.year && textInfo.year) result.year = textInfo.year;
+  // IMPORTANT: VIN-based year should ALWAYS take priority over text extraction
+  // Only use text year if we have NO VIN at all
+  if (!result.year && textInfo.year) {
+    // Only trust text year if no VIN was found, or if years are close
+    if (!result.vin) {
+      result.year = textInfo.year;
+    } else if (result.vinDecoded?.errors && result.vinDecoded.errors.length > 0) {
+      // VIN decode failed, but validate text year is reasonable (2010+)
+      if (textInfo.year >= 2010) {
+        result.year = textInfo.year;
+      }
+    }
+  }
   if (!result.make && textInfo.make) result.make = textInfo.make;
   if (!result.model && textInfo.model) result.model = textInfo.model;
 
@@ -173,10 +185,40 @@ function extractVehicleFromText(text: string): { year?: number; make?: string; m
   const result: { year?: number; make?: string; model?: string } = {};
   const normalizedText = text.replace(/\s+/g, ' ').toUpperCase();
 
-  // Find year (4 digits between 1990-2030)
-  const yearMatch = text.match(/\b(199[0-9]|20[0-2][0-9]|2030)\b/);
-  if (yearMatch) {
-    result.year = parseInt(yearMatch[1], 10);
+  // Find year - look for ALL years and pick the most likely vehicle year
+  // Vehicle years are typically recent (2015-2030), prioritize those over older dates
+  const yearRegex = /\b(199[0-9]|20[0-3][0-9])\b/g;
+  const allYears: number[] = [];
+  let match;
+  while ((match = yearRegex.exec(text)) !== null) {
+    allYears.push(parseInt(match[1], 10));
+  }
+
+  if (allYears.length > 0) {
+    // Filter to likely vehicle years (2010+) first
+    const recentYears = allYears.filter(y => y >= 2010 && y <= 2030);
+
+    if (recentYears.length > 0) {
+      // Find the most common recent year, or the highest one
+      const yearCounts = new Map<number, number>();
+      for (const y of recentYears) {
+        yearCounts.set(y, (yearCounts.get(y) || 0) + 1);
+      }
+
+      // Get year with highest count, prefer higher year on tie
+      let bestYear = recentYears[0];
+      let bestCount = 0;
+      for (const [year, count] of yearCounts) {
+        if (count > bestCount || (count === bestCount && year > bestYear)) {
+          bestYear = year;
+          bestCount = count;
+        }
+      }
+      result.year = bestYear;
+    } else {
+      // No recent years found, use the highest year found
+      result.year = Math.max(...allYears);
+    }
   }
 
   // Check for make aliases first (NISS, CHEV, TOY, etc.)
