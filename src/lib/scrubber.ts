@@ -6,6 +6,10 @@ export interface CalibrationMatch {
   reason: string;
   matchedKeyword: string;
   repairOperation: string;
+  procedureType?: string;
+  procedureName?: string;
+  location?: string;
+  toolsRequired?: string[];
 }
 
 export interface ScrubResult {
@@ -28,6 +32,28 @@ export interface VehicleWithSource {
   model: string;
   sourceProvider: string | null;
   sourceUrl: string | null;
+}
+
+/**
+ * Extract CCC ONE estimate line number from text
+ * CCC ONE format: "2 * Rpr Bumper cover" or "6 O/H bumper assy"
+ * Returns the estimate line number or null if not found
+ */
+function extractCCCLineNumber(line: string): number | null {
+  // Match patterns like "2 * Rpr", "6 O/H", "15 * Subl", "7 Repl", etc.
+  // The line number is at the start, optionally followed by * or **
+  const match = line.match(/^\s*(\d{1,3})\s*\*{0,2}\s*(Rpr|Repl|O\/H|Ovhl|R&I|R&R|Subl|Add|Blend|Refn)/i);
+  if (match) {
+    return parseInt(match[1], 10);
+  }
+
+  // Also match section headers like "1 FRONT BUMPER"
+  const sectionMatch = line.match(/^\s*(\d{1,3})\s+[A-Z]{2,}/);
+  if (sectionMatch) {
+    return parseInt(sectionMatch[1], 10);
+  }
+
+  return null;
 }
 
 /**
@@ -58,9 +84,9 @@ function isSupplierAddressLine(line: string): boolean {
  * and stripping out part numbers, prices, quantities, and supplier info.
  *
  * Examples:
- * - "6Repl Lower Grille622546LY0A1603.82Incl." → "Lower Grille - Replace"
- * - "1FRONT BUMPER & GRILLE" → "Front Bumper & Grille"
- * - "R&I Front Bumper Cover" → "Front Bumper Cover - R&I"
+ * - "6Repl Lower Grille622546LY0A1603.82Incl." â "Lower Grille - Replace"
+ * - "1FRONT BUMPER & GRILLE" â "Front Bumper & Grille"
+ * - "R&I Front Bumper Cover" â "Front Bumper Cover - R&I"
  */
 function cleanRepairDescription(rawLine: string): string {
   // First, try to extract repair operation using common patterns
@@ -345,9 +371,27 @@ export async function scrubEstimate(
     const line = lines[i].toLowerCase();
     const calibrationMatches: CalibrationMatch[] = [];
 
+    // Try to extract CCC ONE estimate line number
+    const cccLineNumber = extractCCCLineNumber(lines[i]);
+
     for (const mapping of vehicle.repairCalibrationMaps) {
       const keywords: string[] = JSON.parse(mapping.repairKeywords);
       const triggeredSystems: string[] = JSON.parse(mapping.triggersCalibration);
+
+      // Parse optional procedure details from mapping
+      let procedureType: string | undefined;
+      let procedureName: string | undefined;
+      let location: string | undefined;
+      let toolsRequired: string[] | undefined;
+
+      try {
+        if (mapping.procedureType) procedureType = mapping.procedureType;
+        if (mapping.procedureName) procedureName = mapping.procedureName;
+        if (mapping.location) location = mapping.location;
+        if (mapping.toolsRequired) toolsRequired = JSON.parse(mapping.toolsRequired);
+      } catch {
+        // Ignore parsing errors for optional fields
+      }
 
       for (const keyword of keywords) {
         if (line.includes(keyword.toLowerCase())) {
@@ -361,6 +405,10 @@ export async function scrubEstimate(
                 reason: `Repair operation "${mapping.repairOperation}" triggers calibration`,
                 matchedKeyword: keyword,
                 repairOperation: mapping.repairOperation,
+                procedureType,
+                procedureName,
+                location,
+                toolsRequired,
               });
             }
           }
@@ -369,8 +417,10 @@ export async function scrubEstimate(
     }
 
     if (calibrationMatches.length > 0) {
+      // Use CCC line number if available, otherwise use text line position
+      const lineNumber = cccLineNumber !== null ? cccLineNumber : i + 1;
       results.push({
-        lineNumber: i + 1,
+        lineNumber,
         description: cleanRepairDescription(lines[i]),
         calibrationMatches,
       });
