@@ -103,6 +103,10 @@ model RepairCalibrationMap {
   repairOperation String
   repairKeywords  String
   triggersCalibration String
+  procedureType   String?
+  procedureName   String?
+  location        String?
+  toolsRequired   String?  // JSON array of tool names
   notes           String?
 
   vehicle Vehicle @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
