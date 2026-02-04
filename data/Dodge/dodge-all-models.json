@@ -6,116 +6,129 @@
     "model": "All Models"
   },
   "source": {
-    "provider": "Dodge Position Statement",
-    "url": "MoparGlassReplacementPositionStatement.pdf",
+    "provider": "ALLDATA",
+    "url": "https://www.alldata.com",
     "date_extracted": "2026-01-29"
   },
   "adas_systems": [
     {
-      "system_name": "Forward Facing Camera",
-      "oem_name": "Forward Collision Warning Camera",
-      "description": "Adaptive Cruise Control, Forward Collision Warning, LaneSense",
-      "location": "windshield",
+      "system_name": "Adaptive Cruise Control w/Stop",
+      "oem_name": "Adaptive Cruise Control Module",
+      "description": "Maintains set speed and distance from vehicles ahead, can bring vehicle to complete stop",
+      "location": "Grille",
+      "dtc_set": true,
+      "scan_tool_required": true,
+      "calibration_type": "Dynamic",
+      "tools_required": ["Scan Tool Diagnostics", "Workshop Provided Instruments"],
+      "calibration_triggers": ["Component replacement", "After collision repair", "Front bumper overhaul", "Front bumper repair"]
+    },
+    {
+      "system_name": "Forward Collision Warning-Plus",
+      "oem_name": "Forward Collision Warning Module",
+      "description": "Alerts driver of potential frontal collision and can apply emergency braking",
+      "location": "Grille",
+      "dtc_set": true,
+      "scan_tool_required": true,
+      "calibration_type": "Dynamic",
+      "tools_required": ["Scan Tool Diagnostics", "Workshop Provided Instruments"],
+      "calibration_triggers": ["Component replacement", "After collision repair", "Front bumper overhaul", "Front bumper repair"]
+    },
+    {
+      "system_name": "ParkSense with Stop rear parking sensors",
+      "oem_name": "ParkSense Rear Park Assist",
+      "description": "Ultrasonic sensors detect objects behind vehicle during reverse",
+      "location": "Rear Bumper",
       "dtc_set": true,
       "scan_tool_required": true,
       "calibration_type": "Static",
-      "calibration_triggers": [
-        "Component replacement",
-        "After collision repair"
-      ]
+      "tools_required": ["Scan Tool Diagnostics"],
+      "calibration_triggers": ["Component replacement", "After collision repair", "Rear bumper overhaul", "Rear bumper repair"]
     },
     {
-      "system_name": "Front Radar Module",
-      "oem_name": "Adaptive Cruise Control Radar",
-      "description": "Adaptive Cruise Control, Full Speed Forward Collision Warning",
-      "location": "front grille/bumper",
-      "dtc_set": true,
-      "scan_tool_required": true,
-      "calibration_type": "Static/Dynamic",
-      "calibration_triggers": [
-        "Component replacement",
-        "After collision repair"
-      ]
-    },
-    {
-      "system_name": "Blind Spot Monitor Sensor",
-      "oem_name": "Blind Spot Monitoring",
-      "description": "Blind Spot Monitoring, Rear Cross Path Detection",
-      "location": "rear bumper corners",
+      "system_name": "Rear Cross Path Detection",
+      "oem_name": "Rear Cross Path Detection Module",
+      "description": "Alerts driver of crossing traffic when reversing",
+      "location": "Rear Bumper Corners",
       "dtc_set": true,
       "scan_tool_required": true,
       "calibration_type": "Static",
-      "calibration_triggers": [
-        "Component replacement",
-        "After collision repair"
-      ]
+      "tools_required": ["Scan Tool Diagnostics"],
+      "calibration_triggers": ["Component replacement", "After collision repair", "Rear bumper overhaul"]
+    },
+    {
+      "system_name": "Blind Spot w/Trailer Detection",
+      "oem_name": "Blind Spot Monitoring Module",
+      "description": "Monitors blind spots and alerts driver, includes trailer detection capability",
+      "location": "Rear Bumper Corners",
+      "dtc_set": true,
+      "scan_tool_required": true,
+      "calibration_type": "Static",
+      "tools_required": ["Scan Tool Diagnostics"],
+      "calibration_triggers": ["Component replacement", "After collision repair", "Rear bumper overhaul"]
+    },
+    {
+      "system_name": "ParkView rear mounted camera",
+      "oem_name": "ParkView Backup Camera",
+      "description": "Displays rear view with dynamic gridlines when reversing",
+      "location": "Liftgate/Tailgate",
+      "dtc_set": true,
+      "scan_tool_required": true,
+      "calibration_type": "Static",
+      "tools_required": ["Scan Tool Diagnostics"],
+      "calibration_triggers": ["Component replacement", "Camera angle adjustment"]
+    },
+    {
+      "system_name": "LaneSense Lane Departure Warning",
+      "oem_name": "LaneSense Camera Module",
+      "description": "Monitors lane markings and provides warning/correction if unintentional lane departure detected",
+      "location": "Windshield",
+      "dtc_set": true,
+      "scan_tool_required": true,
+      "calibration_type": "Static",
+      "tools_required": ["Scan Tool Diagnostics", "Calibration Target"],
+      "calibration_triggers": ["Component replacement", "Windshield replacement", "Camera bracket adjustment"]
     }
   ],
   "repair_to_calibration_map": [
     {
-      "repair_operation": "Front Bumper R&I/R&R",
-      "repair_keywords": [
-        "front bumper",
-        "frt bumper",
-        "f bumper",
-        "front fascia",
-        "bumper cover",
-        "r&i front bumper",
-        "r&r front bumper",
-        "o/h front bumper",
-        "o/h bumper",
-        "rpr front bumper",
-        "rpr bumper"
-      ],
-      "triggers_calibration": [
-        "Front Radar Module"
-      ],
-      "notes": "Front Bumper R&I/R&R requires Front Radar Module calibration"
+      "repair_operation": "Front Bumper Overhaul/Repair",
+      "repair_keywords": ["front bumper", "frt bumper", "f bumper", "front fascia", "bumper cover", "r&i front bumper", "r&r front bumper", "o/h front bumper", "o/h bumper", "o/h bumper assy", "overhaul bumper", "rpr front bumper", "rpr bumper", "rpr bumper cover", "repair bumper", "repl front bumper", "repl bumper"],
+      "triggers_calibration": ["Adaptive Cruise Control w/Stop", "Forward Collision Warning-Plus"],
+      "procedure_type": "Dynamic Calibration",
+      "procedure_name": "Adaptive Speed Control Sensor Alignment",
+      "location": "Grille",
+      "tools_required": ["Scan Tool Diagnostics", "Workshop Provided Instruments"],
+      "notes": "Front Bumper repair/overhaul requires Adaptive Cruise Control Module dynamic calibration"
     },
     {
       "repair_operation": "Front Grille R&I/R&R",
-      "repair_keywords": [
-        "grille",
-        "front grille",
-        "radiator grille",
-        "grill",
-        "r&i grille",
-        "r&r grille"
-      ],
-      "triggers_calibration": [
-        "Front Radar Module"
-      ],
-      "notes": "Front Grille R&I/R&R requires Front Radar Module calibration"
+      "repair_keywords": ["grille", "front grille", "radiator grille", "grill", "lower grille", "upper grille", "r&i grille", "r&r grille", "repl grille", "repl lower grille"],
+      "triggers_calibration": ["Adaptive Cruise Control w/Stop", "Forward Collision Warning-Plus"],
+      "procedure_type": "Dynamic Calibration",
+      "procedure_name": "Adaptive Speed Control Sensor Alignment",
+      "location": "Grille",
+      "tools_required": ["Scan Tool Diagnostics", "Workshop Provided Instruments"],
+      "notes": "Front Grille R&I/R&R requires Adaptive Cruise Control Module dynamic calibration"
     },
     {
       "repair_operation": "Rear Bumper R&I/R&R",
-      "repair_keywords": [
-        "rear bumper",
-        "rr bumper",
-        "r bumper",
-        "rear fascia",
-        "r&i rear bumper",
-        "r&r rear bumper",
-        "o/h rear bumper",
-        "rpr rear bumper"
-      ],
-      "triggers_calibration": [
-        "Blind Spot Monitor Sensor"
-      ],
-      "notes": "Rear Bumper R&I/R&R requires Blind Spot Monitor Sensor calibration"
+      "repair_keywords": ["rear bumper", "rr bumper", "r bumper", "rear fascia", "r&i rear bumper", "r&r rear bumper", "o/h rear bumper", "rpr rear bumper"],
+      "triggers_calibration": ["ParkSense with Stop rear parking sensors", "Rear Cross Path Detection", "Blind Spot w/Trailer Detection"],
+      "procedure_type": "Static Calibration",
+      "procedure_name": "Rear Sensor Module Calibration",
+      "location": "Rear Bumper",
+      "tools_required": ["Scan Tool Diagnostics"],
+      "notes": "Rear Bumper R&I/R&R requires rear sensor calibration"
     },
     {
       "repair_operation": "Windshield R&I/R&R",
-      "repair_keywords": [
-        "windshield",
-        "windscreen",
-        "front glass",
-        "w/s glass"
-      ],
-      "triggers_calibration": [
-        "Forward Facing Camera"
-      ],
-      "notes": "Windshield R&I/R&R requires Forward Facing Camera calibration"
+      "repair_keywords": ["windshield", "windscreen", "front glass", "w/s glass", "w/s"],
+      "triggers_calibration": ["LaneSense Lane Departure Warning"],
+      "procedure_type": "Static Calibration",
+      "procedure_name": "Forward Facing Camera Calibration",
+      "location": "Windshield",
+      "tools_required": ["Scan Tool Diagnostics", "Calibration Target"],
+      "notes": "Windshield R&I/R&R requires Forward Facing Camera static calibration"
     }
   ]
 }
