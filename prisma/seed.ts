@@ -63,6 +63,10 @@ interface RepairCalibrationMapData {
   repair_operation: string;
   repair_keywords: string[];
   triggers_calibration: string[];
+  procedure_type?: string;
+  procedure_name?: string;
+  location?: string;
+  tools_required?: string[];
   notes?: string;
 }
 
@@ -135,6 +139,10 @@ async function seedFromJsonFile(filePath: string) {
         repairOperation: mapping.repair_operation,
         repairKeywords: JSON.stringify(mapping.repair_keywords),
         triggersCalibration: JSON.stringify(mapping.triggers_calibration),
+        procedureType: mapping.procedure_type || null,
+        procedureName: mapping.procedure_name || null,
+        location: mapping.location || null,
+        toolsRequired: mapping.tools_required ? JSON.stringify(mapping.tools_required) : null,
         notes: mapping.notes || null,
       },
     });
