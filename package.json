@@ -10,9 +10,11 @@
     "db:seed": "npx ts-node --compiler-options '{\"module\":\"CommonJS\"}' prisma/seed.ts",
     "db:migrate": "npx prisma migrate dev",
     "db:studio": "npx prisma studio",
+    "audit:position-statements": "npx ts-node --compiler-options '{\"module\":\"CommonJS\"}' scripts/audit-position-statements.ts",
     "postinstall": "prisma generate"
   },
   "dependencies": {
+    "@auth/prisma-adapter": "^2.11.1",
     "@prisma/client": "^5.22.0",
     "@radix-ui/react-label": "^2.1.8",
     "@radix-ui/react-separator": "^1.1.8",
@@ -28,6 +30,7 @@
     "jsonwebtoken": "^9.0.3",
     "lucide-react": "^0.563.0",
     "next": "16.1.6",
+    "next-auth": "^5.0.0-beta.30",
     "pdf-parse": "^1.1.1",
     "prisma": "^5.22.0",
     "react": "19.2.3",

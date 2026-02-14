@@ -1,0 +1,267 @@
+{
+  "generatedAt": "2026-02-14T02:31:42.253Z",
+  "totals": {
+    "makes": 34,
+    "pdfFiles": 64,
+    "jsonFiles": 35,
+    "pdfReadable": 64,
+    "pdfUnreadable": 0,
+    "jsonValid": 35,
+    "jsonInvalid": 0
+  },
+  "makeCoverage": [
+    {
+      "make": "Acura",
+      "pdfCount": 5,
+      "jsonCount": 1,
+      "hasPdf": true,
+      "hasJson": true
+    },
+    {
+      "make": "All-in-one",
+      "pdfCount": 1,
+      "jsonCount": 0,
+      "hasPdf": true,
+      "hasJson": false
+    },
+    {
+      "make": "Audi",
+      "pdfCount": 3,
+      "jsonCount": 1,
+      "hasPdf": true,
+      "hasJson": true
+    },
+    {
+      "make": "BMW",
+      "pdfCount": 0,
+      "jsonCount": 1,
+      "hasPdf": false,
+      "hasJson": true
+    },
+    {
+      "make": "Buick",
+      "pdfCount": 4,
+      "jsonCount": 1,
+      "hasPdf": true,
+      "hasJson": true
+    },
+    {
+      "make": "Cadillac",
+      "pdfCount": 4,
+      "jsonCount": 1,
+      "hasPdf": true,
+      "hasJson": true
+    },
+    {
+      "make": "Chevrolet",
+      "pdfCount": 4,
+      "jsonCount": 1,
+      "hasPdf": true,
+      "hasJson": true
+    },
+    {
+      "make": "Chrysler",
+      "pdfCount": 2,
+      "jsonCount": 1,
+      "hasPdf": true,
+      "hasJson": true
+    },
+    {
+      "make": "Dodge",
+      "pdfCount": 0,
+      "jsonCount": 1,
+      "hasPdf": false,
+      "hasJson": true
+    },
+    {
+      "make": "Ford",
+      "pdfCount": 3,
+      "jsonCount": 1,
+      "hasPdf": true,
+      "hasJson": true
+    },
+    {
+      "make": "Genesis",
+      "pdfCount": 1,
+      "jsonCount": 1,
+      "hasPdf": true,
+      "hasJson": true
+    },
+    {
+      "make": "GMC",
+      "pdfCount": 4,
+      "jsonCount": 1,
+      "hasPdf": true,
+      "hasJson": true
+    },
+    {
+      "make": "Honda",
+      "pdfCount": 3,
+      "jsonCount": 1,
+      "hasPdf": true,
+      "hasJson": true
+    },
+    {
+      "make": "Hyundai",
+      "pdfCount": 1,
+      "jsonCount": 1,
+      "hasPdf": true,
+      "hasJson": true
+    },
+    {
+      "make": "Infiniti",
+      "pdfCount": 0,
+      "jsonCount": 1,
+      "hasPdf": false,
+      "hasJson": true
+    },
+    {
+      "make": "Infinity",
+      "pdfCount": 7,
+      "jsonCount": 1,
+      "hasPdf": true,
+      "hasJson": true
+    },
+    {
+      "make": "Jaguar",
+      "pdfCount": 0,
+      "jsonCount": 1,
+      "hasPdf": false,
+      "hasJson": true
+    },
+    {
+      "make": "Jeep",
+      "pdfCount": 0,
+      "jsonCount": 1,
+      "hasPdf": false,
+      "hasJson": true
+    },
+    {
+      "make": "KIA",
+      "pdfCount": 2,
+      "jsonCount": 1,
+      "hasPdf": true,
+      "hasJson": true
+    },
+    {
+      "make": "Land Rover",
+      "pdfCount": 0,
+      "jsonCount": 1,
+      "hasPdf": false,
+      "hasJson": true
+    },
+    {
+      "make": "Lexus",
+      "pdfCount": 1,
+      "jsonCount": 1,
+      "hasPdf": true,
+      "hasJson": true
+    },
+    {
+      "make": "Lincoln",
+      "pdfCount": 0,
+      "jsonCount": 1,
+      "hasPdf": false,
+      "hasJson": true
+    },
+    {
+      "make": "Mazda",
+      "pdfCount": 2,
+      "jsonCount": 1,
+      "hasPdf": true,
+      "hasJson": true
+    },
+    {
+      "make": "Mercedes",
+      "pdfCount": 0,
+      "jsonCount": 1,
+      "hasPdf": false,
+      "hasJson": true
+    },
+    {
+      "make": "MINI",
+      "pdfCount": 0,
+      "jsonCount": 1,
+      "hasPdf": false,
+      "hasJson": true
+    },
+    {
+      "make": "Nissan",
+      "pdfCount": 11,
+      "jsonCount": 1,
+      "hasPdf": true,
+      "hasJson": true
+    },
+    {
+      "make": "Porsche",
+      "pdfCount": 0,
+      "jsonCount": 1,
+      "hasPdf": false,
+      "hasJson": true
+    },
+    {
+      "make": "Ram",
+      "pdfCount": 0,
+      "jsonCount": 1,
+      "hasPdf": false,
+      "hasJson": true
+    },
+    {
+      "make": "Rivian",
+      "pdfCount": 0,
+      "jsonCount": 1,
+      "hasPdf": false,
+      "hasJson": true
+    },
+    {
+      "make": "Subaru",
+      "pdfCount": 2,
+      "jsonCount": 1,
+      "hasPdf": true,
+      "hasJson": true
+    },
+    {
+      "make": "Tesla",
+      "pdfCount": 0,
+      "jsonCount": 1,
+      "hasPdf": false,
+      "hasJson": true
+    },
+    {
+      "make": "Toyota",
+      "pdfCount": 0,
+      "jsonCount": 3,
+      "hasPdf": false,
+      "hasJson": true
+    },
+    {
+      "make": "Volkswagen",
+      "pdfCount": 0,
+      "jsonCount": 1,
+      "hasPdf": false,
+      "hasJson": true
+    },
+    {
+      "make": "Volvo",
+      "pdfCount": 4,
+      "jsonCount": 1,
+      "hasPdf": true,
+      "hasJson": true
+    }
+  ],
+  "unreadablePdfs": [],
+  "weakPdfs": [
+    {
+      "file": "data/Hyundai/Hyundai_Pos_Pre-Repair-and-Post-Repair-System-Scanning_Revised(6-3-25).pdf",
+      "extractedChars": 126
+    }
+  ],
+  "jsonIssues": [],
+  "recommendations": [
+    "Backfill OEM PDFs for makes that currently have JSON only (higher legal defensibility).",
+    "Normalize source.url fields to canonical public OEM links for every JSON file.",
+    "Regenerate JSON from PDFs after every OEM statement revision and store statement publish date.",
+    "Add regression tests using known estimates to verify required calibrations are still detected.",
+    "Priority missing-PDF makes: BMW, Dodge, Infiniti, Jaguar, Jeep, Land Rover, Lincoln, Mercedes, MINI, Porsche, Ram, Rivian, Tesla, Toyota, Volkswagen"
+  ]
+}

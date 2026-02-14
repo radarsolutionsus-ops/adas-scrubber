@@ -7,15 +7,23 @@
   },
   "source": {
     "provider": "Nissan Position Statement NPSB/25-946",
-    "url": "NPSB_25-946_November_2025.pdf",
+    "url": "https://www.nissancollision.com/",
     "date_extracted": "2026-01-29"
   },
   "scanning_requirements": {
     "pre_scan": "required",
     "post_scan": "required",
     "tool": "CONSULT",
-    "versions": ["CONSULT 4", "VI3"],
-    "alternatives": ["asTech (OEM CONSULT software)", "AirPro (2017+)", "OPUS", "Hunter ADAS with WinAlign"],
+    "versions": [
+      "CONSULT 4",
+      "VI3"
+    ],
+    "alternatives": [
+      "asTech (OEM CONSULT software)",
+      "AirPro (2017+)",
+      "OPUS",
+      "Hunter ADAS with WinAlign"
+    ],
     "applies_to": "All 2008+ Nissan vehicles",
     "older_vehicles": "Post-repair scan recommended for 2007 and older with OBD2 port"
   },

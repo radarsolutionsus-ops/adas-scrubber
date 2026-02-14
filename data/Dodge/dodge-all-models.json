@@ -7,7 +7,7 @@
   },
   "source": {
     "provider": "ALLDATA",
-    "url": "https://www.alldata.com",
+    "url": "https://www.moparrepairconnect.com/collision/resources/position-statements/",
     "date_extracted": "2026-01-29"
   },
   "adas_systems": [
@@ -19,7 +19,10 @@
       "dtc_set": true,
       "scan_tool_required": true,
       "calibration_type": "Dynamic",
-      "tools_required": ["Scan Tool Diagnostics", "Workshop Provided Instruments"],
+      "tools_required": [
+        "Scan Tool Diagnostics",
+        "Workshop Provided Instruments"
+      ],
       "calibration_triggers": [
         "Component replacement",
         "After collision repair",
@@ -35,7 +38,10 @@
       "dtc_set": true,
       "scan_tool_required": true,
       "calibration_type": "Dynamic",
-      "tools_required": ["Scan Tool Diagnostics", "Workshop Provided Instruments"],
+      "tools_required": [
+        "Scan Tool Diagnostics",
+        "Workshop Provided Instruments"
+      ],
       "calibration_triggers": [
         "Component replacement",
         "After collision repair",
@@ -51,7 +57,9 @@
       "dtc_set": true,
       "scan_tool_required": true,
       "calibration_type": "Static",
-      "tools_required": ["Scan Tool Diagnostics"],
+      "tools_required": [
+        "Scan Tool Diagnostics"
+      ],
       "calibration_triggers": [
         "Component replacement",
         "After collision repair",
@@ -67,7 +75,9 @@
       "dtc_set": true,
       "scan_tool_required": true,
       "calibration_type": "Static",
-      "tools_required": ["Scan Tool Diagnostics"],
+      "tools_required": [
+        "Scan Tool Diagnostics"
+      ],
       "calibration_triggers": [
         "Component replacement",
         "After collision repair",
@@ -82,7 +92,9 @@
       "dtc_set": true,
       "scan_tool_required": true,
       "calibration_type": "Static",
-      "tools_required": ["Scan Tool Diagnostics"],
+      "tools_required": [
+        "Scan Tool Diagnostics"
+      ],
       "calibration_triggers": [
         "Component replacement",
         "After collision repair",
@@ -97,7 +109,9 @@
       "dtc_set": true,
       "scan_tool_required": true,
       "calibration_type": "Static",
-      "tools_required": ["Scan Tool Diagnostics"],
+      "tools_required": [
+        "Scan Tool Diagnostics"
+      ],
       "calibration_triggers": [
         "Component replacement",
         "Camera angle adjustment"
@@ -111,7 +125,10 @@
       "dtc_set": true,
       "scan_tool_required": true,
       "calibration_type": "Static",
-      "tools_required": ["Scan Tool Diagnostics", "Calibration Target"],
+      "tools_required": [
+        "Scan Tool Diagnostics",
+        "Calibration Target"
+      ],
       "calibration_triggers": [
         "Component replacement",
         "Windshield replacement",
@@ -148,7 +165,10 @@
       "procedure_type": "Dynamic Calibration",
       "procedure_name": "Adaptive Speed Control Sensor Alignment",
       "location": "Grille",
-      "tools_required": ["Scan Tool Diagnostics", "Workshop Provided Instruments"],
+      "tools_required": [
+        "Scan Tool Diagnostics",
+        "Workshop Provided Instruments"
+      ],
       "notes": "Front Bumper repair/overhaul requires Adaptive Cruise Control Module dynamic calibration"
     },
     {
@@ -172,7 +192,10 @@
       "procedure_type": "Dynamic Calibration",
       "procedure_name": "Adaptive Speed Control Sensor Alignment",
       "location": "Grille",
-      "tools_required": ["Scan Tool Diagnostics", "Workshop Provided Instruments"],
+      "tools_required": [
+        "Scan Tool Diagnostics",
+        "Workshop Provided Instruments"
+      ],
       "notes": "Front Grille R&I/R&R requires Adaptive Cruise Control Module dynamic calibration"
     },
     {
@@ -195,7 +218,9 @@
       "procedure_type": "Static Calibration",
       "procedure_name": "Rear Sensor Module Calibration",
       "location": "Rear Bumper",
-      "tools_required": ["Scan Tool Diagnostics"],
+      "tools_required": [
+        "Scan Tool Diagnostics"
+      ],
       "notes": "Rear Bumper R&I/R&R requires rear sensor calibration"
     },
     {
@@ -213,7 +238,10 @@
       "procedure_type": "Static Calibration",
       "procedure_name": "Forward Facing Camera Calibration",
       "location": "Windshield",
-      "tools_required": ["Scan Tool Diagnostics", "Calibration Target"],
+      "tools_required": [
+        "Scan Tool Diagnostics",
+        "Calibration Target"
+      ],
       "notes": "Windshield R&I/R&R requires Forward Facing Camera static calibration"
     }
   ]

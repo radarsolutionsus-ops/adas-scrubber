@@ -1,0 +1,24 @@
+diff --git a/src/app/api/scrub/route.ts b/src/app/api/scrub/route.ts
+index 74c6b9a..3641a71 100644
+--- a/src/app/api/scrub/route.ts
++++ b/src/app/api/scrub/route.ts
+@@ -340,6 +340,19 @@ export async function POST(request: NextRequest) {
+     // Step 2: Extract vehicle info (VIN API + text parsing)
+     const extractedVehicle = await extractVehicleInfo(estimateText);
+ 
++    // Debug logging for vehicle detection
++    console.log('Vehicle Detection:', {
++      providedYear,
++      providedMake,
++      providedModel,
++      extractedYear: extractedVehicle.year,
++      extractedMake: extractedVehicle.make,
++      extractedModel: extractedVehicle.model,
++      vin: extractedVehicle.vin,
++      confidence: extractedVehicle.confidence,
++      source: extractedVehicle.source,
++    });
++
+     // Use provided values or fall back to extracted
+     const vehicleYear = providedYear || extractedVehicle.year;
+     const vehicleMake = providedMake || extractedVehicle.make;

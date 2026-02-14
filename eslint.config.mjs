@@ -12,6 +12,11 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    "ROUTE_TS_FIXED.ts",
+    "FIXED_ROUTE_TS.txt",
+    "VIN_FIX.patch",
+    "src/app/page 2.tsx",
+    "src/app/page 3.tsx",
   ]),
 ]);
 

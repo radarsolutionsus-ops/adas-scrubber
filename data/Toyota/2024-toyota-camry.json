@@ -7,7 +7,7 @@
   },
   "source": {
     "provider": "I-CAR RTS",
-    "url": "https://rts.i-car.com/calv-4313.html",
+    "url": "https://techinfo.toyota.com/",
     "date_extracted": "2026-01-28"
   },
   "adas_systems": [
@@ -140,62 +140,142 @@
   "repair_to_calibration_map": [
     {
       "repair_operation": "Windshield R&R",
-      "repair_keywords": ["windshield", "w/s", "laminated glass", "front glass"],
-      "triggers_calibration": ["Forward Facing Camera"],
+      "repair_keywords": [
+        "windshield",
+        "w/s",
+        "laminated glass",
+        "front glass"
+      ],
+      "triggers_calibration": [
+        "Forward Facing Camera"
+      ],
       "notes": "Static calibration required"
     },
     {
       "repair_operation": "Front Bumper R&R",
-      "repair_keywords": ["front bumper", "f/bumper", "bumper cover front", "grille"],
-      "triggers_calibration": ["Front Radar", "Front Parking Sensors", "Front Camera (360° View)"],
+      "repair_keywords": [
+        "front bumper",
+        "f/bumper",
+        "bumper cover front",
+        "grille"
+      ],
+      "triggers_calibration": [
+        "Front Radar",
+        "Front Parking Sensors",
+        "Front Camera (360° View)"
+      ],
       "notes": "Multiple systems affected"
     },
     {
       "repair_operation": "Front Bumper Repair",
-      "repair_keywords": ["repair front bumper", "bumper repair"],
-      "triggers_calibration": ["Front Radar", "Front Parking Sensors"],
+      "repair_keywords": [
+        "repair front bumper",
+        "bumper repair"
+      ],
+      "triggers_calibration": [
+        "Front Radar",
+        "Front Parking Sensors"
+      ],
       "notes": "Even repair without replacement triggers calibration"
     },
     {
       "repair_operation": "Left Side Mirror R&R",
-      "repair_keywords": ["left mirror", "l/mirror", "driver mirror", "mirror assy left"],
-      "triggers_calibration": ["Left Side Mirror Camera"],
+      "repair_keywords": [
+        "left mirror",
+        "l/mirror",
+        "driver mirror",
+        "mirror assy left"
+      ],
+      "triggers_calibration": [
+        "Left Side Mirror Camera"
+      ],
       "notes": "360° view system only"
     },
     {
       "repair_operation": "Right Side Mirror R&R",
-      "repair_keywords": ["right mirror", "r/mirror", "passenger mirror", "mirror assy right"],
-      "triggers_calibration": ["Right Side Mirror Camera"],
+      "repair_keywords": [
+        "right mirror",
+        "r/mirror",
+        "passenger mirror",
+        "mirror assy right"
+      ],
+      "triggers_calibration": [
+        "Right Side Mirror Camera"
+      ],
       "notes": "360° view system only"
     },
     {
       "repair_operation": "Deck Lid/Trunk R&R",
-      "repair_keywords": ["deck lid", "trunk lid", "tailgate", "liftgate"],
-      "triggers_calibration": ["Rear View Camera", "360° View Camera (Rear)"],
+      "repair_keywords": [
+        "deck lid",
+        "trunk lid",
+        "tailgate",
+        "liftgate"
+      ],
+      "triggers_calibration": [
+        "Rear View Camera",
+        "360° View Camera (Rear)"
+      ],
       "notes": "Rear camera systems"
     },
     {
       "repair_operation": "Steering Angle Sensor R&R",
-      "repair_keywords": ["steering angle", "sas", "clock spring", "steering column"],
-      "triggers_calibration": ["Rear View Camera", "360° View Camera (Rear)", "Front Camera (360° View)", "Left Side Mirror Camera", "Right Side Mirror Camera"],
+      "repair_keywords": [
+        "steering angle",
+        "sas",
+        "clock spring",
+        "steering column"
+      ],
+      "triggers_calibration": [
+        "Rear View Camera",
+        "360° View Camera (Rear)",
+        "Front Camera (360° View)",
+        "Left Side Mirror Camera",
+        "Right Side Mirror Camera"
+      ],
       "notes": "Affects all camera systems"
     },
     {
       "repair_operation": "Suspension Work (Ride Height Change)",
-      "repair_keywords": ["strut", "shock", "spring", "suspension", "lowering", "lift"],
-      "triggers_calibration": ["Rear View Camera", "360° View Camera (Rear)", "Front Camera (360° View)", "Left Side Mirror Camera", "Right Side Mirror Camera"],
+      "repair_keywords": [
+        "strut",
+        "shock",
+        "spring",
+        "suspension",
+        "lowering",
+        "lift"
+      ],
+      "triggers_calibration": [
+        "Rear View Camera",
+        "360° View Camera (Rear)",
+        "Front Camera (360° View)",
+        "Left Side Mirror Camera",
+        "Right Side Mirror Camera"
+      ],
       "notes": "Any ride height change affects all cameras"
     },
     {
       "repair_operation": "Front Camera R&R",
-      "repair_keywords": ["front camera", "camera front", "fwd camera"],
-      "triggers_calibration": ["Forward Facing Camera"],
+      "repair_keywords": [
+        "front camera",
+        "camera front",
+        "fwd camera"
+      ],
+      "triggers_calibration": [
+        "Forward Facing Camera"
+      ],
       "notes": "Direct sensor replacement"
     },
     {
       "repair_operation": "Front Radar Sensor R&R",
-      "repair_keywords": ["radar", "millimeter wave", "mwr sensor"],
-      "triggers_calibration": ["Front Radar"],
+      "repair_keywords": [
+        "radar",
+        "millimeter wave",
+        "mwr sensor"
+      ],
+      "triggers_calibration": [
+        "Front Radar"
+      ],
       "notes": "Direct sensor replacement"
     }
   ]

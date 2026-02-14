@@ -7,7 +7,7 @@
   },
   "source": {
     "provider": "Volvo Position Statement",
-    "url": "Volvo_Position_Statement_October_2024.pdf",
+    "url": "https://volvocollision.com/position-statements/",
     "date_extracted": "2026-01-29"
   },
   "scanning_requirements": {
@@ -26,7 +26,10 @@
   "windshield_requirements": {
     "oe_only": true,
     "asdm_location": "Active Safety Domain Master located inside upper edge of windshield",
-    "asdm_components": ["Camera", "Radar"],
+    "asdm_components": [
+      "Camera",
+      "Radar"
+    ],
     "sensitivity": "Optical and geometric tolerances (glass thickness and materials)",
     "calibration_required": "ASDM calibration required after windshield replacement",
     "hud_windshields": "Engineered for clear projected image - wrong windshield causes redundant images"

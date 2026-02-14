@@ -4,131 +4,38 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  --radius: 0.75rem;
-  /* Dark theme colors matching PDF report */
-  --background: #0a0a0f;
-  --foreground: #ffffff;
-  --card: #12121a;
-  --card-foreground: #ffffff;
-  --popover: #12121a;
-  --popover-foreground: #ffffff;
-  --primary: #667eea;
-  --primary-foreground: #ffffff;
-  --secondary: #1a1a2a;
-  --secondary-foreground: #a0a0b0;
-  --muted: #1a1a2a;
-  --muted-foreground: #a0a0b0;
-  --accent: #764ba2;
-  --accent-foreground: #ffffff;
-  --destructive: #ef4444;
-  --border: #2a2a3a;
-  --input: #2a2a3a;
-  --ring: #667eea;
-  /* Success/chart colors */
-  --success: #10b981;
-  --success-foreground: #ffffff;
-  --chart-1: #667eea;
-  --chart-2: #764ba2;
-  --chart-3: #10b981;
-  --chart-4: #f59e0b;
-  --chart-5: #ef4444;
-  /* Sidebar */
-  --sidebar: #0d0d14;
-  --sidebar-foreground: #ffffff;
-  --sidebar-primary: #667eea;
-  --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #1a1a2a;
-  --sidebar-accent-foreground: #ffffff;
-  --sidebar-border: #2a2a3a;
-  --sidebar-ring: #667eea;
-}
+  --background: hsl(210 33% 98%);
+  --foreground: hsl(215 25% 16%);
 
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
+  --card: hsl(0 0% 100%);
+  --card-foreground: hsl(215 25% 16%);
 
-html, body {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
-  font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
-  -webkit-font-smoothing: antialiased;
-  background: var(--background);
-  color: var(--foreground);
-}
+  --popover: hsl(0 0% 100%);
+  --popover-foreground: hsl(215 25% 16%);
 
-/* Custom scrollbar for dark theme */
-::-webkit-scrollbar { width: 8px; height: 8px; }
-::-webkit-scrollbar-track { background: #12121a; }
-::-webkit-scrollbar-thumb { background: #2a2a3a; border-radius: 4px; }
-::-webkit-scrollbar-thumb:hover { background: #3a3a4a; }
+  --primary: hsl(191 91% 36%);
+  --primary-foreground: hsl(0 0% 100%);
 
-/* Gradient utilities */
-.gradient-primary {
-  background: linear-gradient(135deg, #667eea, #764ba2);
-}
+  --secondary: hsl(210 20% 96%);
+  --secondary-foreground: hsl(215 25% 20%);
 
-.gradient-text {
-  background: linear-gradient(135deg, #667eea, #764ba2);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
+  --muted: hsl(210 20% 96%);
+  --muted-foreground: hsl(215 12% 44%);
 
-.gradient-border {
-  position: relative;
-}
+  --accent: hsl(210 20% 94%);
+  --accent-foreground: hsl(215 25% 16%);
 
-.gradient-border::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 3px;
-  background: linear-gradient(90deg, #667eea, #764ba2);
-  border-radius: var(--radius) var(--radius) 0 0;
-}
+  --destructive: hsl(0 62.8% 30.6%);
+  --destructive-foreground: hsl(0 0% 98%);
 
-/* Card with colored top border */
-.card-gradient {
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  position: relative;
-  overflow: hidden;
-}
+  --border: hsl(210 24% 86%);
+  --input: hsl(210 24% 86%);
+  --ring: hsl(191 91% 36%);
 
-.card-gradient::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 3px;
-  background: linear-gradient(90deg, #667eea, #764ba2);
-}
-
-/* Success card */
-.card-success {
-  background: rgba(16, 185, 129, 0.1);
-  border: 1px solid rgba(16, 185, 129, 0.3);
-}
-
-/* Warning card */
-.card-warning {
-  background: rgba(245, 158, 11, 0.1);
-  border: 1px solid rgba(245, 158, 11, 0.3);
+  --radius: 0.5rem;
 }
 
 @theme inline {
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
-  --radius-2xl: calc(var(--radius) + 8px);
-  --radius-3xl: calc(var(--radius) + 12px);
-  --radius-4xl: calc(var(--radius) + 16px);
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -144,22 +51,14 @@ html, body {
   --color-accent: var(--accent);
   --color-accent-foreground: var(--accent-foreground);
   --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
-  --color-chart-1: var(--chart-1);
-  --color-chart-2: var(--chart-2);
-  --color-chart-3: var(--chart-3);
-  --color-chart-4: var(--chart-4);
-  --color-chart-5: var(--chart-5);
-  --color-sidebar: var(--sidebar);
-  --color-sidebar-foreground: var(--sidebar-foreground);
-  --color-sidebar-primary: var(--sidebar-primary);
-  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
-  --color-sidebar-accent: var(--sidebar-accent);
-  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
-  --color-sidebar-border: var(--sidebar-border);
-  --color-sidebar-ring: var(--sidebar-ring);
+  
+  --radius-sm: calc(var(--radius) - 2px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
 }
 
 @layer base {
@@ -168,5 +67,11 @@ html, body {
   }
   body {
     @apply bg-background text-foreground;
+    font-family: "Satoshi", "Avenir Next", "Manrope", "Segoe UI", sans-serif;
+    background-image:
+      radial-gradient(circle at 10% 10%, rgba(34, 211, 238, 0.16), transparent 34%),
+      radial-gradient(circle at 90% 0%, rgba(251, 191, 36, 0.14), transparent 30%),
+      linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(241, 245, 249, 0.98));
+    background-attachment: fixed;
   }
 }

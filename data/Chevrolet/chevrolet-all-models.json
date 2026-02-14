@@ -7,7 +7,7 @@
   },
   "source": {
     "provider": "GM Service Technical College / GMSi Position Statement",
-    "url": "GM_Position_Statement_ADAS.pdf",
+    "url": "https://www.gmparts.com/technical-resources/position-statements",
     "date_extracted": "2026-01-29"
   },
   "scanning_requirements": {
@@ -28,7 +28,11 @@
     "paint_thickness_max_mils": 13,
     "measurement_tool": "Non-metallic paint film thickness tool (e.g., PosiTector 200)",
     "substrate_repair": "NOT PERMITTED - bumper replacement required",
-    "prohibited": ["Substrate repair material", "Reinforcement tapes", "Filler material"]
+    "prohibited": [
+      "Substrate repair material",
+      "Reinforcement tapes",
+      "Filler material"
+    ]
   },
   "obstructions_prohibited": [
     "Protective covers/film",

@@ -49,33 +49,6 @@ interface NHTSAResponse {
   Results: NHTSAVariable[];
 }
 
-// Map NHTSA variables to our decoded result
-const VARIABLE_MAPPING: Record<string, keyof VINDecodeResult | 'adas'> = {
-  'Model Year': 'year',
-  'Make': 'make',
-  'Model': 'model',
-  'Trim': 'trim',
-  'Body Class': 'bodyClass',
-  'Drive Type': 'driveType',
-  'Engine Configuration': 'engineConfig',
-  'Fuel Type - Primary': 'fuelType',
-  // ADAS-related variables
-  'Forward Collision Warning': 'adas',
-  'Lane Departure Warning': 'adas',
-  'Blind Spot Warning': 'adas',
-  'Adaptive Cruise Control (ACC)': 'adas',
-  'Park Assist': 'adas',
-  'Rear Cross Traffic Alert': 'adas',
-  'Automatic Emergency Braking (AEB)': 'adas',
-  'Lane Keep System': 'adas',
-  'Night Vision': 'adas',
-  'Pedestrian Automatic Emergency Braking': 'adas',
-  'Backup Camera': 'adas',
-  'Dynamic Brake Support (DBS)': 'adas',
-  'Crash Imminent Braking (CIB)': 'adas',
-  'Lane Centering Assistance': 'adas',
-};
-
 // ADAS variable name to feature flag mapping
 const ADAS_VARIABLE_TO_FEATURE: Record<string, keyof VINDecodeResult['adasFeatures']> = {
   'Forward Collision Warning': 'forwardCollisionWarning',
@@ -110,17 +83,59 @@ export function isValidVIN(vin: string): boolean {
  * Extract VIN from text using regex
  */
 export function extractVINFromText(text: string): string | null {
-  // Look for 17-character alphanumeric string without I, O, Q
-  const vinRegex = /\b[A-HJ-NPR-Z0-9]{17}\b/gi;
-  const matches = text.match(vinRegex);
+  if (!text) return null;
 
-  if (matches && matches.length > 0) {
-    // Return the first valid VIN found
-    for (const match of matches) {
-      if (isValidVIN(match)) {
-        return match.toUpperCase();
+  const upperText = text.toUpperCase();
+
+  // 1) Strict whole-token VIN matches.
+  const strictMatches = upperText.match(/\b[A-HJ-NPR-Z0-9]{17}\b/g) || [];
+  for (const match of strictMatches) {
+    if (isValidVIN(match)) return match;
+  }
+
+  const hasReasonableVinPattern = (candidate: string): boolean => {
+    const digits = (candidate.match(/\d/g) || []).length;
+    const letters = (candidate.match(/[A-Z]/g) || []).length;
+    return digits >= 5 && letters >= 5;
+  };
+
+  const extractVinWindow = (value: string): string | null => {
+    const compact = value.replace(/[^A-HJ-NPR-Z0-9]/g, "");
+    if (compact.length < 17) return null;
+
+    for (let i = 0; i <= compact.length - 17; i++) {
+      const candidate = compact.slice(i, i + 17);
+      if (isValidVIN(candidate) && hasReasonableVinPattern(candidate)) {
+        return candidate;
       }
     }
+    return null;
+  };
+
+  // 2) VIN-labeled lines (handles split chars/hyphens/spaces in OCR output).
+  const lines = upperText.split(/\r?\n/);
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    if (!/\bVIN\b/.test(line)) continue;
+
+    const sameLineCandidate = line.replace(/^.*\bVIN(?:\s*(?:NO|NUMBER|#|:|-))?\s*/i, "");
+    const vinFromSameLine = extractVinWindow(sameLineCandidate);
+    if (vinFromSameLine) return vinFromSameLine;
+
+    // If VIN wraps to next line, try combining with subsequent line.
+    if (i + 1 < lines.length) {
+      const combined = `${sameLineCandidate} ${lines[i + 1]}`;
+      const vinFromCombined = extractVinWindow(combined);
+      if (vinFromCombined) return vinFromCombined;
+    }
+  }
+
+  // 3) Last-chance relaxed scan for OCR-separated VIN segments.
+  const relaxedSegments =
+    upperText.match(/[A-HJ-NPR-Z0-9][A-HJ-NPR-Z0-9\s:-]{15,45}[A-HJ-NPR-Z0-9]/g) || [];
+  for (const segment of relaxedSegments) {
+    const candidate = extractVinWindow(segment);
+    if (candidate) return candidate;
   }
 
   return null;

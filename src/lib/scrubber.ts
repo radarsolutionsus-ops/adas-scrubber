@@ -57,6 +57,27 @@ function extractCCCLineNumber(line: string): number | null {
 }
 
 /**
+ * Heuristic to keep matching focused on real estimate operations.
+ * Filters out vehicle option/feature text that commonly causes false positives.
+ */
+function isLikelyEstimateOperationLine(line: string): boolean {
+  if (!line || line.trim().length < 3) return false;
+  if (isSupplierAddressLine(line)) return false;
+
+  // Typical estimate line with line number + operation token.
+  if (/^\s*\d{1,3}\s*\*{0,2}\s*(Rpr|Repl|O\/H|Ovhl|R&I|R&R|Subl|Add|Blend|Refn|Aim|Align|Calibrat|Repair|Replace|Remove|Overhaul)\b/i.test(line)) {
+    return true;
+  }
+
+  // Section/header line in CCC-like exports (e.g. "1FRONT BUMPER").
+  if (/^\s*\d{1,3}\s*[A-Z][A-Z0-9/&'\-\s]{4,}$/.test(line.trim())) {
+    return true;
+  }
+
+  return false;
+}
+
+/**
  * Check if a line is a supplier/vendor address line that should be skipped entirely
  */
 function isSupplierAddressLine(line: string): boolean {
@@ -254,7 +275,7 @@ const REPAIR_PATTERNS = [
   { pattern: /tailgate|tail\s*gate|liftgate|lift\s*gate/i, type: "Tailgate/Liftgate" },
   { pattern: /alignment|align/i, type: "Alignment" },
   { pattern: /suspension|strut|shock|control\s*arm/i, type: "Suspension" },
-  { pattern: /steering|rack|tie\s*rod/i, type: "Steering" },
+  { pattern: /\bsteering\b|\brack\s*(?:&|and)?\s*pinion\b|\btie\s*rod\b/i, type: "Steering" },
   { pattern: /sensor/i, type: "Sensor" },
   { pattern: /calibrat/i, type: "Calibration" },
   { pattern: /blend|refinish|paint/i, type: "Refinish/Paint" },
@@ -274,8 +295,8 @@ export function detectRepairs(estimateText: string): DetectedRepair[] {
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
 
-    // Skip supplier/vendor address lines
-    if (isSupplierAddressLine(line)) {
+    // Keep matching focused on actual estimate operation rows.
+    if (!isLikelyEstimateOperationLine(line)) {
       continue;
     }
 
@@ -322,24 +343,58 @@ export async function scrubEstimate(
     },
   });
 
+  const normalizeText = (value: string): string =>
+    value.toLowerCase().replace(/[^a-z0-9]/g, " ").replace(/\s+/g, " ").trim();
+
+  const trimTokens = new Set([
+    "base", "s", "se", "sel", "le", "xle", "xse", "limited", "platinum", "sport",
+    "premium", "touring", "lx", "ex", "exl", "sx", "gt", "denali", "lt", "ls",
+    "lariat", "xlt", "st", "rs", "type", "signature", "edition", "awd", "fwd", "4wd",
+  ]);
+
+  const normalizeModelCore = (model: string): string =>
+    normalizeText(model)
+      .split(" ")
+      .filter((token) => token && !trimTokens.has(token))
+      .join(" ");
+
   // Normalize make for matching (handle Mercedes variants: Mercedes, Mercedes Benz, Mercedes-Benz)
   const normalizeMake = (make: string): string => {
-    const lower = make.toLowerCase();
-    if (lower.includes('mercedes')) return 'mercedes';
+    const lower = normalizeText(make);
+    if (lower.includes("mercedes") || lower === "mb") return "mercedes";
     return lower;
   };
 
-  // Case-insensitive search for exact model match
-  let vehicle = allVehicles.find(
-    v => normalizeMake(v.make) === normalizeMake(vehicleMake) &&
-         v.model.toLowerCase() === vehicleModel.toLowerCase()
+  const modelMatches = (requestedModel: string, dbModel: string): boolean => {
+    const normalizedRequested = normalizeText(requestedModel);
+    const normalizedDb = normalizeText(dbModel);
+    if (!normalizedRequested || !normalizedDb) return false;
+    if (normalizedRequested === normalizedDb) return true;
+
+    const coreRequested = normalizeModelCore(requestedModel);
+    const coreDb = normalizeModelCore(dbModel);
+    if (coreRequested && coreDb && coreRequested === coreDb) return true;
+
+    if (normalizedRequested.length >= 4 && normalizedDb.includes(normalizedRequested)) return true;
+    if (normalizedDb.length >= 4 && normalizedRequested.includes(normalizedDb)) return true;
+
+    if (coreRequested && coreDb.length >= 4 && coreDb.includes(coreRequested)) return true;
+    if (coreDb && coreRequested.length >= 4 && coreRequested.includes(coreDb)) return true;
+
+    return false;
+  };
+
+  const makeMatchedVehicles = allVehicles.filter(
+    (v) => normalizeMake(v.make) === normalizeMake(vehicleMake)
   );
 
-  // If no exact match, try "All Models" for the make
+  // Prefer model matches before dropping to all-model fallback.
+  let vehicle = makeMatchedVehicles.find((v) => modelMatches(vehicleModel, v.model));
+
+  // If no model match, try "All Models" for the make.
   if (!vehicle) {
-    vehicle = allVehicles.find(
-      v => normalizeMake(v.make) === normalizeMake(vehicleMake) &&
-           v.model.toLowerCase() === "all models"
+    vehicle = makeMatchedVehicles.find(
+      (v) => normalizeText(v.model) === "all models"
     );
   }
 
@@ -355,6 +410,29 @@ export async function scrubEstimate(
 
   const results: ScrubResult[] = [];
 
+  const parseJsonArray = (value: string): string[] => {
+    try {
+      const parsed = JSON.parse(value);
+      if (Array.isArray(parsed)) {
+        return parsed.map((item) => String(item)).filter(Boolean);
+      }
+      return [];
+    } catch {
+      return [];
+    }
+  };
+
+  const keywordMatched = (lineText: string, keyword: string): boolean => {
+    const escaped = keyword.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    const normalizedKeyword = escaped.replace(/\s+/g, "\\s+");
+    const boundaryRegex = new RegExp(`(^|[^a-z0-9])${normalizedKeyword}([^a-z0-9]|$)`, "i");
+    if (boundaryRegex.test(lineText)) return true;
+
+    // CCC exports often concatenate line number and operation text (e.g. "2O/H bumper").
+    const withoutLinePrefix = lineText.replace(/^\s*\d{1,3}\s*\*{0,2}\s*/i, " ");
+    return boundaryRegex.test(withoutLinePrefix);
+  };
+
   // Build a map of system names to their calibration types
   const systemCalibrationTypes = new Map<string, string | null>();
   for (const system of vehicle.adasSystems) {
@@ -363,8 +441,8 @@ export async function scrubEstimate(
 
   // Check each line against repair keywords
   for (let i = 0; i < lines.length; i++) {
-    // Skip supplier/vendor address lines
-    if (isSupplierAddressLine(lines[i])) {
+    // Keep matching focused on actual estimate operation rows.
+    if (!isLikelyEstimateOperationLine(lines[i])) {
       continue;
     }
 
@@ -375,8 +453,11 @@ export async function scrubEstimate(
     const cccLineNumber = extractCCCLineNumber(lines[i]);
 
     for (const mapping of vehicle.repairCalibrationMaps) {
-      const keywords: string[] = JSON.parse(mapping.repairKeywords);
-      const triggeredSystems: string[] = JSON.parse(mapping.triggersCalibration);
+      const keywords = parseJsonArray(mapping.repairKeywords);
+      const triggeredSystems = parseJsonArray(mapping.triggersCalibration);
+      if (keywords.length === 0 || triggeredSystems.length === 0) {
+        continue;
+      }
 
       // Parse optional procedure details from mapping
       let procedureType: string | undefined;
@@ -394,7 +475,7 @@ export async function scrubEstimate(
       }
 
       for (const keyword of keywords) {
-        if (line.includes(keyword.toLowerCase())) {
+        if (keywordMatched(line, keyword.toLowerCase())) {
           // Found a match - add all triggered systems
           for (const systemName of triggeredSystems) {
             // Avoid duplicates

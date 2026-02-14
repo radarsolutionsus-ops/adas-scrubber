@@ -306,11 +306,6 @@ export const ADAS_PART_INDICATORS = {
 
 export type EstimateFormat = 'ccc' | 'mitchell' | 'audatex' | 'generic';
 
-interface EstimateSection {
-  type: 'labor' | 'parts' | 'materials' | 'sublet' | 'other';
-  lines: ParsedLine[];
-}
-
 export interface ParsedLine {
   lineNumber: number;
   rawText: string;
@@ -322,7 +317,7 @@ export interface ParsedLine {
   laborHours?: number;
   partPrice?: number;
   laborPrice?: number;
-  isADASpArt: boolean;
+  isADASPart: boolean;
   adasSystemsDetected: string[];
   repairCategoriesMatched: string[];
 }
@@ -488,7 +483,7 @@ export function parseLine(text: string, lineNumber: number): ParsedLine {
     cleanedText: cleaned,
     operationType: parseOperationType(text),
     partNumber: extractPartNumber(text),
-    isADASpArt: adasDetection.isADAS,
+    isADASPart: adasDetection.isADAS,
     adasSystemsDetected: adasDetection.systems,
     repairCategoriesMatched: matchRepairCategories(text),
   };
@@ -547,6 +542,498 @@ export function parseEstimate(text: string): {
     adasPartsFound,
     repairsSummary,
   };
+}
+
+function prepareEstimateScanText(text: string): string {
+  const base = text.replace(
+    /([A-Za-z0-9])(RO Number|RO#|PO Number|Purchase Order|Workfile ID|Claim|Policy|Loss Date|Date of Loss|Create Date|Customer|Insurance Company|Insurance|Adjuster|Estimator|Written By|VIN|Owner|Inspection Location)/gi,
+    "$1 $2"
+  );
+  return base.replace(/([A-Z])(ENTERPRISE|GEICO|PROGRESSIVE|ALLSTATE|USAA|FARMERS|LIBERTY MUTUAL)/g, "$1 $2");
+}
+
+function normalizeExtractedValue(value: string): string {
+  return value
+    .replace(/\s+/g, " ")
+    .replace(/^[#:\-.\s]+/, "")
+    .replace(/[|]+/g, " ")
+    .trim();
+}
+
+function removeTrailingLabels(value: string): string {
+  return normalizeExtractedValue(
+    value.replace(
+      /\b(Phone|Create Date|Loss Date|Date of Loss|Claim|Estimator|Adjuster|Customer|Insurance(?: Company)?|Owner|Inspection Location|Policy)\b\s*:?.*$/i,
+      ""
+    )
+  );
+}
+
+function isLegalEntitySuffixLine(line: string): boolean {
+  return /^(INC\.?|LLC|CORP\.?|CORPORATION|CO\.?|LTD\.?)$/i.test(normalizeExtractedValue(line));
+}
+
+function appendCompanySuffixLine(baseLine: string, nextLine?: string): string {
+  const base = normalizeExtractedValue(baseLine);
+  if (!nextLine || !isLegalEntitySuffixLine(nextLine)) return base;
+  const suffix = normalizeExtractedValue(nextLine);
+  return normalizeExtractedValue(`${base} ${suffix}`);
+}
+
+function looksLegalDisclosureLine(line: string): boolean {
+  return /\b(LENDING INSTITUTION|MISCELLANEOUS SHOP SUPPLIES|WASTE (?:REMOVAL|DISPOSAL)|OWNER LIMITED GUARANTEE|STATEMENT OF CLAIM OR AN APPLICATION|IF A CHARGE FOR|THIS GUARANTEE|INSURANCE PROCEEDS|CCC ONE ESTIMATING|BUREAU OF AUTOMOTIVE REPAIR)\b/i.test(
+    line
+  );
+}
+
+function isAddressLike(line: string): boolean {
+  return (
+    /\d{1,6}\s+[A-Z0-9.\-]+\s+(ST|STREET|AVE|AVENUE|BLVD|ROAD|RD|DR|DRIVE|CT|COURT|LANE|LN|WAY)\b/i.test(line) ||
+    /\b[A-Z][A-Z\s.]+,\s*[A-Z]{2}\s*\d{5}/i.test(line)
+  );
+}
+
+function isMetadataLabelOnly(value: string): boolean {
+  return /^(Estimator|Adjuster|Insurance|Insurance Company|Customer|Claim|Policy|Loss Date|Create Date|Phone)$/i.test(value.trim());
+}
+
+function isFinancialSummaryValue(value: string): boolean {
+  return /\b(TOTAL|BALANCE|SUBTOTAL|DEDUCTIBLE|RECEIVED)\b/i.test(value) || /\$/.test(value);
+}
+
+function extractCompanyTail(value: string): string {
+  const legalSuffixMatches = value.match(/[A-Z][A-Z0-9&.,' -]{1,60}?(?:INC\.?|LLC|CORP\.?)\b/gi);
+  if (legalSuffixMatches && legalSuffixMatches.length > 0) {
+    return normalizeExtractedValue(legalSuffixMatches[legalSuffixMatches.length - 1]);
+  }
+  const compactMatches = value.match(/[A-Z][A-Z0-9&.,' -]{1,60}?(?:INC\.?|LLC|CORP\.?|COMPANY|HOLDINGS|INSURANCE|RENTAL|GROUP|MOTORS)\b/gi);
+  if (compactMatches && compactMatches.length > 0) {
+    return normalizeExtractedValue(compactMatches[compactMatches.length - 1]);
+  }
+  return normalizeExtractedValue(value);
+}
+
+function isLikelyCompanyName(line: string): boolean {
+  const trimmed = line.trim();
+  if (!trimmed) return false;
+  if (trimmed.length < 3 || trimmed.length > 90) return false;
+  if (/^\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}$/.test(trimmed)) return false;
+  if (isAddressLike(trimmed)) return false;
+  if (looksLegalDisclosureLine(trimmed)) return false;
+  if (
+    /\b(VEHICLE INFORMATION|ADAS OPERATIONS|ADAS SYSTEMS|FUNCTIONAL OPERATIONS|OPERATIONS|PROCEDURE TYPE|MANUFACTURER REQUIREMENT)\b/i.test(
+      trimmed
+    )
+  ) {
+    return false;
+  }
+  if (
+    /\b(ESTIMATE|PRELIMINARY|LINE|OPERATION|DESCRIPTION|VIN|LICENSE|STATE|MILEAGE|TOTAL|SUBTOTAL|DEDUCTIBLE|PAGE|RECEIVED FROM)\b/i.test(
+      trimmed
+    )
+  ) {
+    return false;
+  }
+
+  const hasLetters = /[A-Z]/i.test(trimmed);
+  const hasSignal = /\b(AUTO|BODY|COLLISION|MOTORS|REPAIR|PAINT|GARAGE|LLC|INC|HOLDINGS|RENTAL|GROUP|SHOP|INSURANCE|COMPANY)\b/i.test(trimmed);
+  return hasLetters && (hasSignal || /^[A-Z][A-Z0-9&.,'\-\s]{3,}$/i.test(trimmed));
+}
+
+function isLikelyShopName(line: string): boolean {
+  return (
+    isLikelyCompanyName(line) &&
+    !/\b(INSURANCE|HOLDINGS|RENTAL|ENTERPRISE|GEICO|PROGRESSIVE|ALLSTATE|STATE FARM|USAA)\b/i.test(line)
+  );
+}
+
+function normalizeIdentifierComparable(value: string): string {
+  return value.toUpperCase().replace(/[^A-Z0-9]/g, "");
+}
+
+function looksCompositePartyLine(value: string): boolean {
+  return /\b(INSURED|CUSTOMER|CLAIM|RISK|MANAGEMENT|POLICY|ENTERPRISE|HERTZ|GEICO|PROGRESSIVE|ALLSTATE|USAA)\b/i.test(
+    value
+  );
+}
+
+function isRepairFacilityHeadingLine(value: string): boolean {
+  const normalized = normalizeExtractedValue(value).toLowerCase();
+  if (!normalized) return false;
+  if (normalized === "repair facility") return true;
+  if (normalized.startsWith("repair facility:")) return true;
+  if (normalized.startsWith("repair facility ") && normalized.length <= 40) return true;
+  return false;
+}
+
+function resolveBestShopName(currentShopName?: string, topShopCandidate?: string): string | undefined {
+  if (!currentShopName) return topShopCandidate;
+  if (!topShopCandidate) return currentShopName;
+
+  const current = normalizeExtractedValue(currentShopName);
+  const top = normalizeExtractedValue(topShopCandidate);
+  if (!current) return top || undefined;
+  if (!top) return current || undefined;
+
+  const currentKey = normalizeIdentifierComparable(current);
+  const topKey = normalizeIdentifierComparable(top);
+
+  if (currentKey && topKey && currentKey.includes(topKey)) {
+    return top;
+  }
+
+  if (looksLegalDisclosureLine(current)) {
+    return top;
+  }
+
+  if (looksCompositePartyLine(current) && !looksCompositePartyLine(top)) {
+    return top;
+  }
+
+  return current;
+}
+
+function extractFirstByPatterns(text: string, patterns: RegExp[]): string | undefined {
+  for (const pattern of patterns) {
+    const match = text.match(pattern);
+    if (match?.[1]) {
+      const value = normalizeExtractedValue(match[1]);
+      if (value) return value;
+    }
+  }
+  return undefined;
+}
+
+function extractFromLines(
+  lines: string[],
+  patterns: RegExp[],
+  options?: { stripTailLabels?: boolean; compact?: boolean }
+): string | undefined {
+  for (const line of lines) {
+    for (const pattern of patterns) {
+      const match = line.match(pattern);
+      if (!match?.[1]) continue;
+      let value = options?.stripTailLabels ? removeTrailingLabels(match[1]) : normalizeExtractedValue(match[1]);
+      if (options?.compact) {
+        value = value.replace(/\s+/g, "");
+      }
+      if (value && !isMetadataLabelOnly(value)) {
+        return value;
+      }
+    }
+  }
+  return undefined;
+}
+
+export interface EstimateIdentifiers {
+  roNumber?: string;
+  poNumber?: string;
+  workfileId?: string;
+  claimNumber?: string;
+  preferredReference?: string;
+}
+
+function isLikelyVinToken(value: string): boolean {
+  return /^[A-HJ-NPR-Z0-9]{17}$/i.test(value);
+}
+
+function normalizeIdentifierToken(value?: string): string | undefined {
+  const normalized = normalizeExtractedValue(value || "").replace(/\s+/g, "");
+  return normalized || undefined;
+}
+
+function buildPreferredReference(input: EstimateIdentifiers): string | undefined {
+  return input.roNumber || input.poNumber || input.workfileId || input.claimNumber;
+}
+
+export function extractEstimateIdentifiers(text: string): EstimateIdentifiers {
+  const scanText = prepareEstimateScanText(text);
+
+  const roNumber = extractFirstByPatterns(scanText, [
+    /\b(?:R\/?O|REPAIR\s*ORDER)(?:\s*(?:NUMBER|NO|#)\s*[:\-]?|[:\-])\s*([A-Z0-9][A-Z0-9\-]{1,})/i,
+  ])?.replace(/\s+/g, "") || extractFirstByPatterns(scanText, [
+    /\bRO\s*NUMBER\s*[:\-]?\s*([A-Z0-9][A-Z0-9\-]{1,})/i,
+  ])?.replace(/\s+/g, "");
+
+  const poNumber = extractFirstByPatterns(scanText, [
+    /\b(?:P\/?O|PURCHASE\s*ORDER)(?:\s*(?:NUMBER|NO|#)\s*[:\-]?|[:\-])\s*([A-Z0-9][A-Z0-9\-]{1,})/i,
+  ])?.replace(/\s+/g, "") || extractFirstByPatterns(scanText, [
+    /\bPO\s*NUMBER\s*[:\-]?\s*([A-Z0-9][A-Z0-9\-]{1,})/i,
+  ])?.replace(/\s+/g, "");
+
+  const workfileId = extractFirstByPatterns(scanText, [
+    /\bWORKFILE\s*(?:ID|#)\s*[:\-]?\s*([A-Z0-9][A-Z0-9\-]{1,})/i,
+  ])?.replace(/\s+/g, "");
+
+  const claimNumber = extractFirstByPatterns(scanText, [
+    /\bCLAIM(?:\s*(?:NUMBER|NO|#))?\s*[:#\-]?\s*([A-Z0-9][A-Z0-9\-]{3,})/i,
+  ])?.replace(/\s+/g, "");
+
+  const normalizedWorkfileId = workfileId && /^(FEDERAL|STATE|LICENSE|NUMBER)$/i.test(workfileId)
+    ? undefined
+    : workfileId;
+
+  return {
+    roNumber,
+    poNumber,
+    workfileId: normalizedWorkfileId,
+    claimNumber,
+    preferredReference: buildPreferredReference({ roNumber, poNumber, workfileId: normalizedWorkfileId, claimNumber }),
+  };
+}
+
+export function extractEstimateIdentifiersFromFileName(fileName?: string): EstimateIdentifiers {
+  if (!fileName) return {};
+
+  const baseName = fileName.split(/[\\/]/).pop() || fileName;
+  const withoutExtension = baseName.replace(/\.[^.]+$/, "");
+  const scanText = prepareEstimateScanText(withoutExtension.replace(/[_]+/g, " "));
+
+  let roNumber = normalizeIdentifierToken(
+    extractFirstByPatterns(scanText, [
+      /\b(?:R\/?O|REPAIR\s*ORDER)(?:\s*(?:NUMBER|NO|#)\s*[:\-]?|[:\-])\s*([A-Z0-9][A-Z0-9\-]{1,})/i,
+      /\bRO\s+([A-Z0-9][A-Z0-9\-]{1,})/i,
+    ])
+  );
+
+  let poNumber = normalizeIdentifierToken(
+    extractFirstByPatterns(scanText, [
+      /\b(?:P\/?O|PURCHASE\s*ORDER)(?:\s*(?:NUMBER|NO|#)\s*[:\-]?|[:\-])\s*([A-Z0-9][A-Z0-9\-]{1,})/i,
+      /\bPO\s+([A-Z0-9][A-Z0-9\-]{1,})/i,
+    ])
+  );
+
+  const workfileId = normalizeIdentifierToken(
+    extractFirstByPatterns(scanText, [
+      /\bWORKFILE\s*(?:ID|#)\s*[:\-]?\s*([A-Z0-9][A-Z0-9\-]{1,})/i,
+    ])
+  );
+
+  if (!roNumber && !poNumber) {
+    const tokens = (scanText.match(/\b[A-Z0-9][A-Z0-9\-]{2,}\b/gi) || []).map((token) => token.toUpperCase());
+    const numericCandidate = tokens.find(
+      (token) => /\d/.test(token) && token.length <= 14 && !isLikelyVinToken(token)
+    );
+
+    if (numericCandidate) {
+      if (/\bPO\b/i.test(scanText)) {
+        poNumber = numericCandidate;
+      } else {
+        roNumber = numericCandidate;
+      }
+    }
+  }
+
+  const claimNumber = normalizeIdentifierToken(
+    extractFirstByPatterns(scanText, [
+      /\bCLAIM(?:\s*(?:NUMBER|NO|#))?\s*[:#\-]?\s*([A-Z0-9][A-Z0-9\-]{3,})/i,
+    ])
+  );
+
+  return {
+    roNumber,
+    poNumber,
+    workfileId,
+    claimNumber,
+    preferredReference: buildPreferredReference({ roNumber, poNumber, workfileId, claimNumber }),
+  };
+}
+
+export function mergeEstimateIdentifiers(
+  primary: EstimateIdentifiers,
+  fallback?: EstimateIdentifiers
+): EstimateIdentifiers {
+  const merged = {
+    roNumber: primary.roNumber || fallback?.roNumber,
+    poNumber: primary.poNumber || fallback?.poNumber,
+    workfileId: primary.workfileId || fallback?.workfileId,
+    claimNumber: primary.claimNumber || fallback?.claimNumber,
+  };
+
+  return {
+    ...merged,
+    preferredReference: buildPreferredReference(merged),
+  };
+}
+
+export function appendEstimateIdentifierHints(
+  estimateText: string,
+  identifiers: EstimateIdentifiers,
+  uploadFileName?: string
+): string {
+  if (estimateText.includes("__ESTIMATE_REFERENCE_HINTS__")) {
+    return estimateText;
+  }
+
+  const hintLines: string[] = ["__ESTIMATE_REFERENCE_HINTS__"];
+  if (uploadFileName) hintLines.push(`Upload File: ${uploadFileName}`);
+  if (identifiers.roNumber) hintLines.push(`RO Number: ${identifiers.roNumber}`);
+  if (identifiers.poNumber) hintLines.push(`PO Number: ${identifiers.poNumber}`);
+  if (identifiers.workfileId) hintLines.push(`Workfile ID: ${identifiers.workfileId}`);
+  if (identifiers.claimNumber) hintLines.push(`Claim Number: ${identifiers.claimNumber}`);
+
+  if (hintLines.length === 1) {
+    return estimateText;
+  }
+
+  return `${estimateText}\n\n${hintLines.join("\n")}\n`;
+}
+
+export interface EstimateMetadata {
+  shopName?: string;
+  customerName?: string;
+  insuranceCompany?: string;
+  claimNumber?: string;
+  policyNumber?: string;
+  roNumber?: string;
+  poNumber?: string;
+  workfileId?: string;
+  estimatorName?: string;
+  adjusterName?: string;
+  lossDate?: string;
+  createDate?: string;
+}
+
+export function extractEstimateMetadata(text: string): EstimateMetadata {
+  const scanText = prepareEstimateScanText(text);
+  const lines = scanText
+    .split(/\r?\n/)
+    .map((line) => normalizeExtractedValue(line))
+    .filter((line) => line.length > 0);
+
+  const ids = extractEstimateIdentifiers(scanText);
+  const metadata: EstimateMetadata = {
+    roNumber: ids.roNumber,
+    poNumber: ids.poNumber,
+    workfileId: ids.workfileId,
+    claimNumber: ids.claimNumber,
+  };
+
+  metadata.policyNumber = extractFromLines(
+    lines,
+    [
+      /\bPolicy(?:\s*(?:#|No|Number))?\s*[:#\-]?\s*([A-Z0-9\-]{4,})/i,
+    ],
+    { compact: true }
+  );
+
+  metadata.claimNumber =
+    metadata.claimNumber ||
+    extractFromLines(
+      lines,
+      [
+        /\bClaim(?:\s*(?:#|No|Number))?\s*[:#\-]?\s*([A-Z0-9\-]{4,})/i,
+      ],
+      { compact: true }
+    );
+
+  metadata.lossDate = extractFromLines(lines, [
+    /\b(?:Date of Loss|Loss Date)\s*[:#\-]?\s*([0-9]{1,2}[\/\-][0-9]{1,2}[\/\-][0-9]{2,4})/i,
+  ]);
+
+  metadata.createDate = extractFromLines(lines, [
+    /\b(?:Create Date|Created Date)\s*[:#\-]?\s*([0-9]{1,2}[\/\-][0-9]{1,2}[\/\-][0-9]{2,4})/i,
+  ]);
+
+  metadata.estimatorName = extractFromLines(
+    lines,
+    [
+      /\bEstimator\s*[:#\-]?\s*([A-Z][A-Z .'\-]{2,})/i,
+      /\bWritten By\s*[:#\-]?\s*([A-Z][A-Z .'\-]{2,})/i,
+    ],
+    { stripTailLabels: true }
+  );
+
+  metadata.adjusterName = extractFromLines(
+    lines,
+    [
+      /\bAdjuster\s*[:#\-]?\s*([^:]{2,80})/i,
+    ],
+    { stripTailLabels: true }
+  );
+
+  metadata.customerName = extractFromLines(
+    lines,
+    [
+      /\bCustomer\s*[:#\-]\s*([^:]{2,80})/i,
+    ],
+    { stripTailLabels: true }
+  );
+  if (metadata.customerName && (isMetadataLabelOnly(metadata.customerName) || isFinancialSummaryValue(metadata.customerName))) {
+    metadata.customerName = undefined;
+  }
+
+  let insuranceCompany = extractFromLines(
+    lines,
+    [
+      /\bInsurance(?:\s*Company)?\s*[:#\-]\s*([^:]{2,120})/i,
+    ],
+    { stripTailLabels: true }
+  );
+  if (insuranceCompany && (isMetadataLabelOnly(insuranceCompany) || insuranceCompany.toLowerCase() === "company" || isFinancialSummaryValue(insuranceCompany))) {
+    insuranceCompany = undefined;
+  }
+
+  if (!insuranceCompany) {
+    for (let i = 0; i < lines.length; i++) {
+      if (!/\bInsurance(?:\s*Company)?\b/i.test(lines[i])) continue;
+      for (let j = i + 1; j <= Math.min(i + 3, lines.length - 1); j++) {
+        const candidate = extractCompanyTail(removeTrailingLabels(lines[j]));
+        if (isLikelyCompanyName(candidate) && !isFinancialSummaryValue(candidate)) {
+          insuranceCompany = candidate;
+          break;
+        }
+      }
+      if (insuranceCompany) break;
+    }
+  }
+  if (insuranceCompany && !isMetadataLabelOnly(insuranceCompany)) {
+    metadata.insuranceCompany = insuranceCompany;
+  }
+
+  const topShopCandidate = (() => {
+    for (let i = 0; i < Math.min(lines.length, 20); i++) {
+      const rawCandidate = appendCompanySuffixLine(lines[i], lines[i + 1]);
+      const candidate = extractCompanyTail(removeTrailingLabels(rawCandidate));
+      if (isLikelyShopName(candidate)) {
+        return candidate;
+      }
+    }
+    return undefined;
+  })();
+
+  for (let i = 0; i < lines.length; i++) {
+    if (!isRepairFacilityHeadingLine(lines[i])) continue;
+    for (let j = i - 1; j >= Math.max(0, i - 5); j--) {
+      const rawCandidate = appendCompanySuffixLine(lines[j], lines[j + 1]);
+      const candidate = extractCompanyTail(removeTrailingLabels(rawCandidate));
+      if (isLikelyShopName(candidate)) {
+        metadata.shopName = candidate;
+        break;
+      }
+    }
+    // Use first Repair Facility block only to avoid picking disclaimer text from later pages.
+    break;
+  }
+
+  metadata.shopName = resolveBestShopName(metadata.shopName, topShopCandidate);
+
+  if (!metadata.insuranceCompany) {
+    for (let i = 0; i < lines.length; i++) {
+      const candidate = extractCompanyTail(lines[i]);
+      if (
+        candidate !== metadata.shopName &&
+        isLikelyCompanyName(candidate) &&
+        !isFinancialSummaryValue(candidate) &&
+        /\b(INSURANCE|HOLDINGS|RENTAL|LLC|INC|COMPANY)\b/i.test(candidate)
+      ) {
+        metadata.insuranceCompany = candidate;
+        break;
+      }
+    }
+  }
+
+  return metadata;
 }
 
 /**

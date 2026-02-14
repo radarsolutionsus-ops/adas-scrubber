@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { scrubEstimate, detectRepairs } from "@/lib/scrubber";
-import { getSession, recordUsage } from "@/lib/auth";
+import { scrubEstimate, type ScrubResult } from "@/lib/scrubber";
+import { applyLearningRules } from "@/lib/learning-memory";
+import { auth } from "@/auth";
+import { recordUsage } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import {
   decodeVIN,
@@ -10,13 +12,22 @@ import {
   VINDecodeResult,
 } from "@/lib/vin-decoder";
 import {
+  appendEstimateIdentifierHints,
+  extractEstimateIdentifiersFromFileName,
   parseEstimate,
-  detectEstimateFormat,
-  REPAIR_KEYWORDS,
-  ADAS_PART_INDICATORS,
+  extractEstimateMetadata,
+  extractEstimateIdentifiers,
+  mergeEstimateIdentifiers,
   getADASSystemDescription,
-  EstimateFormat,
 } from "@/lib/estimate-parser";
+import {
+  calibrationOperationForSystem,
+  canonicalizeCalibrationType,
+  canonicalizeOperationName,
+  canonicalizeSystem,
+  mergeCalibrationTypes,
+  normalizeForKey,
+} from "@/lib/calibration-normalization";
 
 // Common vehicle models by make for text-based detection fallback
 const VEHICLE_MODELS: Record<string, string[]> = {
@@ -100,14 +111,16 @@ interface ExtractedVehicleInfo {
   source: 'vin_api' | 'vin_partial' | 'text' | 'combined';
 }
 
-async function extractVehicleInfo(text: string): Promise<ExtractedVehicleInfo> {
+async function extractVehicleInfo(text: string, vinHint?: string): Promise<ExtractedVehicleInfo> {
   const result: ExtractedVehicleInfo = {
     confidence: 'low',
     source: 'text',
   };
 
   // Step 1: Try to find and decode VIN
-  const vin = extractVINFromText(text);
+  const vinFromText = extractVINFromText(text);
+  const vinFromHint = vinHint ? extractVINFromText(vinHint) : null;
+  const vin = vinFromText || vinFromHint;
 
   if (vin && isValidVIN(vin)) {
     result.vin = vin;
@@ -183,7 +196,6 @@ async function extractVehicleInfo(text: string): Promise<ExtractedVehicleInfo> {
 
 function extractVehicleFromText(text: string): { year?: number; make?: string; model?: string } {
   const result: { year?: number; make?: string; model?: string } = {};
-  const normalizedText = text.replace(/\s+/g, ' ').toUpperCase();
 
   // Find year - look for ALL years and pick the most likely vehicle year
   // Vehicle years are typically recent (2015-2030), prioritize those over older dates
@@ -283,24 +295,336 @@ function extractVehicleFromText(text: string): { year?: number; make?: string; m
 }
 
 async function parsePdf(buffer: Buffer): Promise<string> {
-  const pdfParse = require('pdf-parse/lib/pdf-parse');
+  const pdfParseModule = await import("pdf-parse/lib/pdf-parse");
+  const pdfParse = (pdfParseModule.default || pdfParseModule) as (dataBuffer: Buffer) => Promise<{ text: string }>;
   const data = await pdfParse(buffer);
   return data.text;
 }
 
+function buildAnalysisConfidence(input: {
+  hasVehicleFromDb: boolean;
+  extractedConfidence: "high" | "medium" | "low";
+  resultsCount: number;
+  detectedRepairCount: number;
+  adasPartsCount: number;
+  hasVin: boolean;
+  usedInferenceFallback: boolean;
+}) {
+  const reasons: string[] = [];
+  let score = 52;
+
+  if (input.hasVehicleFromDb) {
+    score += 20;
+    reasons.push("Vehicle mapped to OEM-backed database record.");
+  } else {
+    reasons.push("No exact vehicle mapping found; falling back to generic detection.");
+  }
+
+  if (input.hasVin) {
+    score += 8;
+    reasons.push("VIN detected and used for vehicle confidence.");
+  }
+
+  if (input.extractedConfidence === "high") {
+    score += 12;
+    reasons.push("Vehicle extraction confidence is high.");
+  } else if (input.extractedConfidence === "medium") {
+    score += 7;
+    reasons.push("Vehicle extraction confidence is medium.");
+  } else {
+    score += 2;
+    reasons.push("Vehicle extraction confidence is low.");
+  }
+
+  if (input.detectedRepairCount >= 5) {
+    score += 10;
+    reasons.push("Sufficient repair-line evidence was detected.");
+  } else if (input.detectedRepairCount >= 2) {
+    score += 5;
+    reasons.push("Moderate repair-line evidence was detected.");
+  } else {
+    reasons.push("Limited repair-line evidence was detected.");
+  }
+
+  if (input.resultsCount > 0) {
+    score += 8;
+    reasons.push("Calibration recommendations matched to known repair triggers.");
+  }
+
+  if (input.adasPartsCount > 0) {
+    score += 6;
+    reasons.push("ADAS-specific parts were detected in estimate content.");
+  }
+
+  if (input.usedInferenceFallback) {
+    score -= 8;
+    reasons.push("Used inference fallback because direct OEM map matching was limited.");
+  }
+
+  const normalized = Math.max(45, Math.min(96, score));
+  const label = normalized >= 85 ? "high" : normalized >= 70 ? "medium" : "low";
+
+  return { score: normalized, label, reasons };
+}
+
+function inferCalibrations(
+  detectedRepairs: Array<{ lineNumber: number; description: string; repairType: string }>,
+  adasPartsInEstimate: Array<{ system: string; description: string; lineNumbers: number[] }>
+): ScrubResult[] {
+  const resultsByLine = new Map<number, ScrubResult>();
+  const adasPartGuidance: Record<string, {
+    component: string;
+    systemName: string;
+    calibrationType: string;
+    repairOperation: string;
+    reason: string;
+  }> = {
+    frontRadar: {
+      component: "Front Radar Sensor",
+      systemName: "Front Radar / ACC-AEB",
+      calibrationType: "Static or Dynamic",
+      repairOperation: "Front Radar Calibration",
+      reason: "Front radar component detected in estimate; radar aiming/calibration is typically required after service.",
+    },
+    frontCamera: {
+      component: "Forward Camera",
+      systemName: "Forward Camera / LDW-LKA",
+      calibrationType: "Static + Dynamic",
+      repairOperation: "Forward Camera Calibration",
+      reason: "Forward-facing ADAS camera component detected; camera calibration procedure is typically required.",
+    },
+    blindSpotMonitor: {
+      component: "Blind Spot Radar Sensor",
+      systemName: "Blind Spot / Rear Cross Traffic",
+      calibrationType: "Static",
+      repairOperation: "Blind Spot Radar Calibration",
+      reason: "Blind spot radar-related component detected; BSM/RCTA verification and calibration are typically required.",
+    },
+    surroundCamera: {
+      component: "Surround View Camera",
+      systemName: "Surround View / 360 Camera",
+      calibrationType: "Static",
+      repairOperation: "Surround View Camera Calibration",
+      reason: "360/surround camera component detected; multi-camera alignment/calibration is typically required.",
+    },
+    parkingSensor: {
+      component: "Parking Sensor",
+      systemName: "Parking Assist Sensors",
+      calibrationType: "Coding / Initialization",
+      repairOperation: "Parking Sensor Calibration",
+      reason: "Parking-assist sensor component detected; sensor initialization/coding and verification are typically required.",
+    },
+    steeringAngleSensor: {
+      component: "Steering Angle Sensor",
+      systemName: "Steering Angle Sensor",
+      calibrationType: "Initialization",
+      repairOperation: "Steering Angle Sensor Reset/Relearn",
+      reason: "Steering-angle related component detected; SAS reset/relearn is typically required after service.",
+    },
+    rearCamera: {
+      component: "Rear View Camera",
+      systemName: "Rear View Camera",
+      calibrationType: "Static",
+      repairOperation: "Rear Camera Calibration",
+      reason: "Rear camera component detected; calibration/aim verification is typically required.",
+    },
+  };
+
+  const pushMatch = (
+    lineNumber: number,
+    description: string,
+    match: {
+      systemName: string;
+      calibrationType: string | null;
+      reason: string;
+      matchedKeyword: string;
+      repairOperation: string;
+    }
+  ) => {
+    const existing = resultsByLine.get(lineNumber);
+    if (!existing) {
+      resultsByLine.set(lineNumber, {
+        lineNumber,
+        description,
+        calibrationMatches: [match],
+      });
+      return;
+    }
+    if (!existing.calibrationMatches.some((m) => m.systemName === match.systemName && m.matchedKeyword === match.matchedKeyword)) {
+      existing.calibrationMatches.push(match);
+    }
+  };
+
+  for (const repair of detectedRepairs) {
+    const repairType = repair.repairType.toLowerCase();
+
+    if (/(windshield|camera|headlamp)/.test(repairType)) {
+      pushMatch(repair.lineNumber, repair.description, {
+        systemName: "Forward Camera / LDW-LKA",
+        calibrationType: "Static + Dynamic",
+        reason: "Camera or windshield-area repair commonly requires forward-camera aiming/calibration.",
+        matchedKeyword: repair.repairType,
+        repairOperation: "Forward Camera Calibration",
+      });
+    }
+
+    if (/(front bumper|bumper overhaul|bumper repair|bumper r&i|bumper r&r|grille|radar sensor)/.test(repairType)) {
+      pushMatch(repair.lineNumber, repair.description, {
+        systemName: "Front Radar / ACC-AEB",
+        calibrationType: "Static or Dynamic",
+        reason: "Front fascia/radar-zone repair commonly requires front-radar calibration.",
+        matchedKeyword: repair.repairType,
+        repairOperation: "Front Radar Calibration",
+      });
+    }
+
+    if (/(rear bumper|tailgate|quarter panel|side mirror)/.test(repairType)) {
+      pushMatch(repair.lineNumber, repair.description, {
+        systemName: "Blind Spot / Rear Cross Traffic",
+        calibrationType: "Static",
+        reason: "Rear-quarter and mirror-zone work can impact blind-spot and rear-cross-traffic sensors.",
+        matchedKeyword: repair.repairType,
+        repairOperation: "Blind Spot Radar Calibration",
+      });
+    }
+
+    if (/(alignment|suspension|steering)/.test(repairType)) {
+      pushMatch(repair.lineNumber, repair.description, {
+        systemName: "Steering Angle Sensor",
+        calibrationType: "Initialization",
+        reason: "Alignment or steering work commonly requires steering-angle reset/relearn.",
+        matchedKeyword: repair.repairType,
+        repairOperation: "Steering Angle Sensor Reset/Relearn",
+      });
+    }
+  }
+
+  for (const adasPart of adasPartsInEstimate) {
+    const guidance = adasPartGuidance[adasPart.system] || {
+      component: adasPart.description,
+      systemName: adasPart.description,
+      calibrationType: "OEM Procedure",
+      repairOperation: `${adasPart.description} Calibration`,
+      reason: "ADAS-related component detected in estimate; calibration verification is recommended.",
+    };
+
+    const lineNumber = adasPart.lineNumbers[0] || 1;
+    pushMatch(lineNumber, guidance.component, {
+      systemName: guidance.systemName,
+      calibrationType: guidance.calibrationType,
+      reason: guidance.reason,
+      matchedKeyword: adasPart.system,
+      repairOperation: guidance.repairOperation,
+    });
+  }
+
+  return Array.from(resultsByLine.values()).sort((a, b) => a.lineNumber - b.lineNumber);
+}
+
+function groupCalibrations(results: ScrubResult[]) {
+  type GroupedCalibration = {
+    systemName: string;
+    calibrationType: string;
+    reason: string;
+    repairOperation: string;
+    matchedKeywords: string[];
+    triggerLines: number[];
+    triggerDescriptions: string[];
+    calibrationTypes: string[];
+    reasons: string[];
+  };
+
+  const grouped = new Map<string, GroupedCalibration>();
+
+  for (const result of results) {
+    for (const match of result.calibrationMatches) {
+      const repairOperation = canonicalizeOperationName(
+        match.repairOperation,
+        match.systemName,
+        match.matchedKeyword
+      );
+      const normalizedSystem = canonicalizeSystem(match.systemName, repairOperation);
+      const recommendedOperation = calibrationOperationForSystem(normalizedSystem, repairOperation);
+      const calibrationType = canonicalizeCalibrationType(match.calibrationType);
+      const key = normalizeForKey(recommendedOperation);
+
+      const existing = grouped.get(key);
+      if (!existing) {
+        grouped.set(key, {
+          systemName: normalizedSystem.label,
+          calibrationType,
+          reason: match.reason,
+          repairOperation: recommendedOperation,
+          matchedKeywords: [match.matchedKeyword],
+          triggerLines: [result.lineNumber],
+          triggerDescriptions: [result.description],
+          calibrationTypes: [calibrationType],
+          reasons: [match.reason],
+        });
+        continue;
+      }
+
+      const hasKeyword = existing.matchedKeywords.some(
+        (keyword) => normalizeForKey(keyword) === normalizeForKey(match.matchedKeyword)
+      );
+      if (!hasKeyword) {
+        existing.matchedKeywords.push(match.matchedKeyword);
+      }
+      if (!existing.triggerLines.includes(result.lineNumber)) {
+        existing.triggerLines.push(result.lineNumber);
+      }
+      const hasDescription = existing.triggerDescriptions.some(
+        (description) => normalizeForKey(description) === normalizeForKey(result.description)
+      );
+      if (!hasDescription) {
+        existing.triggerDescriptions.push(result.description);
+      }
+      if (!existing.calibrationTypes.includes(calibrationType)) {
+        existing.calibrationTypes.push(calibrationType);
+      }
+      if (!existing.reasons.includes(match.reason)) {
+        existing.reasons.push(match.reason);
+      }
+
+      existing.calibrationType = mergeCalibrationTypes(existing.calibrationTypes);
+      existing.reason = existing.reasons[0] || existing.reason;
+    }
+  }
+
+  return Array.from(grouped.values())
+    .map((entry) => ({
+      systemName: entry.systemName,
+      calibrationType: mergeCalibrationTypes(entry.calibrationTypes),
+      reason: entry.reasons[0] || entry.reason,
+      repairOperation: entry.repairOperation,
+      matchedKeywords: entry.matchedKeywords,
+      triggerLines: entry.triggerLines.sort((a, b) => a - b),
+      triggerDescriptions: entry.triggerDescriptions,
+    }))
+    .sort((a, b) => {
+      const aFirstLine = a.triggerLines[0] ?? Number.MAX_SAFE_INTEGER;
+      const bFirstLine = b.triggerLines[0] ?? Number.MAX_SAFE_INTEGER;
+      if (aFirstLine !== bFirstLine) return aFirstLine - bFirstLine;
+      return a.systemName.localeCompare(b.systemName);
+    });
+}
+
 export async function POST(request: NextRequest) {
   try {
-    const session = await getSession();
+    const session = await auth();
 
-    if (!session) {
+    if (!session?.user) {
       return NextResponse.json(
         { error: "Please login to analyze estimates" },
         { status: 401 }
       );
     }
 
+    const shopId = session.user.id;
+
     const contentType = request.headers.get("content-type") || "";
     let estimateText: string;
+    let uploadFileName: string | undefined;
     let providedYear: number | undefined;
     let providedMake: string | undefined;
     let providedModel: string | undefined;
@@ -316,6 +640,7 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: "No file uploaded" }, { status: 400 });
       }
 
+      uploadFileName = file.name;
       const buffer = Buffer.from(await file.arrayBuffer());
       estimateText = await parsePdf(buffer);
 
@@ -325,6 +650,7 @@ export async function POST(request: NextRequest) {
     } else {
       const body = await request.json();
       estimateText = body.estimateText;
+      uploadFileName = body.fileName;
       if (body.vehicleYear) providedYear = parseInt(body.vehicleYear, 10);
       if (body.vehicleMake) providedMake = body.vehicleMake;
       if (body.vehicleModel) providedModel = body.vehicleModel;
@@ -336,9 +662,17 @@ export async function POST(request: NextRequest) {
 
     // Step 1: Parse estimate with enhanced parser
     const parsedEstimate = parseEstimate(estimateText);
+    const textIdentifiers = extractEstimateIdentifiers(estimateText);
+    const fileIdentifiers = extractEstimateIdentifiersFromFileName(uploadFileName);
+    const estimateIdentifiers = mergeEstimateIdentifiers(textIdentifiers, fileIdentifiers);
+    const estimateMetadata = extractEstimateMetadata(estimateText);
+    if (!estimateMetadata.roNumber && estimateIdentifiers.roNumber) estimateMetadata.roNumber = estimateIdentifiers.roNumber;
+    if (!estimateMetadata.poNumber && estimateIdentifiers.poNumber) estimateMetadata.poNumber = estimateIdentifiers.poNumber;
+    if (!estimateMetadata.workfileId && estimateIdentifiers.workfileId) estimateMetadata.workfileId = estimateIdentifiers.workfileId;
+    if (!estimateMetadata.claimNumber && estimateIdentifiers.claimNumber) estimateMetadata.claimNumber = estimateIdentifiers.claimNumber;
 
     // Step 2: Extract vehicle info (VIN API + text parsing)
-    const extractedVehicle = await extractVehicleInfo(estimateText);
+    const extractedVehicle = await extractVehicleInfo(estimateText, uploadFileName);
 
     // Debug logging for vehicle detection
     console.log('Vehicle Detection:', {
@@ -358,24 +692,33 @@ export async function POST(request: NextRequest) {
     const vehicleMake = providedMake || extractedVehicle.make;
     const vehicleModel = providedModel || extractedVehicle.model;
 
-    // Step 3: Run scrub against database
-    let results: Awaited<ReturnType<typeof scrubEstimate>>['results'] = [];
-    let vehicle: Awaited<ReturnType<typeof scrubEstimate>>['vehicle'] = null;
-    let detectedRepairs: Awaited<ReturnType<typeof scrubEstimate>>['detectedRepairs'] = [];
-
-    if (vehicleYear && vehicleMake && vehicleModel) {
-      const scrubResult = await scrubEstimate(estimateText, vehicleYear, vehicleMake, vehicleModel);
-      results = scrubResult.results;
-      vehicle = scrubResult.vehicle;
-      detectedRepairs = scrubResult.detectedRepairs;
-    } else if (vehicleMake) {
-      const scrubResult = await scrubEstimate(estimateText, vehicleYear || 2024, vehicleMake, "All Models");
-      results = scrubResult.results;
-      vehicle = scrubResult.vehicle;
-      detectedRepairs = scrubResult.detectedRepairs;
-    } else {
-      detectedRepairs = detectRepairs(estimateText);
+    // Step 3: Require fully detected vehicle profile from uploaded estimate.
+    if (!vehicleYear || !vehicleMake || !vehicleModel) {
+      return NextResponse.json(
+        {
+          error:
+            "Could not fully detect vehicle year/make/model from this estimate PDF. Include a page with VIN or vehicle header.",
+          detectedVehicle: {
+            year: vehicleYear,
+            make: vehicleMake,
+            model: vehicleModel,
+            vin: extractedVehicle.vin,
+            confidence: extractedVehicle.confidence,
+            source: extractedVehicle.source,
+          },
+        },
+        { status: 422 }
+      );
     }
+
+    let results: Awaited<ReturnType<typeof scrubEstimate>>["results"] = [];
+    let vehicle: Awaited<ReturnType<typeof scrubEstimate>>["vehicle"] = null;
+    let detectedRepairs: Awaited<ReturnType<typeof scrubEstimate>>["detectedRepairs"] = [];
+
+    const scrubResult = await scrubEstimate(estimateText, vehicleYear, vehicleMake, vehicleModel);
+    results = scrubResult.results;
+    vehicle = scrubResult.vehicle;
+    detectedRepairs = scrubResult.detectedRepairs;
 
     // Step 4: Build enhanced response
     const vehicleInfo = vehicleYear && vehicleMake && vehicleModel
@@ -384,19 +727,46 @@ export async function POST(request: NextRequest) {
       ? `${vehicleYear || ''} ${vehicleMake} ${vehicleModel || 'Unknown'}`.trim()
       : 'Unknown Vehicle';
 
+    // Include ADAS parts detected in estimate
+    const adasPartsInEstimate = parsedEstimate.adasPartsFound.map(p => ({
+      system: p.system,
+      description: getADASSystemDescription(p.system),
+      lineNumbers: p.lineNumbers,
+    }));
+
+    let usedInferenceFallback = false;
+    if (results.length === 0 && (detectedRepairs.length > 0 || adasPartsInEstimate.length > 0)) {
+      const inferred = inferCalibrations(detectedRepairs, adasPartsInEstimate);
+      if (inferred.length > 0) {
+        results = inferred;
+        usedInferenceFallback = true;
+      }
+    }
+
+    const learningOutput = await applyLearningRules({
+      estimateText,
+      vehicleYear,
+      vehicleMake,
+      vehicleModel,
+      results,
+    });
+    results = learningOutput.results;
+
     // Create report
+    const storedEstimateText = appendEstimateIdentifierHints(estimateText, estimateIdentifiers, uploadFileName);
+
     const report = await prisma.report.create({
       data: {
-        shopId: session.shopId,
+        shopId: shopId,
         vehicleYear: vehicleYear || 0,
         vehicleMake: vehicleMake || 'Unknown',
         vehicleModel: vehicleModel || 'Unknown',
-        estimateText,
+        estimateText: storedEstimateText,
         calibrations: JSON.stringify(results),
       },
     });
 
-    await recordUsage(session.shopId, vehicleInfo, report.id);
+    await recordUsage(shopId, vehicleInfo, report.id);
 
     // Build detected vehicle object for response
     const detectedVehicle = {
@@ -412,12 +782,17 @@ export async function POST(request: NextRequest) {
     // Include ADAS features detected from VIN
     const adasFeaturesFromVIN = extractedVehicle.adasFeaturesFromVIN;
 
-    // Include ADAS parts detected in estimate
-    const adasPartsInEstimate = parsedEstimate.adasPartsFound.map(p => ({
-      system: p.system,
-      description: getADASSystemDescription(p.system),
-      lineNumbers: p.lineNumbers,
-    }));
+    const groupedCalibrations = groupCalibrations(results);
+
+    const analysisConfidence = buildAnalysisConfidence({
+      hasVehicleFromDb: Boolean(vehicle),
+      extractedConfidence: extractedVehicle.confidence,
+      resultsCount: groupedCalibrations.length,
+      detectedRepairCount: detectedRepairs.length,
+      adasPartsCount: adasPartsInEstimate.length,
+      hasVin: Boolean(extractedVehicle.vin),
+      usedInferenceFallback,
+    });
 
     return NextResponse.json({
       results,
@@ -430,6 +805,11 @@ export async function POST(request: NextRequest) {
       adasFeaturesFromVIN,
       adasPartsInEstimate,
       repairsSummary: parsedEstimate.repairsSummary,
+      estimateIdentifiers,
+      estimateMetadata,
+      groupedCalibrations,
+      learnedRuleIdsApplied: learningOutput.appliedRuleIds,
+      analysisConfidence,
     });
   } catch (error) {
     console.error("Scrub error:", error);

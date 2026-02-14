@@ -7,7 +7,7 @@
   },
   "source": {
     "provider": "Honda Position Statement 28870",
-    "url": "Honda_Position_Statement_28870_2025.pdf",
+    "url": "https://techinfo.honda.com/rjanisis/logon.aspx",
     "date_extracted": "2026-01-29"
   },
   "scanning_requirements": {
@@ -27,7 +27,12 @@
       "repair_allowed": false,
       "notes": "Do NOT repair bumper cover when damage is found in radar wave emission range - return to authorized dealer"
     },
-    "approved_paint_suppliers": ["PPG", "Sherwin-Williams", "Axalta Coating Systems", "BASF"]
+    "approved_paint_suppliers": [
+      "PPG",
+      "Sherwin-Williams",
+      "Axalta Coating Systems",
+      "BASF"
+    ]
   },
   "adas_systems": [
     {
@@ -116,6 +121,21 @@
         "Rear bumper R&I/R&R",
         "Bumper refinish",
         "Sensor replacement"
+      ]
+    },
+    {
+      "system_name": "Seat Weight Sensor / ODS",
+      "oem_name": "Occupant Detection System",
+      "description": "Passenger seat occupant detection and restraint classification logic",
+      "location": "front passenger seat",
+      "dtc_set": true,
+      "scan_tool_required": true,
+      "calibration_type": "Initialization / Validation",
+      "calibration_triggers": [
+        "Front seat R&I/R&R",
+        "Seat rail replacement",
+        "Seat belt pretensioner service",
+        "Collision inspection per OEM statement"
       ]
     }
   ],
@@ -304,7 +324,9 @@
         "seat frame",
         "seat belt"
       ],
-      "triggers_calibration": [],
+      "triggers_calibration": [
+        "Seat Weight Sensor / ODS"
+      ],
       "notes": "Seat weight sensor check required after ANY collision regardless of damage per Honda position statement"
     }
   ]

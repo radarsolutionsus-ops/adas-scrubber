@@ -1,23 +1,25 @@
 generator client {
-  provider      = "prisma-client-js"
-  binaryTargets = ["native", "linux-musl-openssl-3.0.x", "linux-musl-arm64-openssl-3.0.x", "debian-openssl-3.0.x"]
+  provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "sqlite"
   url      = env("DATABASE_URL")
 }
 
 // Shop/Account Management
+// Role values: ADMIN, SHOP_OWNER, TECHNICIAN
 model Shop {
-  id            String   @id @default(cuid())
-  name          String
-  email         String   @unique
-  passwordHash  String
-  phone         String?
-  address       String?
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  id               String   @id @default(cuid())
+  name             String
+  email            String   @unique
+  passwordHash     String
+  role             String   @default("SHOP_OWNER")
+  stripeCustomerId String?
+  phone            String?
+  address          String?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
 
   subscription  Subscription?
   usageRecords  UsageRecord[]

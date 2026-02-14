@@ -7,7 +7,7 @@
   },
   "source": {
     "provider": "Infiniti Position Statements (IPSB-26-730, Revised 11-1-25)",
-    "url": "https://www.infiniti-techinfo.com",
+    "url": "https://www.infiniticollision.com/",
     "date_extracted": "2026-02-03"
   },
   "scanning_requirements": {
@@ -124,78 +124,167 @@
     {
       "repair_operation": "Front Bumper R&I/R&R/Repair",
       "repair_keywords": [
-        "front bumper", "frt bumper", "f bumper", "front fascia", "bumper cover",
-        "f/bumper", "bumper cvr frt", "r&i front bumper", "r&r front bumper",
-        "o/h front bumper", "o/h bumper", "rpr front bumper", "rpr bumper",
-        "repl front bumper", "bpr cvr frt", "bmpr cvr frt", "frt bpr"
+        "front bumper",
+        "frt bumper",
+        "f bumper",
+        "front fascia",
+        "bumper cover",
+        "f/bumper",
+        "bumper cvr frt",
+        "r&i front bumper",
+        "r&r front bumper",
+        "o/h front bumper",
+        "o/h bumper",
+        "rpr front bumper",
+        "rpr bumper",
+        "repl front bumper",
+        "bpr cvr frt",
+        "bmpr cvr frt",
+        "frt bpr"
       ],
-      "triggers_calibration": ["Front Radar Sensor", "Around View Monitor", "Parking Sensors"],
+      "triggers_calibration": [
+        "Front Radar Sensor",
+        "Around View Monitor",
+        "Parking Sensors"
+      ],
       "notes": "Front bumper work requires radar, AVM, and parking sensor calibration per Infiniti position statements"
     },
     {
       "repair_operation": "Front Grille R&I/R&R",
       "repair_keywords": [
-        "grille", "grill", "front grille", "radiator grille", "r&i grille",
-        "r&i grill", "r&r grille", "r&r grill", "repl grille", "repl grill"
+        "grille",
+        "grill",
+        "front grille",
+        "radiator grille",
+        "r&i grille",
+        "r&i grill",
+        "r&r grille",
+        "r&r grill",
+        "repl grille",
+        "repl grill"
       ],
-      "triggers_calibration": ["Front Radar Sensor", "Around View Monitor"],
+      "triggers_calibration": [
+        "Front Radar Sensor",
+        "Around View Monitor"
+      ],
       "notes": "Grille removal requires radar calibration"
     },
     {
       "repair_operation": "Rear Bumper R&I/R&R/Repair",
       "repair_keywords": [
-        "rear bumper", "rr bumper", "r bumper", "rear fascia", "back bumper",
-        "r/bumper", "bumper cvr rr", "r&i rear bumper", "r&r rear bumper",
-        "o/h rear bumper", "rpr rear bumper", "bpr cvr rr", "bmpr cvr rr", "rr bpr"
+        "rear bumper",
+        "rr bumper",
+        "r bumper",
+        "rear fascia",
+        "back bumper",
+        "r/bumper",
+        "bumper cvr rr",
+        "r&i rear bumper",
+        "r&r rear bumper",
+        "o/h rear bumper",
+        "rpr rear bumper",
+        "bpr cvr rr",
+        "bmpr cvr rr",
+        "rr bpr"
       ],
-      "triggers_calibration": ["Blind Spot Warning", "Around View Monitor", "Parking Sensors"],
+      "triggers_calibration": [
+        "Blind Spot Warning",
+        "Around View Monitor",
+        "Parking Sensors"
+      ],
       "notes": "Rear bumper work requires BSW/RCTA calibration"
     },
     {
       "repair_operation": "Windshield R&I/R&R",
       "repair_keywords": [
-        "windshield", "windscreen", "front glass", "w/s glass", "w/s",
-        "laminated glass", "wsr", "r&i windshield", "r&r windshield",
-        "repl windshield", "windshield w/camera"
+        "windshield",
+        "windscreen",
+        "front glass",
+        "w/s glass",
+        "w/s",
+        "laminated glass",
+        "wsr",
+        "r&i windshield",
+        "r&r windshield",
+        "repl windshield",
+        "windshield w/camera"
       ],
-      "triggers_calibration": ["Front Camera"],
+      "triggers_calibration": [
+        "Front Camera"
+      ],
       "notes": "Windshield replacement requires camera calibration. OE glass required."
     },
     {
       "repair_operation": "Side Mirror R&I/R&R",
       "repair_keywords": [
-        "side mirror", "door mirror", "outside mirror", "mirror assembly",
-        "wing mirror", "exterior mirror", "r&i mirror", "r&r mirror",
-        "repl mirror", "mirror w/camera"
+        "side mirror",
+        "door mirror",
+        "outside mirror",
+        "mirror assembly",
+        "wing mirror",
+        "exterior mirror",
+        "r&i mirror",
+        "r&r mirror",
+        "repl mirror",
+        "mirror w/camera"
       ],
-      "triggers_calibration": ["Around View Monitor"],
+      "triggers_calibration": [
+        "Around View Monitor"
+      ],
       "notes": "Side mirror cameras are part of Around View Monitor system"
     },
     {
       "repair_operation": "Wheel Alignment",
       "repair_keywords": [
-        "alignment", "wheel alignment", "four wheel alignment", "4 wheel alignment",
-        "thrust angle", "front alignment", "rear alignment"
+        "alignment",
+        "wheel alignment",
+        "four wheel alignment",
+        "4 wheel alignment",
+        "thrust angle",
+        "front alignment",
+        "rear alignment"
       ],
-      "triggers_calibration": ["Front Radar Sensor", "Front Camera", "Steering Angle Sensor"],
+      "triggers_calibration": [
+        "Front Radar Sensor",
+        "Front Camera",
+        "Steering Angle Sensor"
+      ],
       "notes": "Alignment requires radar, camera, and steering angle sensor calibration"
     },
     {
       "repair_operation": "Quarter Panel Repair",
       "repair_keywords": [
-        "quarter panel", "qtr panel", "quarter pnl", "rear quarter", "rr qtr",
-        "r&i quarter", "r&r quarter", "section quarter"
+        "quarter panel",
+        "qtr panel",
+        "quarter pnl",
+        "rear quarter",
+        "rr qtr",
+        "r&i quarter",
+        "r&r quarter",
+        "section quarter"
       ],
-      "triggers_calibration": ["Blind Spot Warning"],
+      "triggers_calibration": [
+        "Blind Spot Warning"
+      ],
       "notes": "Quarter panel repair may affect BSW sensor alignment"
     },
     {
       "repair_operation": "Suspension Work",
       "repair_keywords": [
-        "suspension", "strut", "shock", "control arm", "subframe", "steering knuckle",
-        "spring", "ride height", "level sensor"
+        "suspension",
+        "strut",
+        "shock",
+        "control arm",
+        "subframe",
+        "steering knuckle",
+        "spring",
+        "ride height",
+        "level sensor"
       ],
-      "triggers_calibration": ["Front Camera", "Steering Angle Sensor"],
+      "triggers_calibration": [
+        "Front Camera",
+        "Steering Angle Sensor"
+      ],
       "notes": "Suspension work affecting ride height requires camera recalibration"
     }
   ]
