@@ -1,18 +1,30 @@
 import { NextResponse } from "next/server";
-import { getSession, getShopUsage } from "@/lib/auth";
+import type { NextRequest } from "next/server";
+import { auth } from "@/auth";
+import { getShopUsage } from "@/lib/auth";
+import { applyRateLimit } from "@/lib/security/rate-limit";
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
-    const session = await getSession();
+    const rateLimit = applyRateLimit(request, {
+      id: "usage-api",
+      limit: 120,
+      windowMs: 60_000,
+    });
+    if (rateLimit.limited) {
+      return rateLimit.response;
+    }
 
-    if (!session) {
+    const session = await auth();
+
+    if (!session?.user?.id) {
       return NextResponse.json(
         { error: "Unauthorized" },
         { status: 401 }
       );
     }
 
-    const usage = await getShopUsage(session.shopId);
+    const usage = await getShopUsage(session.user.id);
 
     if (!usage) {
       return NextResponse.json(

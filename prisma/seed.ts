@@ -30,6 +30,7 @@ async function createDemoAccount() {
       subscription: {
         create: {
           plan: "standard",
+          status: "active",
           monthlyVehicleLimit: 150,
           pricePerMonth: 500,
           overagePrice: 5,

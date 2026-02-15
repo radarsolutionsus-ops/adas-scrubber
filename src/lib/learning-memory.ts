@@ -1,5 +1,4 @@
-import { promises as fs } from "fs";
-import path from "path";
+import { prisma } from "@/lib/prisma";
 
 export type LearningAction = "add" | "suppress";
 
@@ -21,6 +20,7 @@ export interface LearningRule {
   updatedAt: string;
   lastAppliedAt?: string;
   lastEditedBy?: string;
+  shopId?: string;
 }
 
 export interface LearningEvent {
@@ -45,6 +45,8 @@ export interface LearningEvent {
   actorId?: string;
   actorName?: string;
   actorEmail?: string;
+  reviewStatus?: "pending" | "approved" | "rejected";
+  reviewedAt?: string;
   shopId?: string;
 }
 
@@ -52,12 +54,6 @@ interface LearningStore {
   version: number;
   updatedAt: string;
   rules: LearningRule[];
-}
-
-interface LearningEventStore {
-  version: number;
-  updatedAt: string;
-  events: LearningEvent[];
 }
 
 interface ScrubMatch {
@@ -76,6 +72,7 @@ interface ScrubResultLike {
 
 interface UpsertLearningRuleInput {
   action: LearningAction;
+  shopId: string;
   make: string;
   model: string;
   yearStart: number;
@@ -91,6 +88,7 @@ interface UpsertLearningRuleInput {
 interface LearningEventInput {
   action: LearningAction;
   ruleId: string;
+  shopId: string;
   make: string;
   model: string;
   yearStart: number;
@@ -108,15 +106,14 @@ interface LearningEventInput {
   actorId?: string;
   actorName?: string;
   actorEmail?: string;
-  shopId?: string;
 }
 
-const STORE_PATH = path.join(process.cwd(), "data", "learning-overrides.json");
-const EVENTS_PATH = path.join(process.cwd(), "data", "learning-events.json");
-const MAX_EVENTS = 10000;
-
 function normalize(value: string): string {
-  return value.toLowerCase().replace(/[^a-z0-9]/g, " ").replace(/\s+/g, " ").trim();
+  return value
+    .toLowerCase()
+    .replace(/[^a-z0-9]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
 }
 
 function keywordMatched(lineText: string, keyword: string): boolean {
@@ -134,189 +131,320 @@ function clampWeight(value: number): number {
   return Math.min(1, Math.max(0.1, Number.isFinite(value) ? value : 0.8));
 }
 
-function defaultStore(): LearningStore {
-  return {
-    version: 2,
-    updatedAt: nowIso(),
-    rules: [],
-  };
+function toIso(value?: Date | null): string | undefined {
+  if (!value) return undefined;
+  return value.toISOString();
 }
 
-function defaultEventStore(): LearningEventStore {
-  return {
-    version: 1,
-    updatedAt: nowIso(),
-    events: [],
-  };
-}
-
-function hydrateRule(raw: Partial<LearningRule>): LearningRule {
-  const now = nowIso();
-  return {
-    id: raw.id || `rule_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
-    action: raw.action === "suppress" ? "suppress" : "add",
-    make: raw.make || "Unknown",
-    model: raw.model || "All Models",
-    yearStart: typeof raw.yearStart === "number" ? raw.yearStart : 1900,
-    yearEnd: typeof raw.yearEnd === "number" ? raw.yearEnd : 2100,
-    keyword: raw.keyword || "",
-    systemName: raw.systemName || "",
-    calibrationType: raw.calibrationType ?? null,
-    reason: raw.reason || "Learned rule",
-    confidenceWeight: clampWeight(raw.confidenceWeight ?? 0.8),
-    usageCount: Number.isFinite(raw.usageCount) ? Number(raw.usageCount) : 0,
-    correctionCount: Number.isFinite(raw.correctionCount)
-      ? Number(raw.correctionCount)
-      : Number.isFinite(raw.usageCount)
-      ? 1
-      : 0,
-    createdAt: raw.createdAt || now,
-    updatedAt: raw.updatedAt || now,
-    lastAppliedAt: raw.lastAppliedAt,
-    lastEditedBy: raw.lastEditedBy,
-  };
-}
-
-export async function loadLearningStore(): Promise<LearningStore> {
+function parseJsonArray(value?: string | null): string[] {
+  if (!value) return [];
   try {
-    const raw = await fs.readFile(STORE_PATH, "utf8");
-    const parsed = JSON.parse(raw) as LearningStore;
-    return {
-      version: parsed.version || 1,
-      updatedAt: parsed.updatedAt || nowIso(),
-      rules: Array.isArray(parsed.rules) ? parsed.rules.map(hydrateRule) : [],
-    };
+    const parsed = JSON.parse(value) as unknown;
+    return Array.isArray(parsed)
+      ? parsed
+          .map((item) => (typeof item === "string" ? item : ""))
+          .filter((item) => item.length > 0)
+      : [];
   } catch {
-    return defaultStore();
+    return [];
   }
 }
 
-async function saveLearningStore(store: LearningStore): Promise<void> {
-  const dir = path.dirname(STORE_PATH);
-  await fs.mkdir(dir, { recursive: true });
-  await fs.writeFile(STORE_PATH, JSON.stringify(store, null, 2));
-}
-
-async function loadLearningEventStore(): Promise<LearningEventStore> {
+function parseJsonNumberArray(value?: string | null): number[] {
+  if (!value) return [];
   try {
-    const raw = await fs.readFile(EVENTS_PATH, "utf8");
-    const parsed = JSON.parse(raw) as LearningEventStore;
-    return {
-      version: parsed.version || 1,
-      updatedAt: parsed.updatedAt || nowIso(),
-      events: Array.isArray(parsed.events) ? parsed.events : [],
-    };
+    const parsed = JSON.parse(value) as unknown;
+    return Array.isArray(parsed)
+      ? parsed
+          .map((item) => (typeof item === "number" ? item : Number.NaN))
+          .filter((item) => Number.isFinite(item))
+      : [];
   } catch {
-    return defaultEventStore();
+    return [];
   }
 }
 
-async function saveLearningEventStore(store: LearningEventStore): Promise<void> {
-  const dir = path.dirname(EVENTS_PATH);
-  await fs.mkdir(dir, { recursive: true });
-  await fs.writeFile(EVENTS_PATH, JSON.stringify(store, null, 2));
+function toPublicRule(rule: {
+  id: string;
+  action: string;
+  make: string;
+  model: string;
+  yearStart: number;
+  yearEnd: number;
+  keyword: string;
+  systemName: string;
+  calibrationType: string | null;
+  reason: string;
+  confidenceWeight: number;
+  usageCount: number;
+  correctionCount: number;
+  createdAt: Date;
+  updatedAt: Date;
+  lastAppliedAt: Date | null;
+  lastEditedBy: string | null;
+  shopId: string;
+}): LearningRule {
+  return {
+    id: rule.id,
+    action: rule.action === "suppress" ? "suppress" : "add",
+    make: rule.make,
+    model: rule.model,
+    yearStart: rule.yearStart,
+    yearEnd: rule.yearEnd,
+    keyword: rule.keyword,
+    systemName: rule.systemName,
+    calibrationType: rule.calibrationType,
+    reason: rule.reason,
+    confidenceWeight: rule.confidenceWeight,
+    usageCount: rule.usageCount,
+    correctionCount: rule.correctionCount,
+    createdAt: rule.createdAt.toISOString(),
+    updatedAt: rule.updatedAt.toISOString(),
+    lastAppliedAt: toIso(rule.lastAppliedAt),
+    lastEditedBy: rule.lastEditedBy || undefined,
+    shopId: rule.shopId,
+  };
 }
 
-export async function loadLearningEvents(limit = 200): Promise<LearningEvent[]> {
-  const store = await loadLearningEventStore();
-  return [...store.events]
-    .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
-    .slice(0, Math.max(1, Math.min(limit, 2000)));
+export async function loadLearningStore(shopId: string): Promise<LearningStore> {
+  const rules = await prisma.learningRule.findMany({
+    where: { shopId },
+    orderBy: [{ updatedAt: "desc" }, { createdAt: "desc" }],
+  });
+
+  return {
+    version: 3,
+    updatedAt: rules[0]?.updatedAt.toISOString() || nowIso(),
+    rules: rules.map(toPublicRule),
+  };
+}
+
+export async function loadLearningEvents(shopId: string, limit = 200): Promise<LearningEvent[]> {
+  const boundedLimit = Math.max(1, Math.min(limit, 2000));
+  const events = await prisma.learningEvent.findMany({
+    where: { shopId },
+    orderBy: { createdAt: "desc" },
+    take: boundedLimit,
+  });
+
+  return events.map((event) => ({
+    id: event.id,
+    createdAt: event.createdAt.toISOString(),
+    action: event.action === "suppress" ? "suppress" : "add",
+    ruleId: event.ruleId || "",
+    make: event.make,
+    model: event.model,
+    yearStart: event.yearStart,
+    yearEnd: event.yearEnd,
+    keyword: event.keyword,
+    systemName: event.systemName,
+    calibrationType: event.calibrationType,
+    reason: event.reason,
+    confidenceWeight: event.confidenceWeight,
+    reportId: event.reportId || undefined,
+    estimateReference: event.estimateReference || undefined,
+    vehicleVin: event.vehicleVin || undefined,
+    triggerLines: parseJsonNumberArray(event.triggerLines),
+    triggerDescriptions: parseJsonArray(event.triggerDescriptions),
+    actorId: event.actorId || undefined,
+    actorName: event.actorName || undefined,
+    actorEmail: event.actorEmail || undefined,
+    reviewStatus:
+      event.reviewStatus === "approved"
+        ? "approved"
+        : event.reviewStatus === "rejected"
+        ? "rejected"
+        : "pending",
+    reviewedAt: event.reviewedAt ? event.reviewedAt.toISOString() : undefined,
+    shopId: event.shopId,
+  }));
 }
 
 export async function upsertLearningRule(input: UpsertLearningRuleInput): Promise<LearningRule> {
-  const store = await loadLearningStore();
-  const now = nowIso();
+  const now = new Date();
+  const makeNorm = normalize(input.make);
+  const modelNorm = normalize(input.model);
+  const keywordNorm = normalize(input.keyword);
+  const systemNorm = normalize(input.systemName);
+  const incomingWeight = clampWeight(input.confidenceWeight);
 
-  const existing = store.rules.find(
-    (rule) =>
-      rule.action === input.action &&
-      normalize(rule.make) === normalize(input.make) &&
-      normalize(rule.model) === normalize(input.model) &&
-      rule.yearStart === input.yearStart &&
-      rule.yearEnd === input.yearEnd &&
-      normalize(rule.keyword) === normalize(input.keyword) &&
-      normalize(rule.systemName) === normalize(input.systemName)
-  );
+  const existing = await prisma.learningRule.findUnique({
+    where: {
+      shopId_action_makeNorm_modelNorm_yearStart_yearEnd_keywordNorm_systemNorm: {
+        shopId: input.shopId,
+        action: input.action,
+        makeNorm,
+        modelNorm,
+        yearStart: input.yearStart,
+        yearEnd: input.yearEnd,
+        keywordNorm,
+        systemNorm,
+      },
+    },
+  });
 
   if (existing) {
-    const nextWeight = clampWeight((existing.confidenceWeight + clampWeight(input.confidenceWeight)) / 2);
-    existing.calibrationType = input.calibrationType;
-    existing.reason = input.reason;
-    existing.confidenceWeight = nextWeight;
-    existing.updatedAt = now;
-    existing.correctionCount += 1;
-    if (input.editedBy) {
-      existing.lastEditedBy = input.editedBy;
-    }
-    store.updatedAt = now;
-    await saveLearningStore(store);
-    return existing;
+    const nextWeight = clampWeight((existing.confidenceWeight + incomingWeight) / 2);
+    const updated = await prisma.learningRule.update({
+      where: { id: existing.id },
+      data: {
+        calibrationType: input.calibrationType,
+        reason: input.reason,
+        confidenceWeight: nextWeight,
+        correctionCount: { increment: 1 },
+        lastEditedBy: input.editedBy || existing.lastEditedBy,
+        updatedAt: now,
+      },
+    });
+
+    return toPublicRule(updated);
   }
 
-  const created: LearningRule = {
-    id: `rule_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
-    usageCount: 0,
-    correctionCount: 1,
-    createdAt: now,
-    updatedAt: now,
-    lastEditedBy: input.editedBy,
-    action: input.action,
-    make: input.make,
-    model: input.model,
-    yearStart: input.yearStart,
-    yearEnd: input.yearEnd,
-    keyword: input.keyword,
-    systemName: input.systemName,
-    calibrationType: input.calibrationType,
-    reason: input.reason,
-    confidenceWeight: clampWeight(input.confidenceWeight),
-  };
+  const created = await prisma.learningRule.create({
+    data: {
+      shopId: input.shopId,
+      action: input.action,
+      make: input.make,
+      model: input.model,
+      makeNorm,
+      modelNorm,
+      yearStart: input.yearStart,
+      yearEnd: input.yearEnd,
+      keyword: input.keyword,
+      keywordNorm,
+      systemName: input.systemName,
+      systemNorm,
+      calibrationType: input.calibrationType,
+      reason: input.reason,
+      confidenceWeight: incomingWeight,
+      usageCount: 0,
+      correctionCount: 1,
+      lastEditedBy: input.editedBy,
+      createdAt: now,
+      updatedAt: now,
+    },
+  });
 
-  store.rules.push(created);
-  store.updatedAt = now;
-  await saveLearningStore(store);
-
-  return created;
+  return toPublicRule(created);
 }
 
 export async function appendLearningEvent(input: LearningEventInput): Promise<LearningEvent> {
-  const store = await loadLearningEventStore();
-  const now = nowIso();
+  const created = await prisma.learningEvent.create({
+    data: {
+      shopId: input.shopId,
+      ruleId: input.ruleId,
+      action: input.action,
+      make: input.make,
+      model: input.model,
+      yearStart: input.yearStart,
+      yearEnd: input.yearEnd,
+      keyword: input.keyword,
+      systemName: input.systemName,
+      calibrationType: input.calibrationType,
+      reason: input.reason,
+      confidenceWeight: clampWeight(input.confidenceWeight),
+      reportId: input.reportId,
+      estimateReference: input.estimateReference,
+      vehicleVin: input.vehicleVin,
+      triggerLines: input.triggerLines ? JSON.stringify(input.triggerLines) : null,
+      triggerDescriptions: input.triggerDescriptions
+        ? JSON.stringify(input.triggerDescriptions)
+        : null,
+      actorId: input.actorId,
+      actorName: input.actorName,
+      actorEmail: input.actorEmail,
+      reviewStatus: "pending",
+    },
+  });
 
-  const event: LearningEvent = {
-    id: `evt_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
-    createdAt: now,
-    action: input.action,
-    ruleId: input.ruleId,
-    make: input.make,
-    model: input.model,
-    yearStart: input.yearStart,
-    yearEnd: input.yearEnd,
-    keyword: input.keyword,
-    systemName: input.systemName,
-    calibrationType: input.calibrationType,
-    reason: input.reason,
-    confidenceWeight: clampWeight(input.confidenceWeight),
-    reportId: input.reportId,
-    estimateReference: input.estimateReference,
-    vehicleVin: input.vehicleVin,
-    triggerLines: input.triggerLines,
-    triggerDescriptions: input.triggerDescriptions,
-    actorId: input.actorId,
-    actorName: input.actorName,
-    actorEmail: input.actorEmail,
-    shopId: input.shopId,
+  return {
+    id: created.id,
+    createdAt: created.createdAt.toISOString(),
+    action: created.action === "suppress" ? "suppress" : "add",
+    ruleId: created.ruleId || "",
+    make: created.make,
+    model: created.model,
+    yearStart: created.yearStart,
+    yearEnd: created.yearEnd,
+    keyword: created.keyword,
+    systemName: created.systemName,
+    calibrationType: created.calibrationType,
+    reason: created.reason,
+    confidenceWeight: created.confidenceWeight,
+    reportId: created.reportId || undefined,
+    estimateReference: created.estimateReference || undefined,
+    vehicleVin: created.vehicleVin || undefined,
+    triggerLines: parseJsonNumberArray(created.triggerLines),
+    triggerDescriptions: parseJsonArray(created.triggerDescriptions),
+    actorId: created.actorId || undefined,
+    actorName: created.actorName || undefined,
+    actorEmail: created.actorEmail || undefined,
+    reviewStatus:
+      created.reviewStatus === "approved"
+        ? "approved"
+        : created.reviewStatus === "rejected"
+        ? "rejected"
+        : "pending",
+    reviewedAt: created.reviewedAt ? created.reviewedAt.toISOString() : undefined,
+    shopId: created.shopId,
   };
+}
 
-  store.events.push(event);
-  if (store.events.length > MAX_EVENTS) {
-    store.events = store.events.slice(store.events.length - MAX_EVENTS);
+export async function reviewLearningEvent(input: {
+  shopId: string;
+  eventId: string;
+  reviewStatus: "approved" | "rejected";
+}): Promise<LearningEvent | null> {
+  const existing = await prisma.learningEvent.findFirst({
+    where: {
+      id: input.eventId,
+      shopId: input.shopId,
+    },
+  });
+
+  if (!existing) {
+    return null;
   }
-  store.updatedAt = now;
 
-  await saveLearningEventStore(store);
-  return event;
+  const updated = await prisma.learningEvent.update({
+    where: { id: existing.id },
+    data: {
+      reviewStatus: input.reviewStatus,
+      reviewedAt: new Date(),
+    },
+  });
+
+  return {
+    id: updated.id,
+    createdAt: updated.createdAt.toISOString(),
+    action: updated.action === "suppress" ? "suppress" : "add",
+    ruleId: updated.ruleId || "",
+    make: updated.make,
+    model: updated.model,
+    yearStart: updated.yearStart,
+    yearEnd: updated.yearEnd,
+    keyword: updated.keyword,
+    systemName: updated.systemName,
+    calibrationType: updated.calibrationType,
+    reason: updated.reason,
+    confidenceWeight: updated.confidenceWeight,
+    reportId: updated.reportId || undefined,
+    estimateReference: updated.estimateReference || undefined,
+    vehicleVin: updated.vehicleVin || undefined,
+    triggerLines: parseJsonNumberArray(updated.triggerLines),
+    triggerDescriptions: parseJsonArray(updated.triggerDescriptions),
+    actorId: updated.actorId || undefined,
+    actorName: updated.actorName || undefined,
+    actorEmail: updated.actorEmail || undefined,
+    reviewStatus:
+      updated.reviewStatus === "approved"
+        ? "approved"
+        : updated.reviewStatus === "rejected"
+        ? "rejected"
+        : "pending",
+    reviewedAt: updated.reviewedAt ? updated.reviewedAt.toISOString() : undefined,
+    shopId: updated.shopId,
+  };
 }
 
 export async function applyLearningRules(input: {
@@ -325,15 +453,21 @@ export async function applyLearningRules(input: {
   vehicleMake: string;
   vehicleModel: string;
   results: ScrubResultLike[];
+  shopId: string;
 }): Promise<{ results: ScrubResultLike[]; appliedRuleIds: string[] }> {
-  const store = await loadLearningStore();
-  const matchingRules = store.rules.filter((rule) => {
-    if (rule.confidenceWeight < 0.2) return false;
-    if (input.vehicleYear < rule.yearStart || input.vehicleYear > rule.yearEnd) return false;
-    if (normalize(rule.make) !== normalize(input.vehicleMake)) return false;
-    const ruleModel = normalize(rule.model);
-    const model = normalize(input.vehicleModel);
-    return ruleModel === "all models" || ruleModel === model;
+  const makeNorm = normalize(input.vehicleMake);
+  const modelNorm = normalize(input.vehicleModel);
+
+  const matchingRules = await prisma.learningRule.findMany({
+    where: {
+      shopId: input.shopId,
+      makeNorm,
+      yearStart: { lte: input.vehicleYear },
+      yearEnd: { gte: input.vehicleYear },
+      confidenceWeight: { gte: 0.2 },
+      OR: [{ modelNorm }, { modelNorm: "all models" }],
+    },
+    orderBy: [{ confidenceWeight: "desc" }, { updatedAt: "desc" }],
   });
 
   if (matchingRules.length === 0) {
@@ -356,24 +490,24 @@ export async function applyLearningRules(input: {
   const applied = new Set<string>();
 
   for (let i = 0; i < lines.length; i++) {
-    const lineText = lines[i];
+    const lineText = lines[i].toLowerCase();
     const lineNumber = i + 1;
 
     for (const rule of matchingRules) {
-      if (!keywordMatched(lineText.toLowerCase(), rule.keyword.toLowerCase())) {
+      if (!keywordMatched(lineText, rule.keywordNorm)) {
         continue;
       }
 
       const current = resultMap.get(lineNumber) || {
         lineNumber,
-        description: lineText,
+        description: lines[i],
         calibrationMatches: [],
       };
 
       if (rule.action === "suppress") {
         const before = current.calibrationMatches.length;
         current.calibrationMatches = current.calibrationMatches.filter(
-          (match) => normalize(match.systemName) !== normalize(rule.systemName)
+          (match) => normalize(match.systemName) !== rule.systemNorm
         );
         if (before !== current.calibrationMatches.length) {
           resultMap.set(lineNumber, current);
@@ -384,8 +518,8 @@ export async function applyLearningRules(input: {
 
       const exists = current.calibrationMatches.some(
         (match) =>
-          normalize(match.systemName) === normalize(rule.systemName) &&
-          normalize(match.matchedKeyword) === normalize(rule.keyword)
+          normalize(match.systemName) === rule.systemNorm &&
+          normalize(match.matchedKeyword) === rule.keywordNorm
       );
 
       if (!exists) {
@@ -403,16 +537,19 @@ export async function applyLearningRules(input: {
   }
 
   if (applied.size > 0) {
-    const now = nowIso();
-    for (const ruleId of applied) {
-      const rule = store.rules.find((entry) => entry.id === ruleId);
-      if (!rule) continue;
-      rule.usageCount += 1;
-      rule.lastAppliedAt = now;
-      rule.updatedAt = now;
-    }
-    store.updatedAt = now;
-    await saveLearningStore(store);
+    const appliedRuleIds = Array.from(applied);
+    await prisma.$transaction(
+      appliedRuleIds.map((ruleId) =>
+        prisma.learningRule.update({
+          where: { id: ruleId },
+          data: {
+            usageCount: { increment: 1 },
+            lastAppliedAt: new Date(),
+            updatedAt: new Date(),
+          },
+        })
+      )
+    );
   }
 
   const updated = Array.from(resultMap.values())

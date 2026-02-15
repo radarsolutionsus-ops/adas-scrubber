@@ -1,17 +1,17 @@
 import { NextResponse } from "next/server";
+import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
-import { getSession, getShopUsage } from "@/lib/auth";
+import { getShopUsage } from "@/lib/auth";
 
 export async function GET() {
   try {
-    const session = await getSession();
-
-    if (!session) {
+    const session = await auth();
+    if (!session?.user?.id) {
       return NextResponse.json({ shop: null });
     }
 
     const shop = await prisma.shop.findUnique({
-      where: { id: session.shopId },
+      where: { id: session.user.id },
       include: { subscription: true },
     });
 
@@ -26,6 +26,7 @@ export async function GET() {
         id: shop.id,
         name: shop.name,
         email: shop.email,
+        role: shop.role,
         subscription: shop.subscription,
         usage,
       },

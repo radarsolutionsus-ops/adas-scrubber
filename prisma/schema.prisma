@@ -15,7 +15,7 @@ model Shop {
   email            String   @unique
   passwordHash     String
   role             String   @default("SHOP_OWNER")
-  stripeCustomerId String?
+  stripeCustomerId String?  @unique
   phone            String?
   address          String?
   createdAt        DateTime @default(now())
@@ -24,19 +24,28 @@ model Shop {
   subscription  Subscription?
   usageRecords  UsageRecord[]
   reports       Report[]
+  learningRules LearningRule[]
+  learningEvents LearningEvent[]
 }
 
 model Subscription {
-  id                 String   @id @default(cuid())
-  shopId             String   @unique
-  plan               String   @default("standard") // standard = $500/month
-  monthlyVehicleLimit Int     @default(150)
-  pricePerMonth      Float    @default(500)
-  overagePrice       Float    @default(5) // per vehicle over limit
-  billingCycleStart  DateTime @default(now())
-  active             Boolean  @default(true)
-  createdAt          DateTime @default(now())
-  updatedAt          DateTime @updatedAt
+  id                   String   @id @default(cuid())
+  shopId               String   @unique
+  plan                 String   @default("standard") // standard = $500/month
+  status               String   @default("inactive")
+  monthlyVehicleLimit  Int      @default(150)
+  pricePerMonth        Float    @default(500)
+  overagePrice         Float    @default(5) // per vehicle over limit
+  billingCycleStart    DateTime @default(now())
+  currentPeriodStart   DateTime?
+  currentPeriodEnd     DateTime?
+  stripeSubscriptionId String? @unique
+  stripePriceId        String?
+  stripeProductId      String?
+  cancelAtPeriodEnd    Boolean  @default(false)
+  active               Boolean  @default(true)
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
 
   shop Shop @relation(fields: [shopId], references: [id], onDelete: Cascade)
 }
@@ -125,6 +134,12 @@ model Report {
   vehicleModel    String
   estimateText    String
   calibrations    String   // JSON array of calibration results
+  workflowStatus  String   @default("NEW_INTAKE")
+  priority        String   @default("MEDIUM")
+  assignedTo      String?
+  dueAt           DateTime?
+  submittedAt     DateTime?
+  updatedAt       DateTime @updatedAt
   pdfUrl          String?
   createdAt       DateTime @default(now())
 
@@ -132,4 +147,81 @@ model Report {
 
   @@index([shopId])
   @@index([createdAt])
+  @@index([workflowStatus])
+}
+
+model LearningRule {
+  id               String   @id @default(cuid())
+  shopId           String
+  action           String
+  make             String
+  model            String
+  makeNorm         String
+  modelNorm        String
+  yearStart        Int
+  yearEnd          Int
+  keyword          String
+  keywordNorm      String
+  systemName       String
+  systemNorm       String
+  calibrationType  String?
+  reason           String
+  confidenceWeight Float    @default(0.8)
+  usageCount       Int      @default(0)
+  correctionCount  Int      @default(0)
+  lastAppliedAt    DateTime?
+  lastEditedBy     String?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  shop   Shop            @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  events LearningEvent[]
+
+  @@unique([shopId, action, makeNorm, modelNorm, yearStart, yearEnd, keywordNorm, systemNorm])
+  @@index([shopId, makeNorm, modelNorm, yearStart, yearEnd])
+}
+
+model LearningEvent {
+  id                  String   @id @default(cuid())
+  shopId              String
+  ruleId              String?
+  action              String
+  make                String
+  model               String
+  yearStart           Int
+  yearEnd             Int
+  keyword             String
+  systemName          String
+  calibrationType     String?
+  reason              String
+  confidenceWeight    Float    @default(0.8)
+  reportId            String?
+  estimateReference   String?
+  vehicleVin          String?
+  triggerLines        String?
+  triggerDescriptions String?
+  actorId             String?
+  actorName           String?
+  actorEmail          String?
+  reviewStatus        String   @default("pending")
+  reviewedAt          DateTime?
+  createdAt           DateTime @default(now())
+
+  shop Shop          @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  rule LearningRule? @relation(fields: [ruleId], references: [id], onDelete: SetNull)
+
+  @@index([shopId, createdAt])
+  @@index([shopId, reviewStatus, createdAt])
+  @@index([ruleId])
+}
+
+model WebhookEvent {
+  id          String   @id
+  source      String
+  eventType   String
+  payloadHash String?
+  processedAt DateTime @default(now())
+  createdAt   DateTime @default(now())
+
+  @@index([source, processedAt])
 }

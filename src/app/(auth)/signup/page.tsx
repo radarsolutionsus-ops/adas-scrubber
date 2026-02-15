@@ -74,12 +74,12 @@ export default function SignUpPage() {
                 type="password"
                 placeholder="Create a strong password"
                 required
-                minLength={6}
+                minLength={8}
                 disabled={isPending}
                 className="bg-background/50"
               />
               <p className="text-[0.8rem] text-muted-foreground">
-                Must be at least 6 characters
+                Must be at least 8 characters with letters and numbers
               </p>
             </div>
 
@@ -118,7 +118,7 @@ export default function SignUpPage() {
       </Card>
 
       <div className="text-center text-xs text-muted-foreground">
-        <p>$500/month standard plan. No credit card required for demo.</p>
+        <p>Access and usage limits are managed from your dashboard billing controls.</p>
       </div>
     </div>
   );

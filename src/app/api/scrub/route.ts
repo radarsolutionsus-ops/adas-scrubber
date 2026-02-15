@@ -28,6 +28,11 @@ import {
   mergeCalibrationTypes,
   normalizeForKey,
 } from "@/lib/calibration-normalization";
+import { applyRateLimit } from "@/lib/security/rate-limit";
+import {
+  buildOpenAIOperationHintText,
+  extractEstimateAssistFromOpenAI,
+} from "@/lib/openai-pdf-scrub";
 
 // Common vehicle models by make for text-based detection fallback
 const VEHICLE_MODELS: Record<string, string[]> = {
@@ -167,18 +172,25 @@ async function extractVehicleInfo(text: string, vinHint?: string): Promise<Extra
   // Step 2: Text-based detection (supplement or fallback)
   const textInfo = extractVehicleFromText(text);
 
-  // Merge text-based info if we're missing data
-  // IMPORTANT: VIN-based year should ALWAYS take priority over text extraction
-  // Only use text year if we have NO VIN at all
-  if (!result.year && textInfo.year) {
-    // Only trust text year if no VIN was found, or if years are close
-    if (!result.vin) {
-      result.year = textInfo.year;
-    } else if (result.vinDecoded?.errors && result.vinDecoded.errors.length > 0) {
-      // VIN decode failed, but validate text year is reasonable (2010+)
-      if (textInfo.year >= 2010) {
+  // Merge text-based info if we're missing data. If VIN decode failed and VIN fallback
+  // produced an older legacy year, prefer a modern text-based year when available.
+  if (textInfo.year) {
+    if (!result.year) {
+      if (!result.vin) {
+        result.year = textInfo.year;
+      } else if (result.vinDecoded?.errors && result.vinDecoded.errors.length > 0 && textInfo.year >= 2010) {
         result.year = textInfo.year;
       }
+    } else if (
+      result.vin &&
+      result.vinDecoded?.errors &&
+      result.vinDecoded.errors.length > 0 &&
+      result.year < 2010 &&
+      textInfo.year >= 2010
+    ) {
+      result.year = textInfo.year;
+      result.source = "combined";
+      result.confidence = "medium";
     }
   }
   if (!result.make && textInfo.make) result.make = textInfo.make;
@@ -197,18 +209,68 @@ async function extractVehicleInfo(text: string, vinHint?: string): Promise<Extra
 function extractVehicleFromText(text: string): { year?: number; make?: string; model?: string } {
   const result: { year?: number; make?: string; model?: string } = {};
 
+  // Highest-confidence vehicle header extraction (e.g. "Vehicle: 2023 Acura RDX ...").
+  const vehicleHeaderPatterns = [
+    /\bVehicle\s*:\s*(19[9]\d|20[0-3]\d)\s+([A-Za-z][A-Za-z\- ]{1,25})\s+([A-Za-z0-9][A-Za-z0-9\- ]{1,25})/i,
+    /\b(19[9]\d|20[0-3]\d)\s+([A-Za-z][A-Za-z\- ]{1,25})\s+([A-Za-z0-9][A-Za-z0-9\- ]{1,25})\b/i,
+  ];
+
+  for (const pattern of vehicleHeaderPatterns) {
+    const match = text.match(pattern);
+    if (!match) continue;
+
+    const year = Number(match[1]);
+    const makeCandidate = match[2]?.trim();
+    const modelCandidate = match[3]?.trim();
+
+    if (Number.isFinite(year)) {
+      result.year = year;
+    }
+
+    if (makeCandidate) {
+      const normalizedMake =
+        Object.entries(MAKE_ALIASES).find(([alias]) => alias.toLowerCase() === makeCandidate.toLowerCase())?.[1] ||
+        Object.keys(VEHICLE_MODELS).find((make) => make.toLowerCase() === makeCandidate.toLowerCase()) ||
+        makeCandidate;
+      result.make = normalizedMake;
+    }
+
+    if (modelCandidate) {
+      const cleanedModel = modelCandidate.replace(/\s{2,}/g, " ").trim();
+      if (cleanedModel && !/^(VIN|CLAIM|RO|PO)$/i.test(cleanedModel)) {
+        result.model = cleanedModel.split(/\s{2,}/)[0] || cleanedModel;
+      }
+    }
+
+    if (result.year && result.make && result.model) {
+      return result;
+    }
+  }
+
   // Find year - look for ALL years and pick the most likely vehicle year
   // Vehicle years are typically recent (2015-2030), prioritize those over older dates
   const yearRegex = /\b(199[0-9]|20[0-3][0-9])\b/g;
   const allYears: number[] = [];
+  const contextualYears: number[] = [];
   let match;
   while ((match = yearRegex.exec(text)) !== null) {
-    allYears.push(parseInt(match[1], 10));
+    const year = parseInt(match[1], 10);
+    allYears.push(year);
+
+    // Prefer years found in context lines likely to contain vehicle descriptors.
+    const start = Math.max(0, (match.index || 0) - 80);
+    const end = Math.min(text.length, (match.index || 0) + 80);
+    const contextWindow = text.slice(start, end);
+    if (/\b(VIN|VEHICLE|MAKE|MODEL|ACURA|HONDA|TOYOTA|FORD|CHEVROLET|BMW|MERCEDES|NISSAN|KIA|HYUNDAI|LEXUS|GMC|VOLVO|GENESIS)\b/i.test(contextWindow)) {
+      contextualYears.push(year);
+    }
   }
 
   if (allYears.length > 0) {
+    const prioritizedYears = contextualYears.length > 0 ? contextualYears : allYears;
+
     // Filter to likely vehicle years (2010+) first
-    const recentYears = allYears.filter(y => y >= 2010 && y <= 2030);
+    const recentYears = prioritizedYears.filter(y => y >= 2010 && y <= 2030);
 
     if (recentYears.length > 0) {
       // Find the most common recent year, or the highest one
@@ -229,7 +291,7 @@ function extractVehicleFromText(text: string): { year?: number; make?: string; m
       result.year = bestYear;
     } else {
       // No recent years found, use the highest year found
-      result.year = Math.max(...allYears);
+      result.year = Math.max(...prioritizedYears);
     }
   }
 
@@ -294,6 +356,47 @@ function extractVehicleFromText(text: string): { year?: number; make?: string; m
   return result;
 }
 
+function classifyEstimateDocument(text: string): {
+  kind: "estimate" | "adas_report";
+  score: number;
+  reasons: string[];
+} {
+  const reasons: string[] = [];
+  let score = 0;
+
+  const weightedChecks: Array<{ pattern: RegExp; weight: number; reason: string }> = [
+    { pattern: /\bcalibration report\b/i, weight: 3, reason: "Contains 'calibration report' heading." },
+    { pattern: /\bprocedure type\s*:/i, weight: 2, reason: "Contains procedure-type narrative sections." },
+    { pattern: /\brepair\/installation triggers\s*:/i, weight: 2, reason: "Contains repair/installation trigger sections." },
+    { pattern: /\bresponsible for\s*:/i, weight: 1, reason: "Contains responsibility narrative blocks." },
+    { pattern: /\bplease consult the below manufacturer-provided documentation/i, weight: 2, reason: "Contains manufacturer-procedure disclaimer content." },
+    { pattern: /\bdisclaimer:\s*this report is informational/i, weight: 3, reason: "Contains report disclaimer block." },
+    { pattern: /\bmanufacturer procedure\s*alldata\b/i, weight: 2, reason: "Contains generated procedure source label formatting." },
+    { pattern: /\btotal projected price\b/i, weight: 2, reason: "Contains projected-price summary language used by report outputs." },
+  ];
+
+  for (const check of weightedChecks) {
+    if (check.pattern.test(text)) {
+      score += check.weight;
+      reasons.push(check.reason);
+    }
+  }
+
+  const lineNarrativeHits =
+    (text.match(/\bLine\s+\d+\b/g)?.length || 0) +
+    (text.match(/\bLines\s+\d+/g)?.length || 0);
+  if (lineNarrativeHits >= 6) {
+    score += 1;
+    reasons.push("Contains dense line-reference narrative typical of generated calibration reports.");
+  }
+
+  return {
+    kind: score >= 6 ? "adas_report" : "estimate",
+    score,
+    reasons,
+  };
+}
+
 async function parsePdf(buffer: Buffer): Promise<string> {
   const pdfParseModule = await import("pdf-parse/lib/pdf-parse");
   const pdfParse = (pdfParseModule.default || pdfParseModule) as (dataBuffer: Buffer) => Promise<{ text: string }>;
@@ -309,6 +412,7 @@ function buildAnalysisConfidence(input: {
   adasPartsCount: number;
   hasVin: boolean;
   usedInferenceFallback: boolean;
+  usedOpenAIOperationFallback: boolean;
 }) {
   const reasons: string[] = [];
   let score = 52;
@@ -359,6 +463,11 @@ function buildAnalysisConfidence(input: {
   if (input.usedInferenceFallback) {
     score -= 8;
     reasons.push("Used inference fallback because direct OEM map matching was limited.");
+  }
+
+  if (input.usedOpenAIOperationFallback) {
+    score += 4;
+    reasons.push("Applied OpenAI operation extraction fallback for low-structure estimate content.");
   }
 
   const normalized = Math.max(45, Math.min(96, score));
@@ -521,6 +630,108 @@ function inferCalibrations(
   return Array.from(resultsByLine.values()).sort((a, b) => a.lineNumber - b.lineNumber);
 }
 
+function inferSteeringFromLineMentions(
+  estimateText: string
+): ScrubResult[] {
+  const lineTextByNumber = new Map<number, string>();
+  const lines = estimateText
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter((line) => line.length > 0);
+  for (let i = 0; i < lines.length; i++) {
+    lineTextByNumber.set(i + 1, lines[i]);
+  }
+
+  const results: ScrubResult[] = [];
+  const seenLines = new Set<number>();
+  const regex = /\bSteering[^\n]{0,120}?\bLine\s+(\d{1,3})\b/gi;
+  let match: RegExpExecArray | null;
+
+  while ((match = regex.exec(estimateText)) !== null) {
+    const lineNumber = Number.parseInt(match[1], 10);
+    if (!Number.isFinite(lineNumber) || lineNumber < 1 || lineNumber > 999) continue;
+    if (seenLines.has(lineNumber)) continue;
+    seenLines.add(lineNumber);
+
+    results.push({
+      lineNumber,
+      description: lineTextByNumber.get(lineNumber) || "Steering operation",
+      calibrationMatches: [
+        {
+          systemName: "Steering Angle Sensor",
+          calibrationType: "Initialization",
+          reason: "Steering-system operation reference indicates steering-angle reset/relearn requirement.",
+          matchedKeyword: "steering-line-mention",
+          repairOperation: "Steering Angle Sensor Reset/Relearn",
+        },
+      ],
+    });
+  }
+
+  return results;
+}
+
+function mergeMissingInferredCalibrations(baseResults: ScrubResult[], inferredResults: ScrubResult[]) {
+  if (inferredResults.length === 0) {
+    return { merged: baseResults, addedCount: 0 };
+  }
+  if (baseResults.length === 0) {
+    return { merged: inferredResults, addedCount: inferredResults.length };
+  }
+
+  const operationKeyForMatch = (match: ScrubResult["calibrationMatches"][number]) => {
+    const repairOperation = canonicalizeOperationName(
+      match.repairOperation,
+      match.systemName,
+      match.matchedKeyword
+    );
+    const normalizedSystem = canonicalizeSystem(match.systemName, repairOperation);
+    return normalizeForKey(calibrationOperationForSystem(normalizedSystem, repairOperation));
+  };
+
+  const existingOperationKeys = new Set<string>();
+  for (const result of baseResults) {
+    for (const match of result.calibrationMatches) {
+      existingOperationKeys.add(operationKeyForMatch(match));
+    }
+  }
+
+  const mergedByLine = new Map<number, ScrubResult>();
+  for (const result of baseResults) {
+    mergedByLine.set(result.lineNumber, {
+      lineNumber: result.lineNumber,
+      description: result.description,
+      calibrationMatches: [...result.calibrationMatches],
+    });
+  }
+
+  let addedCount = 0;
+  for (const result of inferredResults) {
+    for (const match of result.calibrationMatches) {
+      const operationKey = operationKeyForMatch(match);
+      if (existingOperationKeys.has(operationKey)) continue;
+      existingOperationKeys.add(operationKey);
+
+      const existingLine = mergedByLine.get(result.lineNumber);
+      if (!existingLine) {
+        mergedByLine.set(result.lineNumber, {
+          lineNumber: result.lineNumber,
+          description: result.description,
+          calibrationMatches: [match],
+        });
+      } else {
+        existingLine.calibrationMatches.push(match);
+      }
+      addedCount += 1;
+    }
+  }
+
+  return {
+    merged: Array.from(mergedByLine.values()).sort((a, b) => a.lineNumber - b.lineNumber),
+    addedCount,
+  };
+}
+
 function groupCalibrations(results: ScrubResult[]) {
   type GroupedCalibration = {
     systemName: string;
@@ -611,6 +822,15 @@ function groupCalibrations(results: ScrubResult[]) {
 
 export async function POST(request: NextRequest) {
   try {
+    const rateLimit = applyRateLimit(request, {
+      id: "scrub-api",
+      limit: 45,
+      windowMs: 60_000,
+    });
+    if (rateLimit.limited) {
+      return rateLimit.response;
+    }
+
     const session = await auth();
 
     if (!session?.user) {
@@ -639,6 +859,16 @@ export async function POST(request: NextRequest) {
       if (!file) {
         return NextResponse.json({ error: "No file uploaded" }, { status: 400 });
       }
+      const fileName = file.name || "estimate.pdf";
+      const isPdfMime = file.type === "application/pdf";
+      const isPdfName = fileName.toLowerCase().endsWith(".pdf");
+      if (!isPdfMime && !isPdfName) {
+        return NextResponse.json({ error: "Only PDF estimate files are supported" }, { status: 400 });
+      }
+      const maxUploadBytes = 20 * 1024 * 1024;
+      if (file.size > maxUploadBytes) {
+        return NextResponse.json({ error: "File too large. Max upload size is 20MB." }, { status: 413 });
+      }
 
       uploadFileName = file.name;
       const buffer = Buffer.from(await file.arrayBuffer());
@@ -659,13 +889,84 @@ export async function POST(request: NextRequest) {
     if (!estimateText) {
       return NextResponse.json({ error: "No estimate text provided" }, { status: 400 });
     }
+    if (estimateText.length > 2_000_000) {
+      return NextResponse.json({ error: "Estimate content is too large to process." }, { status: 413 });
+    }
+
+    // Prevent scrubbing report-style PDFs as raw estimates.
+    const documentClassification = classifyEstimateDocument(estimateText);
+    if (documentClassification.kind === "adas_report") {
+      return NextResponse.json(
+        {
+          error:
+            "This file appears to be a calibration report, not a raw repair estimate. Upload the original estimate PDF (CCC/Mitchell/Audatex).",
+          documentClassification,
+        },
+        { status: 422 }
+      );
+    }
+
+    const openAiAssist = await extractEstimateAssistFromOpenAI({
+      estimateText,
+      fileName: uploadFileName,
+    });
+    if (openAiAssist?.documentType === "adas_report") {
+      return NextResponse.json(
+        {
+          error:
+            "This file appears to be a calibration report, not a raw repair estimate. Upload the original estimate PDF (CCC/Mitchell/Audatex).",
+          documentClassification: {
+            kind: "adas_report",
+            score: 999,
+            reasons: ["OpenAI classified this upload as a generated calibration report."],
+          },
+        },
+        { status: 422 }
+      );
+    }
+    if (!providedYear && openAiAssist?.vehicle.year) providedYear = openAiAssist.vehicle.year;
+    if (!providedMake && openAiAssist?.vehicle.make) providedMake = openAiAssist.vehicle.make;
+    if (!providedModel && openAiAssist?.vehicle.model) providedModel = openAiAssist.vehicle.model;
 
     // Step 1: Parse estimate with enhanced parser
     const parsedEstimate = parseEstimate(estimateText);
     const textIdentifiers = extractEstimateIdentifiers(estimateText);
     const fileIdentifiers = extractEstimateIdentifiersFromFileName(uploadFileName);
     const estimateIdentifiers = mergeEstimateIdentifiers(textIdentifiers, fileIdentifiers);
+    if (!estimateIdentifiers.roNumber && openAiAssist?.metadata.roNumber) {
+      estimateIdentifiers.roNumber = openAiAssist.metadata.roNumber;
+    }
+    if (!estimateIdentifiers.poNumber && openAiAssist?.metadata.poNumber) {
+      estimateIdentifiers.poNumber = openAiAssist.metadata.poNumber;
+    }
+    if (!estimateIdentifiers.claimNumber && openAiAssist?.metadata.claimNumber) {
+      estimateIdentifiers.claimNumber = openAiAssist.metadata.claimNumber;
+    }
     const estimateMetadata = extractEstimateMetadata(estimateText);
+    if (!estimateMetadata.shopName && openAiAssist?.metadata.shopName) {
+      estimateMetadata.shopName = openAiAssist.metadata.shopName;
+    }
+    if (!estimateMetadata.customerName && openAiAssist?.metadata.customerName) {
+      estimateMetadata.customerName = openAiAssist.metadata.customerName;
+    }
+    if (!estimateMetadata.estimatorName && openAiAssist?.metadata.estimatorName) {
+      estimateMetadata.estimatorName = openAiAssist.metadata.estimatorName;
+    }
+    if (!estimateMetadata.adjusterName && openAiAssist?.metadata.adjusterName) {
+      estimateMetadata.adjusterName = openAiAssist.metadata.adjusterName;
+    }
+    if (!estimateMetadata.claimNumber && openAiAssist?.metadata.claimNumber) {
+      estimateMetadata.claimNumber = openAiAssist.metadata.claimNumber;
+    }
+    if (!estimateMetadata.policyNumber && openAiAssist?.metadata.policyNumber) {
+      estimateMetadata.policyNumber = openAiAssist.metadata.policyNumber;
+    }
+    if (!estimateMetadata.lossDate && openAiAssist?.metadata.lossDate) {
+      estimateMetadata.lossDate = openAiAssist.metadata.lossDate;
+    }
+    if (!estimateMetadata.createDate && openAiAssist?.metadata.createDate) {
+      estimateMetadata.createDate = openAiAssist.metadata.createDate;
+    }
     if (!estimateMetadata.roNumber && estimateIdentifiers.roNumber) estimateMetadata.roNumber = estimateIdentifiers.roNumber;
     if (!estimateMetadata.poNumber && estimateIdentifiers.poNumber) estimateMetadata.poNumber = estimateIdentifiers.poNumber;
     if (!estimateMetadata.workfileId && estimateIdentifiers.workfileId) estimateMetadata.workfileId = estimateIdentifiers.workfileId;
@@ -673,6 +974,17 @@ export async function POST(request: NextRequest) {
 
     // Step 2: Extract vehicle info (VIN API + text parsing)
     const extractedVehicle = await extractVehicleInfo(estimateText, uploadFileName);
+    if (!extractedVehicle.year && openAiAssist?.vehicle.year) extractedVehicle.year = openAiAssist.vehicle.year;
+    if (!extractedVehicle.make && openAiAssist?.vehicle.make) extractedVehicle.make = openAiAssist.vehicle.make;
+    if (!extractedVehicle.model && openAiAssist?.vehicle.model) extractedVehicle.model = openAiAssist.vehicle.model;
+    if (!extractedVehicle.vin && openAiAssist?.vehicle.vin) extractedVehicle.vin = openAiAssist.vehicle.vin;
+    if (
+      extractedVehicle.confidence === "low" &&
+      (openAiAssist?.vehicle.year || openAiAssist?.vehicle.make || openAiAssist?.vehicle.model)
+    ) {
+      extractedVehicle.confidence = "medium";
+      extractedVehicle.source = "combined";
+    }
 
     // Debug logging for vehicle detection
     console.log('Vehicle Detection:', {
@@ -714,11 +1026,26 @@ export async function POST(request: NextRequest) {
     let results: Awaited<ReturnType<typeof scrubEstimate>>["results"] = [];
     let vehicle: Awaited<ReturnType<typeof scrubEstimate>>["vehicle"] = null;
     let detectedRepairs: Awaited<ReturnType<typeof scrubEstimate>>["detectedRepairs"] = [];
+    let usedOpenAIOperationFallback = false;
 
     const scrubResult = await scrubEstimate(estimateText, vehicleYear, vehicleMake, vehicleModel);
     results = scrubResult.results;
     vehicle = scrubResult.vehicle;
     detectedRepairs = scrubResult.detectedRepairs;
+
+    if (results.length === 0 && openAiAssist?.operations.length) {
+      const operationHints = buildOpenAIOperationHintText(openAiAssist.operations);
+      if (operationHints) {
+        const aiAugmentedText = `${estimateText}\n${operationHints}`;
+        const aiScrubResult = await scrubEstimate(aiAugmentedText, vehicleYear, vehicleMake, vehicleModel);
+        if (aiScrubResult.results.length > 0) {
+          results = aiScrubResult.results;
+          detectedRepairs = aiScrubResult.detectedRepairs;
+          vehicle = aiScrubResult.vehicle || vehicle;
+          usedOpenAIOperationFallback = true;
+        }
+      }
+    }
 
     // Step 4: Build enhanced response
     const vehicleInfo = vehicleYear && vehicleMake && vehicleModel
@@ -735,10 +1062,25 @@ export async function POST(request: NextRequest) {
     }));
 
     let usedInferenceFallback = false;
-    if (results.length === 0 && (detectedRepairs.length > 0 || adasPartsInEstimate.length > 0)) {
+    if (detectedRepairs.length > 0 || adasPartsInEstimate.length > 0) {
       const inferred = inferCalibrations(detectedRepairs, adasPartsInEstimate);
-      if (inferred.length > 0) {
+      if (results.length === 0 && inferred.length > 0) {
         results = inferred;
+        usedInferenceFallback = true;
+      } else if (results.length > 0 && inferred.length > 0) {
+        const merged = mergeMissingInferredCalibrations(results, inferred);
+        if (merged.addedCount > 0) {
+          results = merged.merged;
+          usedInferenceFallback = true;
+        }
+      }
+    }
+
+    const steeringMentionInferred = inferSteeringFromLineMentions(estimateText);
+    if (steeringMentionInferred.length > 0) {
+      const merged = mergeMissingInferredCalibrations(results, steeringMentionInferred);
+      if (merged.addedCount > 0) {
+        results = merged.merged;
         usedInferenceFallback = true;
       }
     }
@@ -748,6 +1090,7 @@ export async function POST(request: NextRequest) {
       vehicleYear,
       vehicleMake,
       vehicleModel,
+      shopId,
       results,
     });
     results = learningOutput.results;
@@ -792,6 +1135,7 @@ export async function POST(request: NextRequest) {
       adasPartsCount: adasPartsInEstimate.length,
       hasVin: Boolean(extractedVehicle.vin),
       usedInferenceFallback,
+      usedOpenAIOperationFallback,
     });
 
     return NextResponse.json({
@@ -810,6 +1154,12 @@ export async function POST(request: NextRequest) {
       groupedCalibrations,
       learnedRuleIdsApplied: learningOutput.appliedRuleIds,
       analysisConfidence,
+      openAiAssist: {
+        enabled: Boolean(openAiAssist),
+        model: openAiAssist?.model || null,
+        confidence: openAiAssist?.confidence || 0,
+        usedOperationFallback: usedOpenAIOperationFallback,
+      },
     });
   } catch (error) {
     console.error("Scrub error:", error);

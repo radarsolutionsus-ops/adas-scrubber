@@ -5,7 +5,8 @@
   "scripts": {
     "dev": "next dev",
     "build": "prisma generate && next build",
-    "start": "prisma migrate deploy && prisma db seed || true && next start",
+    "start": "prisma db push && next start",
+    "start:with-seed": "prisma db push && prisma db seed && next start",
     "lint": "eslint",
     "db:seed": "npx ts-node --compiler-options '{\"module\":\"CommonJS\"}' prisma/seed.ts",
     "db:migrate": "npx prisma migrate dev",

@@ -4,20 +4,11 @@ import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
 import { signIn } from "@/auth";
 import { AuthError } from "next-auth";
+import { createStripeCustomer, isStripeConfigured } from "@/lib/billing/stripe";
 
 export interface RegisterState {
   error?: string;
   success?: boolean;
-}
-
-// Placeholder for Stripe integration
-async function createStripeCustomer(email: string, name: string): Promise<string | null> {
-  // TODO: Implement Stripe customer creation
-  // const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
-  // const customer = await stripe.customers.create({ email, name });
-  // return customer.id;
-  console.log(`[Stripe Placeholder] Would create customer for: ${name} <${email}>`);
-  return null;
 }
 
 export async function register(
@@ -43,8 +34,12 @@ export async function register(
       return { error: "Please enter a valid email address" };
     }
 
-    if (password.length < 6) {
-      return { error: "Password must be at least 6 characters" };
+    if (password.length < 8) {
+      return { error: "Password must be at least 8 characters" };
+    }
+
+    if (!/[A-Za-z]/.test(password) || !/[0-9]/.test(password)) {
+      return { error: "Password must include at least one letter and one number" };
     }
 
     if (password !== confirmPassword) {
@@ -63,20 +58,17 @@ export async function register(
     // Hash password
     const passwordHash = await bcrypt.hash(password, 12);
 
-    // Create Stripe customer (placeholder for now)
-    const stripeCustomerId = await createStripeCustomer(email, shopName);
-
-    // Create shop with subscription
-    await prisma.shop.create({
+    // Create account first; Stripe customer is attached after we have shop id metadata.
+    const createdShop = await prisma.shop.create({
       data: {
         name: shopName,
         email,
         passwordHash,
         role: "SHOP_OWNER",
-        stripeCustomerId,
         subscription: {
           create: {
             plan: "standard",
+            status: "active",
             monthlyVehicleLimit: 150,
             pricePerMonth: 500,
             overagePrice: 5,
@@ -84,6 +76,22 @@ export async function register(
         },
       },
     });
+
+    if (isStripeConfigured()) {
+      try {
+        const stripeCustomerId = await createStripeCustomer({
+          shopId: createdShop.id,
+          email,
+          name: shopName,
+        });
+        await prisma.shop.update({
+          where: { id: createdShop.id },
+          data: { stripeCustomerId },
+        });
+      } catch (stripeError) {
+        console.error("Stripe customer creation failed:", stripeError);
+      }
+    }
 
     // Sign in the new user
     await signIn("credentials", {

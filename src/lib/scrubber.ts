@@ -47,6 +47,12 @@ function extractCCCLineNumber(line: string): number | null {
     return parseInt(match[1], 10);
   }
 
+  // Handle compact CCC/Mitchell exports like "60S01ReplClockspring..."
+  const compactMatch = line.match(/^\s*(\d{1,3})(?:[A-Z0-9]{1,6})?(Rpr|Repl|O\/H|Ovhl|R&I|R&R|Subl|Add|Blend|Refn|Aim|Align|Calibrat|Repair|Replace|Remove|Overhaul)/i);
+  if (compactMatch) {
+    return parseInt(compactMatch[1], 10);
+  }
+
   // Also match section headers like "1 FRONT BUMPER"
   const sectionMatch = line.match(/^\s*(\d{1,3})\s+[A-Z]{2,}/);
   if (sectionMatch) {
@@ -66,6 +72,11 @@ function isLikelyEstimateOperationLine(line: string): boolean {
 
   // Typical estimate line with line number + operation token.
   if (/^\s*\d{1,3}\s*\*{0,2}\s*(Rpr|Repl|O\/H|Ovhl|R&I|R&R|Subl|Add|Blend|Refn|Aim|Align|Calibrat|Repair|Replace|Remove|Overhaul)\b/i.test(line)) {
+    return true;
+  }
+
+  // Compact exports where op code is concatenated: "60S01ReplClockspring..."
+  if (/^\s*\d{1,3}(?:[A-Z0-9]{1,6})?(Rpr|Repl|O\/H|Ovhl|R&I|R&R|Subl|Add|Blend|Refn|Aim|Align|Calibrat|Repair|Replace|Remove|Overhaul)/i.test(line)) {
     return true;
   }
 
@@ -117,11 +128,11 @@ function cleanRepairDescription(rawLine: string): string {
   let component = '';
 
   // Detect operation type at the start (after optional leading number)
-  const replMatch = rawLine.match(/^\d*\s*(Repl(?:ace)?|R&R)\s*/i);
-  const riMatch = rawLine.match(/^\d*\s*(R&I|Remove)\s*/i);
-  const overhaulMatch = rawLine.match(/^\d*\s*(O\/H|Overhaul|Ovhl)\s*/i);
-  const repairMatch = rawLine.match(/^\d*\s*(Rpr|Repair)\s*/i);
-  const refinishMatch = rawLine.match(/^\d*\s*(Refinish|Blend|Paint)\s*/i);
+  const replMatch = rawLine.match(/^\d*(?:[A-Z0-9]{1,6})?\s*(Repl(?:ace)?|R&R)\s*/i);
+  const riMatch = rawLine.match(/^\d*(?:[A-Z0-9]{1,6})?\s*(R&I|Remove)\s*/i);
+  const overhaulMatch = rawLine.match(/^\d*(?:[A-Z0-9]{1,6})?\s*(O\/H|Overhaul|Ovhl)\s*/i);
+  const repairMatch = rawLine.match(/^\d*(?:[A-Z0-9]{1,6})?\s*(Rpr|Repair)\s*/i);
+  const refinishMatch = rawLine.match(/^\d*(?:[A-Z0-9]{1,6})?\s*(Refinish|Blend|Paint)\s*/i);
 
   if (replMatch) {
     operation = 'Replace';
@@ -177,6 +188,8 @@ function cleanRepairDescription(rawLine: string): string {
     /suspension/i,
     /strut/i,
     /control\s*arm/i,
+    /clock\s*spring/i,
+    /clockspring/i,
   ];
 
   for (const pattern of componentPatterns) {
@@ -202,8 +215,8 @@ function cleanRepairDescription(rawLine: string): string {
   // Fallback: clean up the raw line more aggressively
   let cleaned = rawLine;
 
-  // Remove leading numbers (line numbers)
-  cleaned = cleaned.replace(/^\s*\d{1,3}\s*/, '');
+  // Remove leading numbers + compact section code (e.g., "60S01")
+  cleaned = cleaned.replace(/^\s*\d{1,3}(?:[A-Z0-9]{1,6})?\s*/, '');
 
   // Remove operation prefixes for cleaner output (we'll add them back formatted)
   cleaned = cleaned.replace(/^(Repl|Replace|R&R|R&I|Remove|O\/H|Overhaul|Ovhl|Rpr|Repair|Refinish|Blend)\s*/i, '');
@@ -294,6 +307,8 @@ export function detectRepairs(estimateText: string): DetectedRepair[] {
 
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
+    const cccLineNumber = extractCCCLineNumber(line);
+    const lineNumber = cccLineNumber !== null ? cccLineNumber : i + 1;
 
     // Keep matching focused on actual estimate operation rows.
     if (!isLikelyEstimateOperationLine(line)) {
@@ -303,9 +318,9 @@ export function detectRepairs(estimateText: string): DetectedRepair[] {
     for (const repairPattern of REPAIR_PATTERNS) {
       if (repairPattern.pattern.test(line)) {
         // Avoid duplicate repair types for the same line
-        if (!detectedRepairs.find(r => r.lineNumber === i + 1 && r.repairType === repairPattern.type)) {
+        if (!detectedRepairs.find(r => r.lineNumber === lineNumber && r.repairType === repairPattern.type)) {
           detectedRepairs.push({
-            lineNumber: i + 1,
+            lineNumber,
             description: cleanRepairDescription(line),
             repairType: repairPattern.type,
           });

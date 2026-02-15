@@ -67,6 +67,55 @@ const ADAS_VARIABLE_TO_FEATURE: Record<string, keyof VINDecodeResult['adasFeatur
   'Lane Centering Assistance': 'laneKeepAssist',
 };
 
+const VIN_CHAR_WEIGHTS = [8, 7, 6, 5, 4, 3, 2, 10, 0, 9, 8, 7, 6, 5, 4, 3, 2];
+const VIN_TRANSLITERATION: Record<string, number> = {
+  A: 1,
+  B: 2,
+  C: 3,
+  D: 4,
+  E: 5,
+  F: 6,
+  G: 7,
+  H: 8,
+  J: 1,
+  K: 2,
+  L: 3,
+  M: 4,
+  N: 5,
+  P: 7,
+  R: 9,
+  S: 2,
+  T: 3,
+  U: 4,
+  V: 5,
+  W: 6,
+  X: 7,
+  Y: 8,
+  Z: 9,
+};
+
+function vinCharValue(char: string): number | null {
+  if (/^\d$/.test(char)) return Number.parseInt(char, 10);
+  return VIN_TRANSLITERATION[char] ?? null;
+}
+
+function hasValidVinCheckDigit(vin: string): boolean {
+  if (vin.length !== 17) return false;
+  const expectedCheck = vin.charAt(8).toUpperCase();
+  if (!/^[0-9X]$/.test(expectedCheck)) return false;
+
+  let sum = 0;
+  for (let i = 0; i < 17; i++) {
+    const value = vinCharValue(vin.charAt(i).toUpperCase());
+    if (value === null) return false;
+    sum += value * VIN_CHAR_WEIGHTS[i];
+  }
+
+  const remainder = sum % 11;
+  const computed = remainder === 10 ? "X" : String(remainder);
+  return computed === expectedCheck;
+}
+
 /**
  * Validate VIN format (17 characters, no I, O, Q)
  */
@@ -76,6 +125,10 @@ export function isValidVIN(vin: string): boolean {
   if (/[IOQ]/i.test(vin)) return false;
   // Must be alphanumeric
   if (!/^[A-HJ-NPR-Z0-9]{17}$/i.test(vin)) return false;
+  // WMI first position should never be 0
+  if (vin.charAt(0) === "0") return false;
+  // Check digit should be valid for high-confidence extraction
+  if (!hasValidVinCheckDigit(vin.toUpperCase())) return false;
   return true;
 }
 

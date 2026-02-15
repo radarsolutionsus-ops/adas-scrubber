@@ -4,6 +4,7 @@ import { auth } from "@/auth";
 import { createReportPdfBuffer } from "@/lib/report-pdf";
 import { extractEstimateIdentifiers, extractEstimateMetadata } from "@/lib/estimate-parser";
 import { extractVINFromText } from "@/lib/vin-decoder";
+import { applyRateLimit } from "@/lib/security/rate-limit";
 
 export const runtime = "nodejs";
 
@@ -79,6 +80,15 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const rateLimit = applyRateLimit(request, {
+      id: "report-pdf",
+      limit: 80,
+      windowMs: 60_000,
+    });
+    if (rateLimit.limited) {
+      return rateLimit.response;
+    }
+
     const session = await auth();
     if (!session?.user?.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
