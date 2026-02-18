@@ -10,6 +10,7 @@ RUN apt-get update \
 FROM base AS deps
 ENV PRISMA_SKIP_POSTINSTALL_GENERATE=true
 COPY package.json package-lock.json ./
+COPY prisma ./prisma
 RUN npm ci
 
 FROM deps AS builder
