@@ -139,7 +139,7 @@ model Report {
   assignedTo      String?
   dueAt           DateTime?
   submittedAt     DateTime?
-  updatedAt       DateTime @updatedAt
+  updatedAt       DateTime @default(now()) @updatedAt
   pdfUrl          String?
   createdAt       DateTime @default(now())
 
