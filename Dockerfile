@@ -36,4 +36,4 @@ USER nextjs
 EXPOSE 3000
 ENV PORT=3000
 
-CMD ["sh", "-c", "npx prisma db push --skip-generate && node server.js"]
+CMD ["sh", "-c", "npx prisma db push --accept-data-loss --skip-generate && node server.js"]
