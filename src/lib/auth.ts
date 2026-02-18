@@ -7,11 +7,37 @@ export async function getShopUsage(shopId: string) {
     include: { subscription: true },
   });
 
-  if (!shop || !shop.subscription) {
+  if (!shop) {
     return null;
   }
 
-  const monthStart = getUsageWindowStart(shop.subscription.billingCycleStart);
+  let subscription = shop.subscription;
+  if (!subscription) {
+    try {
+      subscription = await prisma.subscription.create({
+        data: {
+          shopId: shop.id,
+          plan: "standard",
+          status: "active",
+          monthlyVehicleLimit: 150,
+          pricePerMonth: 500,
+          overagePrice: 5,
+          active: true,
+        },
+      });
+    } catch {
+      // Handle race where another request created it first.
+      subscription = await prisma.subscription.findUnique({
+        where: { shopId: shop.id },
+      });
+    }
+  }
+
+  if (!subscription) {
+    return null;
+  }
+
+  const monthStart = getUsageWindowStart(subscription.billingCycleStart);
 
   const [usageCount, lifetimeCount] = await Promise.all([
     prisma.usageRecord.count({
@@ -25,7 +51,7 @@ export async function getShopUsage(shopId: string) {
     }),
   ]);
 
-  const limit = shop.subscription.monthlyVehicleLimit;
+  const limit = subscription.monthlyVehicleLimit;
   const remaining = Math.max(0, limit - usageCount);
   const overage = Math.max(0, usageCount - limit);
 
@@ -34,7 +60,7 @@ export async function getShopUsage(shopId: string) {
     limit,
     remaining,
     overage,
-    overageCharge: overage * shop.subscription.overagePrice,
+    overageCharge: overage * subscription.overagePrice,
     billingCycleStart: monthStart,
     lifetimeUsed: lifetimeCount,
     resetMode: getUsageResetMode(),

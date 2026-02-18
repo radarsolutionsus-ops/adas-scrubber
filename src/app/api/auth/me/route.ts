@@ -19,6 +19,25 @@ export async function GET() {
       return NextResponse.json({ shop: null });
     }
 
+    let subscription = shop.subscription;
+    if (!subscription) {
+      try {
+        subscription = await prisma.subscription.create({
+          data: {
+            shopId: shop.id,
+            plan: "standard",
+            status: "active",
+            monthlyVehicleLimit: 150,
+            pricePerMonth: 500,
+            overagePrice: 5,
+            active: true,
+          },
+        });
+      } catch {
+        subscription = await prisma.subscription.findUnique({ where: { shopId: shop.id } });
+      }
+    }
+
     const usage = await getShopUsage(shop.id);
 
     return NextResponse.json({
@@ -27,7 +46,7 @@ export async function GET() {
         name: shop.name,
         email: shop.email,
         role: shop.role,
-        subscription: shop.subscription,
+        subscription,
         usage,
       },
     });

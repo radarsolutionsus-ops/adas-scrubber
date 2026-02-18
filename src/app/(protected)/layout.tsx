@@ -4,6 +4,7 @@ import { LogOut, Radar, User, LayoutDashboard, ClipboardCheck } from "lucide-rea
 import { Button } from "@/components/ui/button";
 import { logout } from "@/actions/logout";
 import Link from "next/link";
+import { prisma } from "@/lib/prisma";
 
 export default async function ProtectedLayout({
   children,
@@ -13,6 +14,14 @@ export default async function ProtectedLayout({
   const session = await auth();
 
   if (!session?.user) {
+    redirect("/login");
+  }
+
+  const shop = await prisma.shop.findUnique({
+    where: { id: session.user.id },
+    select: { id: true, name: true, email: true },
+  });
+  if (!shop) {
     redirect("/login");
   }
 
@@ -54,8 +63,8 @@ export default async function ProtectedLayout({
                 <User className="w-4 h-4 text-cyan-700" />
               </div>
               <div className="hidden sm:block">
-                <p className="font-medium text-slate-900">{session.user.name}</p>
-                <p className="text-xs text-slate-500">{session.user.email}</p>
+                <p className="font-medium text-slate-900">{shop.name}</p>
+                <p className="text-xs text-slate-500">{shop.email}</p>
               </div>
             </div>
             <form action={logout}>

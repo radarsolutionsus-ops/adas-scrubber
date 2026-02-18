@@ -841,6 +841,16 @@ export async function POST(request: NextRequest) {
     }
 
     const shopId = session.user.id;
+    const shopExists = await prisma.shop.findUnique({
+      where: { id: shopId },
+      select: { id: true },
+    });
+    if (!shopExists) {
+      return NextResponse.json(
+        { error: "Account record is missing. Please sign in again." },
+        { status: 401 }
+      );
+    }
 
     const contentType = request.headers.get("content-type") || "";
     let estimateText: string;
@@ -1150,6 +1160,13 @@ export async function POST(request: NextRequest) {
     });
   } catch (error) {
     console.error("Scrub error:", error);
+    const code = typeof error === "object" && error ? Reflect.get(error, "code") : undefined;
+    if (code === "P2003" || code === "P2025") {
+      return NextResponse.json(
+        { error: "Some required database records were missing. Refresh and try again." },
+        { status: 409 }
+      );
+    }
     return NextResponse.json({ error: "Failed to scrub estimate" }, { status: 500 });
   }
 }

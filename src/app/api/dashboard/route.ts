@@ -305,8 +305,35 @@ export async function GET(request: NextRequest) {
     getShopUsage(shopId),
   ]);
 
-  if (!shop || !shop.subscription || !usage) {
-    return NextResponse.json({ error: "Shop subscription not found" }, { status: 404 });
+  if (!shop) {
+    return NextResponse.json({ error: "Shop account not found. Please sign in again." }, { status: 401 });
+  }
+  if (!usage) {
+    return NextResponse.json({ error: "Usage profile unavailable for this account." }, { status: 503 });
+  }
+
+  let subscription = shop.subscription;
+  if (!subscription) {
+    try {
+      subscription = await prisma.subscription.create({
+        data: {
+          shopId: shop.id,
+          plan: "standard",
+          status: "active",
+          monthlyVehicleLimit: 150,
+          pricePerMonth: 500,
+          overagePrice: 5,
+          active: true,
+        },
+      });
+    } catch {
+      subscription = await prisma.subscription.findUnique({
+        where: { shopId: shop.id },
+      });
+    }
+  }
+  if (!subscription) {
+    return NextResponse.json({ error: "Subscription record unavailable." }, { status: 503 });
   }
 
   const now = new Date();
@@ -527,9 +554,9 @@ export async function GET(request: NextRequest) {
     shop: {
       id: shop.id,
       name: shop.name,
-      plan: shop.subscription.plan,
-      subscriptionActive: shop.subscription.active,
-      monthlyVehicleLimit: shop.subscription.monthlyVehicleLimit,
+      plan: subscription.plan,
+      subscriptionActive: subscription.active,
+      monthlyVehicleLimit: subscription.monthlyVehicleLimit,
     },
     executiveMetrics: {
       monthlyUsed: usage.used,
