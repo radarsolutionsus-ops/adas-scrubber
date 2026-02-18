@@ -88,7 +88,7 @@ function asLineNumber(value: unknown): number | undefined {
   return undefined;
 }
 
-function normalizeOpCode(value: unknown): string {
+function normalizeOpCode(value: unknown): string | null {
   const raw = asCleanString(value, 24)?.toLowerCase().replace(/\s+/g, "") || "";
   switch (raw) {
     case "rpr":
@@ -131,7 +131,7 @@ function normalizeOpCode(value: unknown): string {
     case "remove":
       return "Remove";
     default:
-      return "Rpr";
+      return null;
   }
 }
 
@@ -188,7 +188,7 @@ function normalizeOperations(value: unknown): OpenAIOperationSignal[] {
     const record = entry as Record<string, unknown>;
 
     const opCode = normalizeOpCode(record.opCode);
-    if (!ALLOWED_OP_CODES.has(opCode)) continue;
+    if (!opCode || !ALLOWED_OP_CODES.has(opCode)) continue;
 
     const component =
       asCleanString(record.component, 120) ||

@@ -7,6 +7,11 @@ const { auth } = NextAuth(authConfig);
 const MUTATION_METHODS = new Set(["POST", "PUT", "PATCH", "DELETE"]);
 
 function buildContentSecurityPolicy(): string {
+  const scriptPolicy =
+    process.env.NODE_ENV === "production"
+      ? "script-src 'self' 'unsafe-inline' https://js.stripe.com"
+      : "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com";
+
   return [
     "default-src 'self'",
     "base-uri 'self'",
@@ -15,7 +20,7 @@ function buildContentSecurityPolicy(): string {
     "img-src 'self' data: blob: https:",
     "font-src 'self' data:",
     "style-src 'self' 'unsafe-inline'",
-    "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com",
+    scriptPolicy,
     "connect-src 'self' https://api.stripe.com https://*.stripe.com https://vpic.nhtsa.dot.gov",
     "frame-src 'self' https://js.stripe.com https://hooks.stripe.com https://billing.stripe.com https://checkout.stripe.com",
     "form-action 'self' https://checkout.stripe.com https://billing.stripe.com",

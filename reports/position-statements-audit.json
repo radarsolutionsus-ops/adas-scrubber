@@ -1,10 +1,10 @@
 {
-  "generatedAt": "2026-02-14T02:31:42.253Z",
+  "generatedAt": "2026-02-18T01:14:18.150Z",
   "totals": {
     "makes": 34,
-    "pdfFiles": 64,
+    "pdfFiles": 75,
     "jsonFiles": 35,
-    "pdfReadable": 64,
+    "pdfReadable": 75,
     "pdfUnreadable": 0,
     "jsonValid": 35,
     "jsonInvalid": 0
@@ -82,7 +82,7 @@
     },
     {
       "make": "Genesis",
-      "pdfCount": 1,
+      "pdfCount": 2,
       "jsonCount": 1,
       "hasPdf": true,
       "hasJson": true
@@ -117,7 +117,7 @@
     },
     {
       "make": "Infinity",
-      "pdfCount": 7,
+      "pdfCount": 8,
       "jsonCount": 1,
       "hasPdf": true,
       "hasJson": true
@@ -173,9 +173,9 @@
     },
     {
       "make": "Mercedes",
-      "pdfCount": 0,
+      "pdfCount": 5,
       "jsonCount": 1,
-      "hasPdf": false,
+      "hasPdf": true,
       "hasJson": true
     },
     {
@@ -229,9 +229,9 @@
     },
     {
       "make": "Toyota",
-      "pdfCount": 0,
+      "pdfCount": 3,
       "jsonCount": 3,
-      "hasPdf": false,
+      "hasPdf": true,
       "hasJson": true
     },
     {
@@ -243,7 +243,7 @@
     },
     {
       "make": "Volvo",
-      "pdfCount": 4,
+      "pdfCount": 5,
       "jsonCount": 1,
       "hasPdf": true,
       "hasJson": true
@@ -254,6 +254,10 @@
     {
       "file": "data/Hyundai/Hyundai_Pos_Pre-Repair-and-Post-Repair-System-Scanning_Revised(6-3-25).pdf",
       "extractedChars": 126
+    },
+    {
+      "file": "data/Infinity/INFINITY Calibration.pdf",
+      "extractedChars": 207
     }
   ],
   "jsonIssues": [],
@@ -262,6 +266,6 @@
     "Normalize source.url fields to canonical public OEM links for every JSON file.",
     "Regenerate JSON from PDFs after every OEM statement revision and store statement publish date.",
     "Add regression tests using known estimates to verify required calibrations are still detected.",
-    "Priority missing-PDF makes: BMW, Dodge, Infiniti, Jaguar, Jeep, Land Rover, Lincoln, Mercedes, MINI, Porsche, Ram, Rivian, Tesla, Toyota, Volkswagen"
+    "Priority missing-PDF makes: BMW, Dodge, Infiniti, Jaguar, Jeep, Land Rover, Lincoln, MINI, Porsche, Ram, Rivian, Tesla, Volkswagen"
   ]
 }

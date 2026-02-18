@@ -376,7 +376,9 @@ export async function scrubEstimate(
   // Normalize make for matching (handle Mercedes variants: Mercedes, Mercedes Benz, Mercedes-Benz)
   const normalizeMake = (make: string): string => {
     const lower = normalizeText(make);
-    if (lower.includes("mercedes") || lower === "mb") return "mercedes";
+    if (lower.includes("mercedes") || lower === "mb" || lower === "benz") return "mercedes";
+    if (lower === "infinity") return "infiniti";
+    if (lower === "vw") return "volkswagen";
     return lower;
   };
 

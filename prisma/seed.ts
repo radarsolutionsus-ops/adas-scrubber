@@ -6,6 +6,14 @@ import "dotenv/config";
 
 const prisma = new PrismaClient();
 
+function shouldSeedDemoAccount(): boolean {
+  const explicit = process.env.SEED_DEMO_ACCOUNT;
+  if (explicit) {
+    return ["1", "true", "yes", "on"].includes(explicit.trim().toLowerCase());
+  }
+  return process.env.NODE_ENV !== "production";
+}
+
 async function createDemoAccount() {
   const demoEmail = "demo@test.com";
   const demoPassword = "demo123";
@@ -83,24 +91,34 @@ interface VehicleOemData {
   repair_to_calibration_map: RepairCalibrationMapData[];
 }
 
+function canonicalizeMake(make: string): string {
+  const normalized = make.trim().toLowerCase().replace(/[^a-z0-9]/g, "");
+  if (normalized === "infinity") return "Infiniti";
+  if (normalized === "mercedes" || normalized === "mercedesbenz" || normalized === "mb") return "Mercedes-Benz";
+  if (normalized === "kia") return "Kia";
+  if (normalized === "vw") return "Volkswagen";
+  return make.trim();
+}
+
 async function seedFromJsonFile(filePath: string) {
   console.log(`Seeding from: ${filePath}`);
 
   const data: VehicleOemData = JSON.parse(fs.readFileSync(filePath, "utf-8"));
+  const canonicalMake = canonicalizeMake(data.vehicle.make);
 
   // Create the vehicle with source info
   const vehicle = await prisma.vehicle.create({
     data: {
       yearStart: data.vehicle.year_start,
       yearEnd: data.vehicle.year_end,
-      make: data.vehicle.make,
+      make: canonicalMake,
       model: data.vehicle.model,
       sourceProvider: data.source?.provider || null,
       sourceUrl: data.source?.url || null,
     },
   });
 
-  console.log(`  Created vehicle: ${data.vehicle.year_start} ${data.vehicle.make} ${data.vehicle.model}`);
+  console.log(`  Created vehicle: ${data.vehicle.year_start} ${canonicalMake} ${data.vehicle.model}`);
 
   // Create ADAS systems and their calibration triggers
   for (const system of data.adas_systems) {
@@ -179,9 +197,12 @@ function findAllJsonFiles(dir: string): string[] {
 async function main() {
   console.log("Starting database seed...\n");
 
-  // Create demo account first
-  await createDemoAccount();
-  console.log("");
+  if (shouldSeedDemoAccount()) {
+    await createDemoAccount();
+    console.log("");
+  } else {
+    console.log("Skipping demo account seed (SEED_DEMO_ACCOUNT disabled).\n");
+  }
 
   // Clear existing vehicle data (keep shops)
   await prisma.calibrationTrigger.deleteMany();

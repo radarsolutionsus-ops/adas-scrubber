@@ -96,9 +96,11 @@ export default function LoginPage() {
         </CardContent>
       </Card>
 
-      <div className="text-center text-xs text-muted-foreground">
-        <p>Demo: demo@test.com / demo123</p>
-      </div>
+      {process.env.NODE_ENV !== "production" ? (
+        <div className="text-center text-xs text-muted-foreground">
+          <p>Demo: demo@test.com / demo123</p>
+        </div>
+      ) : null}
     </div>
   );
 }

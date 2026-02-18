@@ -986,19 +986,6 @@ export async function POST(request: NextRequest) {
       extractedVehicle.source = "combined";
     }
 
-    // Debug logging for vehicle detection
-    console.log('Vehicle Detection:', {
-      providedYear,
-      providedMake,
-      providedModel,
-      extractedYear: extractedVehicle.year,
-      extractedMake: extractedVehicle.make,
-      extractedModel: extractedVehicle.model,
-      vin: extractedVehicle.vin,
-      confidence: extractedVehicle.confidence,
-      source: extractedVehicle.source,
-    });
-
     // Use provided values or fall back to extracted
     const vehicleYear = providedYear || extractedVehicle.year;
     const vehicleMake = providedMake || extractedVehicle.make;
